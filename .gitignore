@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+.vscode/
 
 # debug
 npm-debug.log*
@@ -39,3 +40,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/app/generated/prisma
+
+# Database — keep out of git; back up separately
+prisma/dev.db
+prisma/dev.db-journal
+
+# User uploads — large binary files, excluded from version control
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Private business-card photos — served only through authenticated API
+data/private-uploads/*
+!data/private-uploads/.gitkeep

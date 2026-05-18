@@ -1,0 +1,81 @@
+// Prisma 7 schema — SQLite for local dev, easy to swap to Postgres for production
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// Each Profile = one networking contact with their full digital card
+model Profile {
+  id          String       @id @default(cuid())
+  slug        String       @unique                // used in the public QR URL: /p/<slug>
+  name        String
+  email       String?
+  phone       String?
+  headline    String?                             // one-liner shown under name
+  about       String?                             // LinkedIn-style about section
+  headshotUrl String?                             // path under /uploads/
+  pdfUrl      String?                             // path to uploaded PDF business card
+  linkedinUrl String?
+  githubUrl   String?
+  links       String?                             // JSON: [{label, url}, ...]
+  isOwner     Boolean      @default(false)        // true = this is the logged-in user's own card
+  userId      String?                             // linked User account (owner of this card)
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  // Secondary card support — a profile can link to a parent profile (different career/role).
+  // WHY: Someone with two careers (e.g. engineer + musician) can share one QR per role,
+  //      but both cards reference each other so contacts can discover both.
+  parentProfileId   String?
+  parentProfile     Profile?  @relation("SecondaryCards", fields: [parentProfileId], references: [id], onDelete: SetNull)
+  secondaryProfiles Profile[] @relation("SecondaryCards")
+  connections Connection[]                        // people who submitted the connect form
+  scans       Scan[]                              // every visit to the public profile page
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+// Each User = an account that can log in and manage their own profile card(s).
+// WHY: Multi-user support — each person can have their own login and card.
+// passwordHash is bcrypt; resetToken is used for forgot-password flow.
+model User {
+  id               String    @id @default(cuid())
+  username         String    @unique
+  passwordHash     String
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  profiles         Profile[]
+  createdAt        DateTime  @default(now())
+}
+
+// Each Connection = someone who scanned a profile's QR and shared their info.
+// WHY: All personal fields are AES-256-GCM encrypted at the application layer
+//      before being written to the DB. emailHash enables duplicate detection
+//      without decrypting every row.
+model Connection {
+  id           String   @id @default(cuid())
+  profileId    String                             // which profile's QR was scanned
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  // Encrypted personal fields — decrypt only in authenticated admin routes
+  emailEnc     String?                            // AES-256-GCM encrypted email
+  emailHash    String?                            // SHA-256(email) for dedup without decryption
+  linkedinEnc  String?                            // encrypted LinkedIn URL or username
+  githubEnc    String?                            // encrypted GitHub username or URL
+  cardFilename String?                            // UUID filename stored outside /public/ (private)
+
+  createdAt    DateTime @default(now())
+}
+
+// Each Scan = one visit to /p/[slug] (the public QR landing page).
+// WHY: Lets you see total scans vs actual connections — conversion rate at a glance.
+//      Logged server-side so it works even if the visitor never submits the form.
+model Scan {
+  id        String   @id @default(cuid())
+  profileId String
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  userAgent String?  // browser/device hint, useful for understanding mobile vs desktop
+  createdAt DateTime @default(now())
+}

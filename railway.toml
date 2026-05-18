@@ -1,0 +1,26 @@
+# Railway deployment configuration.
+# WHY: Tells Railway how to build and start the Next.js app, and where persistent
+#      data lives so the SQLite DB and uploaded files survive redeploys.
+#
+# REQUIRED: Create a Railway Volume mounted at /data, then set these env vars
+# in your Railway service settings:
+#
+#   SESSION_SECRET   — copy from .env.local
+#   ENCRYPTION_KEY   — copy from .env.local
+#   ADMIN_PASSWORD   — copy from .env.local
+#   APP_URL          — your Railway public URL (e.g. https://myapp.up.railway.app)
+#   DATABASE_URL     — file:/data/networking.db
+#   DB_PATH          — /data/networking.db
+#   UPLOAD_DIR       — /data/uploads
+#   PRIVATE_UPLOAD_DIR — /data/private-uploads
+#   NODE_ENV         — production
+
+[build]
+builder = "nixpacks"
+buildCommand = "npm run build"
+
+[deploy]
+# prisma db push creates/updates the schema on the volume before the server starts
+startCommand = "npx prisma db push --accept-data-loss && npm start"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
