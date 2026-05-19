@@ -1,8 +1,8 @@
 // GET /api/private-files/[filename]
-// Streams a private business-card photo to the authenticated admin.
-// WHY: Files are stored outside /public/ — this is the only way to serve them.
-//      Auth check ensures only logged-in admins can download them.
-// SECURITY: Filename is sanitised (basename only) to prevent path traversal.
+// Serves a private business-card photo to the authenticated admin.
+// WHY: In production (Supabase), generates a short-lived signed URL and redirects.
+//      In dev, reads from local disk. Either way the file is never publicly accessible.
+// SECURITY: Filename is sanitised to prevent path traversal.
 
 import { NextRequest, NextResponse } from "next/server";
 import { readFile } from "fs/promises";
@@ -11,11 +11,8 @@ import { existsSync } from "fs";
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { sessionOptions, SessionData } from "@/lib/session";
+import { createClient } from "@supabase/supabase-js";
 
-const UPLOAD_DIR =
-  process.env.PRIVATE_UPLOAD_DIR ?? join(process.cwd(), "data", "private-uploads");
-
-// Basic MIME type map — we only store common image formats
 const MIME: Record<string, string> = {
   jpg: "image/jpeg",
   jpeg: "image/jpeg",
@@ -29,30 +26,35 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ filename: string }> }
 ) {
-  // Require an active admin session
   const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
-  if (!session.isLoggedIn) {
+  if (!session.isLoggedIn)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
-  // Sanitise: strip any path components so callers can't traverse the filesystem
   const safe = basename((await params).filename);
-  const filePath = join(UPLOAD_DIR, safe);
 
-  if (!existsSync(filePath)) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  // Production: generate a 1-hour signed URL from Supabase private bucket
+  if (process.env.SUPABASE_URL) {
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const { data, error } = await supabase.storage
+      .from("private-uploads")
+      .createSignedUrl(safe, 3600);
+    if (error || !data)
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.redirect(data.signedUrl);
   }
+
+  // Dev fallback: read from local private directory
+  const uploadDir = process.env.PRIVATE_UPLOAD_DIR ?? join(process.cwd(), "data", "private-uploads");
+  const filePath = join(uploadDir, safe);
+  if (!existsSync(filePath))
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const ext = safe.split(".").pop()?.toLowerCase() ?? "jpg";
-  const mime = MIME[ext] ?? "application/octet-stream";
-
   const buffer = await readFile(filePath);
   return new NextResponse(buffer, {
-    headers: {
-      "Content-Type": mime,
-      "Content-Disposition": `inline; filename="${safe}"`,
-      // Prevent browser from caching private images
-      "Cache-Control": "no-store",
-    },
+    headers: { "Content-Type": MIME[ext] ?? "application/octet-stream" },
   });
 }

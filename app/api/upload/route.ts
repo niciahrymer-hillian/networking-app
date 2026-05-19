@@ -1,15 +1,16 @@
-// POST /api/upload — accepts a multipart form file and saves it to UPLOAD_DIR.
-// WHY: Using UPLOAD_DIR (defaulting to public/uploads in dev, /data/uploads in prod) means
-//      files can live on a Railway persistent volume and survive redeploys.
-// EFFECT: Returns a URL path (/api/uploads/<uuid>.<ext>) to store in the profile record.
+// POST /api/upload — accepts a multipart form file.
+// WHY: Using SUPABASE_URL when set (production/Vercel) uploads to Supabase Storage so files
+//      persist across deploys. Falls back to local disk when running without Supabase (dev).
+// EFFECT: Returns a URL to store in the profile record. In production this is a Supabase CDN URL;
+//         in dev it is /api/uploads/<filename> served from the local UPLOAD_DIR.
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
+import { createClient } from "@supabase/supabase-js";
 
-// Allowed MIME types — restrict to images and PDFs only
 const ALLOWED_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -29,7 +30,6 @@ export async function POST(request: NextRequest) {
   if (!file)
     return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
-  // Validate type and size before writing — prevents storing dangerous file types
   if (!ALLOWED_TYPES.has(file.type))
     return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
 
@@ -39,14 +39,27 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
 
-  // Use UUID filename to avoid collisions and prevent path traversal via original name
   const ext = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") ?? "bin";
   const filename = `${uuidv4()}.${ext}`;
-  // UPLOAD_DIR can be pointed at a Railway volume (/data/uploads) for persistence across redeploys
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  // Production: upload to Supabase Storage public bucket
+  if (process.env.SUPABASE_URL) {
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const { error } = await supabase.storage
+      .from("uploads")
+      .upload(filename, buffer, { contentType: file.type, upsert: false });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    const { data: { publicUrl } } = supabase.storage.from("uploads").getPublicUrl(filename);
+    return NextResponse.json({ url: publicUrl });
+  }
+
+  // Dev fallback: save to local UPLOAD_DIR and serve via /api/uploads/
   const uploadDir = process.env.UPLOAD_DIR ?? join(process.cwd(), "public", "uploads");
-
   await mkdir(uploadDir, { recursive: true });
-  await writeFile(join(uploadDir, filename), Buffer.from(await file.arrayBuffer()));
-
+  await writeFile(join(uploadDir, filename), buffer);
   return NextResponse.json({ url: `/api/uploads/${filename}` });
 }
