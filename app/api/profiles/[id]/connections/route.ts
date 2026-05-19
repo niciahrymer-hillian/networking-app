@@ -15,11 +15,16 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
-  if (!session.isLoggedIn) {
+  if (!session.isLoggedIn || !session.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
+  const profile = await prisma.profile.findFirst({ where: { id, userId: session.userId } });
+  if (!profile) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   const connections = await prisma.connection.findMany({
     where: { profileId: id },
     orderBy: { createdAt: "desc" },

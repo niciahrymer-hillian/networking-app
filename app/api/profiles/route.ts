@@ -7,17 +7,20 @@ import { requireAuth } from "@/lib/auth";
 import { v4 as uuidv4 } from "uuid";
 
 export async function GET() {
-  if (!(await requireAuth()))
+  const session = await requireAuth();
+  if (!session?.userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const profiles = await prisma.profile.findMany({
+    where: { userId: session.userId },
     orderBy: { createdAt: "desc" },
   });
   return NextResponse.json(profiles);
 }
 
 export async function POST(request: NextRequest) {
-  if (!(await requireAuth()))
+  const session = await requireAuth();
+  if (!session?.userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
@@ -28,6 +31,7 @@ export async function POST(request: NextRequest) {
   const profile = await prisma.profile.create({
     data: {
       slug: uuidv4(), // unique URL-safe ID for the public /p/<slug> page
+      userId: session.userId,
       name: body.name.trim(),
       email: body.email?.trim() || null,
       phone: body.phone?.trim() || null,

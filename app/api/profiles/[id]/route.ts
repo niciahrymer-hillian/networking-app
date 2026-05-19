@@ -9,11 +9,12 @@ import { requireAuth } from "@/lib/auth";
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_req: NextRequest, { params }: Params) {
-  if (!(await requireAuth()))
+  const session = await requireAuth();
+  if (!session?.userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  const profile = await prisma.profile.findUnique({ where: { id } });
+  const profile = await prisma.profile.findFirst({ where: { id, userId: session.userId } });
   if (!profile)
     return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -21,11 +22,17 @@ export async function GET(_req: NextRequest, { params }: Params) {
 }
 
 export async function PUT(request: NextRequest, { params }: Params) {
-  if (!(await requireAuth()))
+  const session = await requireAuth();
+  if (!session?.userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
   const body = await request.json();
+
+  const owned = await prisma.profile.findFirst({ where: { id, userId: session.userId } });
+  if (!owned) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   if (!body.name?.trim())
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -50,10 +57,17 @@ export async function PUT(request: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
-  if (!(await requireAuth()))
+  const session = await requireAuth();
+  if (!session?.userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
+
+  const owned = await prisma.profile.findFirst({ where: { id, userId: session.userId } });
+  if (!owned) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   await prisma.profile.delete({ where: { id } });
   return NextResponse.json({ ok: true });
 }

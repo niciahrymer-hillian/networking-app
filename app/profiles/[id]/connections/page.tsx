@@ -15,10 +15,10 @@ interface Props {
 
 export default async function ConnectionsPage({ params }: Props) {
   const session = await requireAuth();
-  if (!session) redirect("/login");
+  if (!session?.userId) redirect("/login");
 
   const { id } = await params;
-  const profile = await prisma.profile.findUnique({ where: { id } });
+  const profile = await prisma.profile.findFirst({ where: { id, userId: session.userId } });
   if (!profile) redirect("/");
 
   const [raw, scanCount] = await Promise.all([

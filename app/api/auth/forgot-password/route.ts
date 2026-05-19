@@ -9,6 +9,16 @@ import { prisma } from "@/lib/db";
 import { randomUUID } from "crypto";
 
 export async function POST(request: NextRequest) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.ALLOW_PASSWORD_RECOVERY_KEY !== "true"
+  ) {
+    return NextResponse.json(
+      { error: "Password recovery is disabled in production" },
+      { status: 403 }
+    );
+  }
+
   const body = await request.json().catch(() => ({}));
   const { username, recoveryKey } = body as { username?: string; recoveryKey?: string };
 

@@ -9,6 +9,10 @@ import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_SIGNUP !== "true") {
+    return NextResponse.json({ error: "Sign up is disabled" }, { status: 403 });
+  }
+
   const body = await request.json().catch(() => ({}));
   const { username, password } = body as { username?: string; password?: string };
 

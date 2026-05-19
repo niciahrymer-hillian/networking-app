@@ -38,6 +38,30 @@ export default async function AppNav() {
               Dashboard
             </Link>
             <Link
+              href="/my-profile"
+              className="text-sm text-white/60 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              My profile
+            </Link>
+            <Link
+              href="/my-connections"
+              className="text-sm text-white/60 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              My connections
+            </Link>
+            <Link
+              href="/notifications"
+              className="text-sm text-white/60 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              Notifications
+            </Link>
+            <Link
+              href="/scan-log"
+              className="text-sm text-white/60 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              Scan log
+            </Link>
+            <Link
               href="/profiles/new"
               className="text-sm text-white/60 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
             >

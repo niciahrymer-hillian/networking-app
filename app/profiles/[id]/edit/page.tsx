@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { requireAuth } from "@/lib/auth";
 import ProfileForm, { ProfileFormData } from "@/components/ProfileForm";
 import QRSection from "./QRSection";
 import SetOwnerButton from "./SetOwnerButton";
@@ -13,22 +14,25 @@ export default async function EditProfilePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await requireAuth();
+  if (!session?.userId) notFound();
+
   const { id } = await params;
-  const profile = await prisma.profile.findUnique({ where: { id } });
+  const profile = await prisma.profile.findFirst({ where: { id, userId: session.userId } });
 
   if (!profile) notFound();
 
   // Fetch other profiles to populate the secondary-card link dropdown
   const otherProfiles = await prisma.profile.findMany({
-    where: { id: { not: id } },
+    where: { id: { not: id }, userId: session.userId },
     select: { id: true, name: true, headline: true },
     orderBy: { createdAt: "desc" },
   });
 
   // If this profile already has a parent, fetch the parent's name for display
   const parentProfile = profile.parentProfileId
-    ? await prisma.profile.findUnique({
-        where: { id: profile.parentProfileId },
+    ? await prisma.profile.findFirst({
+        where: { id: profile.parentProfileId, userId: session.userId },
         select: { name: true },
       })
     : null;

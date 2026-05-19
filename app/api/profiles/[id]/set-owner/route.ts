@@ -18,18 +18,25 @@ export async function PATCH(
   if (!session.isLoggedIn) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  if (!session.userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const { id } = await params;
 
   // Run both updates in a transaction — clear all, then set the target
+  const target = await prisma.profile.findFirst({ where: { id, userId: session.userId } });
+  if (!target) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   await prisma.$transaction([
-    prisma.profile.updateMany({ data: { isOwner: false } }),
+    prisma.profile.updateMany({ where: { userId: session.userId }, data: { isOwner: false } }),
     prisma.profile.update({
       where: { id },
       data: {
         isOwner: true,
-        // Link to the logged-in user's account if we have one
-        userId: session.userId ?? null,
+        userId: session.userId,
       },
     }),
   ]);

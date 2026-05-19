@@ -11,6 +11,7 @@ import { existsSync } from "fs";
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { sessionOptions, SessionData } from "@/lib/session";
+import { prisma } from "@/lib/db";
 import { createClient } from "@supabase/supabase-js";
 
 const MIME: Record<string, string> = {
@@ -27,10 +28,21 @@ export async function GET(
   { params }: { params: Promise<{ filename: string }> }
 ) {
   const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
-  if (!session.isLoggedIn)
+  if (!session.isLoggedIn || !session.userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const safe = basename((await params).filename);
+
+  const allowed = await prisma.connection.findFirst({
+    where: {
+      cardFilename: safe,
+      profile: { userId: session.userId },
+    },
+    select: { id: true },
+  });
+  if (!allowed) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   // Production: generate a 1-hour signed URL from Supabase private bucket
   if (process.env.SUPABASE_URL) {

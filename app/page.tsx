@@ -3,13 +3,19 @@
 
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { requireAuth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import DeleteButton from "./DeleteButton";
 import ShareQRButton from "@/components/ShareQRButton";
 
 export const dynamic = "force-dynamic"; // always fetch fresh profiles
 
 export default async function Dashboard() {
+  const session = await requireAuth();
+  if (!session?.userId) redirect("/login");
+
   const profiles = await prisma.profile.findMany({
+    where: { userId: session.userId },
     orderBy: { createdAt: "desc" },
     include: {
       _count: { select: { connections: true, scans: true } },

@@ -17,6 +17,9 @@ export async function PATCH(
   if (!session.isLoggedIn) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  if (!session.userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const { id } = await params;
   // parentProfileId = null means "unlink / make this a top-level card"
@@ -24,6 +27,18 @@ export async function PATCH(
 
   if (parentProfileId === id) {
     return NextResponse.json({ error: "A profile cannot be its own secondary card." }, { status: 400 });
+  }
+
+  const current = await prisma.profile.findFirst({ where: { id, userId: session.userId } });
+  if (!current) {
+    return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+  }
+
+  if (parentProfileId) {
+    const parent = await prisma.profile.findFirst({ where: { id: parentProfileId, userId: session.userId } });
+    if (!parent) {
+      return NextResponse.json({ error: "Parent profile not found" }, { status: 404 });
+    }
   }
 
   try {
