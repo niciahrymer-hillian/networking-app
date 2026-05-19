@@ -58,7 +58,19 @@ const statements = sql
 
 console.log(`Applying ${statements.length} statements to Turso...`);
 for (const stmt of statements) {
-  await db.execute(stmt + ";");
+  try {
+    await db.execute(stmt + ";");
+  } catch (e) {
+    // Ignore 'already exists' errors for tables and indexes
+    if (
+      e.message?.includes("already exists") ||
+      e.cause?.message?.includes("already exists")
+    ) {
+      console.warn("Skipping:", e.message);
+      continue;
+    }
+    throw e;
+  }
 }
 
 console.log("Schema pushed to Turso successfully.");
