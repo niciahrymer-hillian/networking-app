@@ -1,0 +1,35 @@
+# Fly.io deployment configuration.
+# WHY: Defines the app name, region, persistent volume (for SQLite + uploads),
+#      and port mapping so Fly knows how to run the container.
+#
+# REQUIRED: After `fly launch`, run these to set secrets (never commit these):
+#   fly secrets set SESSION_SECRET="..."
+#   fly secrets set ENCRYPTION_KEY="..."
+#   fly secrets set ADMIN_PASSWORD="..."
+#   fly secrets set APP_URL="https://<your-app>.fly.dev"
+#   fly secrets set NODE_ENV="production"
+#   fly secrets set DATABASE_URL="file:/data/networking.db"
+#   fly secrets set DB_PATH="/data/networking.db"
+#   fly secrets set UPLOAD_DIR="/data/uploads"
+#   fly secrets set PRIVATE_UPLOAD_DIR="/data/private-uploads"
+
+app = "networking-app"
+primary_region = "lax"
+
+[build]
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+
+# Persistent volume — SQLite DB and all uploads live here so they survive redeploys
+[[mounts]]
+  source = "networking_data"
+  destination = "/data"

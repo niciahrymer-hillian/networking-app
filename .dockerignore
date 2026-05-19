@@ -1,0 +1,10 @@
+.next/
+node_modules/
+prisma/dev.db
+prisma/dev.db-journal
+.env*
+.git/
+.vscode/
+public/uploads/*
+data/
+*.tsbuildinfo
