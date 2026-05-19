@@ -4,11 +4,6 @@
 
 import QRCodeDisplay from "@/components/QRCodeDisplay";
 
-export default function QRSection({ slug, name }: { slug: string; name: string }) {
-  const appUrl =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : "http://localhost:3000";
-
+export default function QRSection({ slug, name, appUrl }: { slug: string; name: string; appUrl: string }) {
   return <QRCodeDisplay url={`${appUrl}/p/${slug}`} profileName={name} />;
 }

@@ -132,7 +132,7 @@ export default async function Dashboard() {
                       ? `${p._count.scans} scan${p._count.scans !== 1 ? "s" : ""}`
                       : "Connections"}
                   </Link>
-                  <ShareQRButton slug={p.slug} name={p.name} />
+                  <ShareQRButton slug={p.slug} name={p.name} appUrl={process.env.APP_URL ?? "http://localhost:3000"} />
                   <DeleteButton id={p.id} name={p.name} />
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default async function Dashboard() {
                   <div className="flex gap-2 flex-wrap">
                     <Link href={`/p/${s.slug}`} target="_blank" className="text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded-lg transition-colors">View</Link>
                     <Link href={`/profiles/${s.id}/edit`} className="text-xs bg-indigo-700/40 hover:bg-indigo-600/50 px-2 py-1 rounded-lg transition-colors">Edit</Link>
-                    <ShareQRButton slug={s.slug} name={s.name} />
+                    <ShareQRButton slug={s.slug} name={s.name} appUrl={process.env.APP_URL ?? "http://localhost:3000"} />
                   </div>
                 </div>
               ))}

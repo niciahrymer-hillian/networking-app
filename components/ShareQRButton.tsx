@@ -12,15 +12,14 @@ const QRCodeDisplay = dynamic(() => import("./QRCodeDisplay"), { ssr: false });
 interface Props {
   slug: string;
   name: string;
+  appUrl?: string;
 }
 
-export default function ShareQRButton({ slug, name }: Props) {
+export default function ShareQRButton({ slug, name, appUrl }: Props) {
   const [open, setOpen] = useState(false);
 
-  const url =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/p/${slug}`
-      : `/p/${slug}`;
+  const baseUrl = appUrl || (typeof window !== "undefined" ? window.location.origin : "");
+  const url = `${baseUrl}/p/${slug}`;
 
   return (
     <>
