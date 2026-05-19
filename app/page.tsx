@@ -123,6 +123,12 @@ export default async function Dashboard() {
                     Edit
                   </Link>
                   <Link
+                    href={`/profiles/${p.id}/edit#qr`}
+                    className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    Regenerate QR
+                  </Link>
+                  <Link
                     href={`/profiles/${p.id}/connections`}
                     className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-colors"
                   >

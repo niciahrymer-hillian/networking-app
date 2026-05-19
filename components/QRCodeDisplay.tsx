@@ -9,9 +9,10 @@ import QRCode from "qrcode";
 interface QRCodeDisplayProps {
   url: string;        // The full URL the QR code should point to
   profileName: string;
+  actionLabel?: string;
 }
 
-export default function QRCodeDisplay({ url, profileName }: QRCodeDisplayProps) {
+export default function QRCodeDisplay({ url, profileName, actionLabel = "Download fresh QR code" }: QRCodeDisplayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export default function QRCodeDisplay({ url, profileName }: QRCodeDisplayProps) 
         onClick={handleDownload}
         className="text-sm text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors"
       >
-        Download QR code
+        {actionLabel}
       </button>
     </div>
   );

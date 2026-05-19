@@ -5,5 +5,5 @@
 import QRCodeDisplay from "@/components/QRCodeDisplay";
 
 export default function QRSection({ slug, name, appUrl }: { slug: string; name: string; appUrl: string }) {
-  return <QRCodeDisplay url={`${appUrl}/p/${slug}`} profileName={name} />;
+  return <QRCodeDisplay url={`${appUrl}/p/${slug}`} profileName={name} actionLabel="Regenerate fresh QR code" />;
 }
