@@ -11,9 +11,12 @@ export default function AccountPage() {
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [resetUrl, setResetUrl] = useState("");
+  const [resetError, setResetError] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,17 +39,40 @@ export default function AccountPage() {
         setError(data.error ?? "Something went wrong.");
       } else {
         setSuccess(true);
-        setCurrent(""); setNext(""); setConfirm("");
+        setCurrent("");
+        setNext("");
+        setConfirm("");
       }
     } finally {
       setLoading(false);
     }
   }
 
+  async function handleResetClick() {
+    setResetError("");
+    setResetUrl("");
+    setResetLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/account-reset", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setResetError(data.error ?? "Unable to generate reset link.");
+      } else {
+        setResetUrl(data.resetUrl);
+      }
+    } finally {
+      setResetLoading(false);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#0a0a14] text-white flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold mb-6">Account Settings</h1>
+      <div className="w-full max-w-xl space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Account Settings</h1>
+          <p className="text-sm text-white/50">Change your password or generate a reset link if you don’t know your current password.</p>
+        </div>
 
         <form onSubmit={handleSubmit} className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
           <h2 className="text-sm font-semibold text-white/60 uppercase tracking-wider">Change Password</h2>
@@ -116,6 +142,41 @@ export default function AccountPage() {
             </button>
           </div>
         </form>
+
+        <section className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-semibold text-white/60 uppercase tracking-wider">Reset Password</h2>
+              <p className="text-sm text-white/50">Generate a one-time reset link if you don’t remember your current password.</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleResetClick}
+              disabled={resetLoading}
+              className="bg-white/10 hover:bg-white/15 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            >
+              {resetLoading ? "Generating…" : "Generate reset link"}
+            </button>
+          </div>
+
+          {resetError && (
+            <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+              {resetError}
+            </p>
+          )}
+
+          {resetUrl && (
+            <div className="space-y-2">
+              <p className="text-green-400 text-sm">Reset link created. It expires in 1 hour.</p>
+              <a
+                href={resetUrl}
+                className="block break-all text-indigo-300 hover:text-indigo-200 text-sm"
+              >
+                {resetUrl}
+              </a>
+            </div>
+          )}
+        </section>
       </div>
     </main>
   );

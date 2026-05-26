@@ -1,0 +1,20 @@
+<svg viewBox="0 0 360 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="360" height="120" rx="24" fill="#050814" />
+  <defs>
+    <radialGradient id="brandGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(110 50) scale(60 60)">
+      <stop offset="0%" stop-color="#7DD3FC" />
+      <stop offset="100%" stop-color="#0F172A" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="50" r="42" fill="#0F172A" />
+  <circle cx="110" cy="50" r="54" fill="url(#brandGlow)" />
+  <circle cx="110" cy="50" r="26" fill="#0EA5E9" />
+  <circle cx="150" cy="36" r="16" fill="#F97316" opacity="0.95" />
+  <circle cx="82" cy="18" r="16" fill="#A855F7" opacity="0.95" />
+  <circle cx="70" cy="80" r="16" fill="#22D3EE" opacity="0.95" />
+  <circle cx="146" cy="76" r="16" fill="#FBBF24" opacity="0.95" />
+  <circle cx="110" cy="50" r="12" fill="#FFFFFF" />
+  <text x="110" y="56" text-anchor="middle" fill="#0F172A" font-family="Inter, sans-serif" font-size="28" font-weight="800">N</text>
+  <text x="190" y="42" fill="#FFFFFF" font-family="Inter, sans-serif" font-size="26" font-weight="800">NETWORKING</text>
+  <text x="190" y="66" fill="#7DD3FC" font-family="Inter, sans-serif" font-size="12" letter-spacing="0.18em" text-transform="uppercase">CONNECTION MADE EASY</text>
+</svg>

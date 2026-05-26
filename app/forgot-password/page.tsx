@@ -1,15 +1,13 @@
 "use client";
-// Forgot password — generates a one-time reset token shown on screen.
-// WHY: No email is configured. User proves server access via the ADMIN_PASSWORD
-//      env var (the "recovery key") — only someone who deployed the app knows it.
+// Forgot password — generates a reset token for username or email.
 
 import { useState } from "react";
 import Link from "next/link";
 
 export default function ForgotPasswordPage() {
-  const [username, setUsername] = useState("");
-  const [recoveryKey, setRecoveryKey] = useState("");
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [token, setToken] = useState("");
+  const [email, setEmail] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -21,14 +19,14 @@ export default function ForgotPasswordPage() {
     const res = await fetch("/api/auth/forgot-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, recoveryKey }),
+      body: JSON.stringify({ usernameOrEmail }),
     });
 
     const data = await res.json();
     if (res.ok && data.token) {
       setToken(data.token);
+      setEmail(data.email ?? null);
     } else if (res.ok) {
-      // Generic message (username not found but we don't reveal that)
       setToken("not-found");
     } else {
       setError(data.error ?? "Request failed.");
@@ -53,6 +51,16 @@ export default function ForgotPasswordPage() {
               Set new password →
             </Link>
           </div>
+          {email && (
+            <p className="text-white/50 text-sm mt-4">
+              A reset link was generated for {email}. If email delivery is configured, check your inbox.
+            </p>
+          )}
+          {!email && (
+            <p className="text-white/50 text-sm mt-4">
+              If email is not configured, use the direct link above.
+            </p>
+          )}
         </div>
       </main>
     );
@@ -78,8 +86,7 @@ export default function ForgotPasswordPage() {
           <p className="text-4xl mb-3">🔒</p>
           <h1 className="text-2xl font-bold text-white">Forgot password</h1>
           <p className="text-white/40 text-sm mt-1 leading-relaxed">
-            Enter your username and the <strong className="text-white/60">ADMIN_PASSWORD</strong> from your
-            server environment as the recovery key.
+            Enter the username or email for your account. A password reset link will be generated.
           </p>
         </div>
 
@@ -89,18 +96,10 @@ export default function ForgotPasswordPage() {
         >
           <input
             type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Username"
+            value={usernameOrEmail}
+            onChange={(e) => setUsernameOrEmail(e.target.value)}
+            placeholder="Username or email"
             autoFocus
-            required
-            className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 transition-colors"
-          />
-          <input
-            type="password"
-            value={recoveryKey}
-            onChange={(e) => setRecoveryKey(e.target.value)}
-            placeholder="Recovery key (ADMIN_PASSWORD)"
             required
             className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 transition-colors"
           />
@@ -112,7 +111,7 @@ export default function ForgotPasswordPage() {
             disabled={loading}
             className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium py-3 rounded-lg transition-colors"
           >
-            {loading ? "Checking…" : "Get reset link"}
+            {loading ? "Checking…" : "Generate reset link"}
           </button>
         </form>
 

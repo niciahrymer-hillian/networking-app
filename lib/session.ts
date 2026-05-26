@@ -6,6 +6,7 @@ import { SessionOptions } from "iron-session";
 
 export interface SessionData {
   isLoggedIn: boolean;
+  isAdmin?: boolean;
   userId?: string;    // DB User.id of the logged-in account
   username?: string;  // for display in the UI
 }

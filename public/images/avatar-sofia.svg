@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="none">
+  <defs>
+    <linearGradient id="avatarS" x1="0" y1="0" x2="300" y2="300" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#312e81" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+  </defs>
+  <rect width="300" height="300" rx="60" fill="url(#avatarS)" />
+  <circle cx="150" cy="130" r="80" fill="#f8fafc" />
+  <path d="M110 190c15-32 35-48 70-48s55 16 70 48" stroke="#0f172a" stroke-width="18" stroke-linecap="round" fill="none" />
+  <text x="150" y="170" text-anchor="middle" fill="#0f172a" font-family="Inter, sans-serif" font-size="96" font-weight="800">S</text>
+</svg>

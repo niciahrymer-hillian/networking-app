@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1200" y2="800" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#111827" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g)" rx="80" />
+  <circle cx="320" cy="390" r="150" fill="#111827" />
+  <circle cx="640" cy="410" r="150" fill="#111827" />
+  <path d="M210 410c120-120 240-120 360 0" stroke="#60a5fa" stroke-width="34" stroke-linecap="round" />
+  <path d="M490 410c120-120 240-120 360 0" stroke="#93c5fd" stroke-width="34" stroke-linecap="round" />
+  <path d="M285 325l180 180" stroke="#f8fafc" stroke-width="28" stroke-linecap="round" />
+  <path d="M755 325l-180 180" stroke="#f8fafc" stroke-width="28" stroke-linecap="round" />
+  <rect x="220" y="570" width="760" height="140" rx="60" fill="#1e293b" opacity="0.85" />
+  <text x="600" y="640" text-anchor="middle" fill="#cbd5e1" font-family="Inter, sans-serif" font-size="72" font-weight="700">Networking Snapshot</text>
+</svg>

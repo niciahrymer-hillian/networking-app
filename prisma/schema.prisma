@@ -23,6 +23,7 @@ model Profile {
   githubUrl   String?
   links       String?                             // JSON: [{label, url}, ...]
   isOwner     Boolean      @default(false)        // true = this is the logged-in user's own card
+  isQREnabled Boolean      @default(true)         // false = profile is hidden/no QR exposure
   userId      String?                             // linked User account (owner of this card)
   user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
   // Secondary card support — a profile can link to a parent profile (different career/role).
@@ -39,15 +40,20 @@ model Profile {
 
 // Each User = an account that can log in and manage their own profile card(s).
 // WHY: Multi-user support — each person can have their own login and card.
-// passwordHash is bcrypt; resetToken is used for forgot-password flow.
+// Password resets and email verification use time-limited tokens.
 model User {
-  id               String    @id @default(cuid())
-  username         String    @unique
-  passwordHash     String
-  resetToken       String?
-  resetTokenExpiry DateTime?
-  profiles         Profile[]
-  createdAt        DateTime  @default(now())
+  id                        String    @id @default(cuid())
+  username                  String    @unique
+  email                     String?   @unique
+  emailVerified             Boolean   @default(false)
+  emailVerificationToken    String?
+  emailVerificationExpiry   DateTime?
+  isAdmin                   Boolean   @default(false)
+  passwordHash              String
+  resetToken                String?
+  resetTokenExpiry          DateTime?
+  profiles                  Profile[]
+  createdAt                 DateTime  @default(now())
 }
 
 // Each Connection = someone who scanned a profile's QR and shared their info.

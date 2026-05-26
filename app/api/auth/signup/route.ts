@@ -1,12 +1,19 @@
-// POST /api/auth/signup — create a new user account.
-// WHY: Multi-user support — anyone can sign up to get their own card and dashboard.
-// EFFECT: Creates a User row, sets a session, returns ok.
+// POST /api/auth/signup — create a new user account and request email verification.
+// WHY: New accounts must verify an email address before they can sign in.
+// EFFECT: Creates a User row with a verification token and returns a verification link.
 
 import { NextRequest, NextResponse } from "next/server";
-import { getIronSession } from "iron-session";
-import { sessionOptions, SessionData } from "@/lib/session";
 import { prisma } from "@/lib/db";
+import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
+
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
+function isEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
 export async function POST(request: NextRequest) {
   if (process.env.NODE_ENV === "production" && process.env.ALLOW_SIGNUP !== "true") {
@@ -14,32 +21,59 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json().catch(() => ({}));
-  const { username, password } = body as { username?: string; password?: string };
+  const { username, email, password } = body as {
+    username?: string;
+    email?: string;
+    password?: string;
+  };
 
-  if (!username || !password) {
-    return NextResponse.json({ error: "Username and password are required" }, { status: 400 });
+  if (!username || !email || !password) {
+    return NextResponse.json({ error: "Username, email, and password are required" }, { status: 400 });
   }
   if (username.length < 3) {
     return NextResponse.json({ error: "Username must be at least 3 characters" }, { status: 400 });
+  }
+  if (!isEmail(email)) {
+    return NextResponse.json({ error: "A valid email address is required" }, { status: 400 });
   }
   if (password.length < 8) {
     return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
   }
 
-  const existing = await prisma.user.findUnique({ where: { username } });
-  if (existing) {
+  const normalizedEmail = normalizeEmail(email);
+  const existingUsername = await prisma.user.findUnique({ where: { username } });
+  if (existingUsername) {
     return NextResponse.json({ error: "Username already taken" }, { status: 409 });
+  }
+  const existingEmail = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+  if (existingEmail) {
+    return NextResponse.json({ error: "Email already in use" }, { status: 409 });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const user = await prisma.user.create({ data: { username, passwordHash } });
+  // Generate a 6-digit numeric code for verification
+  const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+  const verificationExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-  const response = NextResponse.json({ ok: true }, { status: 201 });
-  const session = await getIronSession<SessionData>(request, response, sessionOptions);
-  session.isLoggedIn = true;
-  session.userId = user.id;
-  session.username = user.username;
-  await session.save();
+  const user = await prisma.user.create({
+    data: {
+      username,
+      email: normalizedEmail,
+      passwordHash,
+      emailVerified: false,
+      emailVerificationToken: verificationToken,
+      emailVerificationExpiry: verificationExpiry,
+    },
+  });
 
-  return response;
+  // Send verification email (optional in dev if SENDGRID_API_KEY missing)
+  try {
+    const { sendVerificationEmail } = await import('@/lib/mail');
+    await sendVerificationEmail(normalizedEmail, verificationToken);
+  } catch (err) {
+    // swallow — user can request code again from verify page
+    console.error('Failed to send verification email during signup', err);
+  }
+
+  return NextResponse.json({ ok: true, email: normalizedEmail }, { status: 201 });
 }

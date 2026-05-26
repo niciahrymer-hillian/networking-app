@@ -1,5 +1,5 @@
 "use client";
-// Login page — username + password gate for the dashboard.
+// Login page — username or email + password gate for the dashboard.
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,14 +20,14 @@ export default function LoginPage() {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ usernameOrEmail, password }),
     });
 
     if (res.ok) {
       router.push("/");
     } else {
       const data = await res.json();
-      setError(data.error ?? "Incorrect username or password.");
+      setError(data.error ?? "Incorrect username/email or password.");
       setLoading(false);
     }
   }
@@ -47,9 +47,9 @@ export default function LoginPage() {
         >
           <input
             type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Username"
+            value={usernameOrEmail}
+            onChange={(e) => setUsernameOrEmail(e.target.value)}
+            placeholder="Username or email"
             autoFocus
             autoComplete="username"
             required

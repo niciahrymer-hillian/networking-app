@@ -5,6 +5,7 @@
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { sessionOptions, SessionData } from "./session";
+import { prisma } from "@/lib/db";
 
 // Returns the current session — works in Server Components, Route Handlers, and Server Actions.
 // EFFECT: Reads the encrypted session cookie from the incoming request.
@@ -18,5 +19,20 @@ export async function getSession() {
 export async function requireAuth() {
   const session = await getSession();
   if (!session.isLoggedIn) return null;
+  return session;
+}
+
+// Returns the session only if the user is an administrator.
+// EFFECT: Used by admin routes/pages to protect superuser operations.
+export async function requireAdmin() {
+  const session = await getSession();
+  if (!session.isLoggedIn || !session.userId) return null;
+
+  if (session.isAdmin) return session;
+
+  const user = await prisma.user.findUnique({ where: { id: session.userId } });
+  if (!user?.isAdmin) return null;
+
+  session.isAdmin = true;
   return session;
 }

@@ -10,8 +10,9 @@ import { sessionOptions, SessionData } from "./lib/session";
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Always allow: public profile pages, login page, auth API endpoints, and Next.js internals
+  // Always allow: public homepage, public profile pages, login page, auth API endpoints, static assets, and Next.js internals
   if (
+    pathname === "/" ||
     pathname.startsWith("/p/") ||
     pathname === "/login" ||
     pathname === "/signup" ||
@@ -19,6 +20,8 @@ export default async function proxy(request: NextRequest) {
     pathname.startsWith("/reset-password/") ||
     pathname.startsWith("/api/auth/") ||
     pathname.startsWith("/_next/") ||
+    pathname.startsWith("/images/") ||
+    pathname === "/logo.svg" ||
     pathname.startsWith("/uploads/") ||
     pathname.startsWith("/api/uploads/") ||
     pathname === "/favicon.ico"

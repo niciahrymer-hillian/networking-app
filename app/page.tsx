@@ -1,175 +1,159 @@
-// Dashboard — lists all profiles and provides management actions.
-// Protected by middleware; only reachable when logged in.
-
 import Link from "next/link";
-import { prisma } from "@/lib/db";
-import { requireAuth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import DeleteButton from "./DeleteButton";
-import ShareQRButton from "@/components/ShareQRButton";
+import LandingCarousel from "@/components/LandingCarousel";
+import { getSession } from "@/lib/auth";
+import LogoutButton from "@/app/LogoutButton";
 
-export const dynamic = "force-dynamic"; // always fetch fresh profiles
+const handshakeImages = [
+  {
+    src: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=1200&q=80",
+    alt: "Business handshake",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80",
+    alt: "Team handshake",
+  },
+];
 
-export default async function Dashboard() {
-  const session = await requireAuth();
-  if (!session?.userId) redirect("/login");
+const profilePreviews = [
+  {
+    name: "Ava Chen",
+    title: "Product Designer",
+    company: "Spark Labs",
+    location: "New York, NY",
+    email: "ava@sparklabs.com",
+    headshot: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=320&q=80",
+    slug: "ava-chen",
+  },
+  {
+    name: "Liam Patel",
+    title: "Growth Marketing Lead",
+    company: "Nexa Ventures",
+    location: "San Francisco, CA",
+    email: "liam@nexaventures.com",
+    headshot: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=320&q=80",
+    slug: "liam-patel",
+  },
+  {
+    name: "Sofia Gomez",
+    title: "Data Scientist",
+    company: "Pulse Analytics",
+    location: "Austin, TX",
+    email: "sofia@pulseanalytics.com",
+    headshot: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=320&q=80",
+    slug: "sofia-gomez",
+  },
+];
 
-  const profiles = await prisma.profile.findMany({
-    where: { userId: session.userId },
-    orderBy: { createdAt: "desc" },
-    include: {
-      _count: { select: { connections: true, scans: true } },
-      secondaryProfiles: { select: { id: true } },
-    },
-  });
+export default async function Home() {
+  const session = await getSession();
 
-  const ownerProfile = profiles.find((p) => p.isOwner);
-  // Top-level cards = profiles that are NOT secondary to another
-  const topLevel = profiles.filter((p) => !p.parentProfileId);
-  // Quick lookup: secondaryId → parent profile object
-  const secondaryOf = new Map(
-    profiles.filter((p) => p.parentProfileId).map((p) => [p.id, p.parentProfileId!])
-  );
+  if (session?.isLoggedIn) {
+    return (
+      <main className="min-h-screen bg-[#0f0f1a] text-white flex items-center justify-center px-4 py-10">
+        <div className="mx-auto w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-xl shadow-black/20">
+          <p className="text-sm uppercase tracking-[0.35em] text-indigo-300 mb-2">Signed in</p>
+          <h1 className="text-3xl font-semibold mb-4">@{session.username}</h1>
+          <p className="text-white/60 mb-8">Your landing page shows the signed-in experience and quick access to your dashboard.</p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/dashboard" className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500">
+              Go to Dashboard
+            </Link>
+            <LogoutButton />
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#0f0f1a] text-white">
-      {/* Page toolbar — AppNav (in layout) handles brand + global nav + auth */}
-      {ownerProfile && (
-        <div className="border-b border-white/10 px-4 py-2 max-w-5xl mx-auto w-full flex justify-end">
-          <Link
-            href={`/p/${ownerProfile.slug}`}
-            target="_blank"
-            className="text-xs font-medium text-indigo-300 bg-indigo-900/40 border border-indigo-500/30 hover:bg-indigo-800/50 px-3 py-1.5 rounded-lg transition-colors"
-          >
-            ✦ View my card
-          </Link>
-        </div>
-      )}
+      <div className="mx-auto max-w-6xl px-4 py-10">
+        <LandingCarousel />
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* Welcome banner */}
-        <div className="mb-8 rounded-2xl bg-gradient-to-r from-indigo-900/60 to-purple-900/40 border border-indigo-500/20 px-6 py-5 text-center">
-          <p className="text-3xl mb-2">🤝</p>
-          <h2 className="text-xl font-bold text-white tracking-tight">Welcome To the Network!</h2>
-          <p className="text-white/50 text-sm mt-1">Manage your cards, track connections, and share your QR.</p>
-        </div>
+        <div className="mt-12 grid gap-12 lg:grid-cols-[1.2fr_0.8fr] items-start">
+          <div className="space-y-6">
+            <p className="text-sm uppercase tracking-[0.4em] text-indigo-400">Digital networking for your professional circle</p>
+            <h1 className="text-5xl font-semibold leading-tight text-white">Build polished QR-ready profiles that make networking effortless.</h1>
+            <p className="text-lg text-white/70 max-w-3xl">Create multiple contact profiles, control QR visibility, and share your professional story instantly with anyone you meet.</p>
 
-        {profiles.length === 0 ? (
-          <div className="text-center py-24 text-white/40">
-            <p className="text-5xl mb-4">👋</p>
-            <p className="text-lg">No profiles yet.</p>
-            <p className="text-sm mt-1">
-              <Link href="/profiles/new" className="text-indigo-400 underline">
-                Add your first contact
+            <div className="grid gap-4 text-white/70 sm:grid-cols-2">
+              <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+                <p className="text-sm uppercase tracking-[0.35em] text-indigo-300 mb-3">Sample profile flow</p>
+                <p className="text-sm">Click any preview, sign in, and see how QR-driven profiles help your networking feel smoother and more memorable.</p>
+              </div>
+              <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+                <p className="text-sm uppercase tracking-[0.35em] text-indigo-300 mb-3">Secure sharing</p>
+                <p className="text-sm">Enable or disable QR exposure for each profile so you control who sees your information.</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link href="/login" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500">
+                Sign in
               </Link>
+              <Link href="/signup" className="inline-flex items-center justify-center rounded-xl border border-white/10 px-6 py-3 text-sm font-semibold text-white/80 transition hover:border-white/20 hover:text-white">
+                Create account
+              </Link>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {handshakeImages.map((image) => (
+              <img
+                key={image.src}
+                src={image.src}
+                alt={image.alt}
+                className="h-60 w-full rounded-3xl object-cover border border-white/10"
+              />
+            ))}
+          </div>
+        </div>
+
+        <section className="mt-16 rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-xl shadow-black/10">
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm uppercase tracking-[0.35em] text-indigo-300">Try a sample profile</p>
+              <h2 className="text-2xl font-semibold text-white">Sample profiles with QR previews</h2>
+            </div>
+            <p className="text-sm text-white/60 max-w-xl">
+              Each preview is a clickable route to login, then the dashboard will let you explore the same profile workflow.
             </p>
           </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {topLevel.map((p) => {
-              // Find secondary cards that point to this profile
-              const secondaries = profiles.filter((s) => s.parentProfileId === p.id);
-              return (
-              <div key={p.id} className="flex flex-col gap-2">
-              <div
-                className={`bg-white/5 border rounded-2xl p-4 flex flex-col gap-3 hover:border-indigo-500/40 transition-colors ${
-                  p.isOwner ? "border-indigo-500/40" : "border-white/10"
-                }`}
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            {profilePreviews.map((profile) => (
+              <Link
+                key={profile.name}
+                href={`/p/${profile.slug}`}
+                className="group block overflow-hidden rounded-3xl border border-white/10 bg-slate-950/80 p-5 transition hover:border-indigo-500/40"
               >
-                {/* Headshot + name */}
-                <div className="flex items-center gap-3">
-                  {p.headshotUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={p.headshotUrl}
-                      alt={p.name}
-                      className="rounded-full object-cover w-12 h-12 border border-white/10"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-indigo-800/50 flex items-center justify-center text-xl font-bold text-indigo-300">
-                      {p.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold truncate">{p.name}</p>
-                      {p.isOwner && (
-                        <span className="text-[10px] font-medium text-indigo-400 bg-indigo-900/50 px-1.5 py-0.5 rounded shrink-0">
-                          My card
-                        </span>
-                      )}
-                    </div>
-                    {p.headline && (
-                      <p className="text-xs text-white/50 truncate">
-                        {p.headline}
-                      </p>
-                    )}
+                <div className="flex items-center gap-4">
+                  <div className="h-16 w-16 overflow-hidden rounded-3xl bg-white/10 border border-white/10">
+                    <img src={profile.headshot} alt={profile.name} className="h-full w-full object-cover" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-semibold text-white">{profile.name}</p>
+                    <p className="text-sm text-white/60">{profile.title}</p>
+                    <p className="text-sm text-white/60">{profile.company}</p>
                   </div>
                 </div>
-
-                {/* Action buttons */}
-                <div className="flex gap-2 flex-wrap mt-auto pt-2 border-t border-white/10">
-                  <Link
-                    href={`/p/${p.slug}`}
-                    target="_blank"
-                    className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    View public
-                  </Link>
-                  <Link
-                    href={`/profiles/${p.id}/edit`}
-                    className="text-xs bg-indigo-700/50 hover:bg-indigo-600/60 px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    Edit
-                  </Link>
-                  <Link
-                    href={`/profiles/${p.id}/edit#qr`}
-                    className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    Regenerate QR
-                  </Link>
-                  <Link
-                    href={`/profiles/${p.id}/connections`}
-                    className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    {p._count.connections > 0
-                      ? `${p._count.connections} / ${p._count.scans} connected`
-                      : p._count.scans > 0
-                      ? `${p._count.scans} scan${p._count.scans !== 1 ? "s" : ""}`
-                      : "Connections"}
-                  </Link>
-                  <ShareQRButton slug={p.slug} name={p.name} appUrl={process.env.APP_URL ?? "http://localhost:3000"} />
-                  <DeleteButton id={p.id} name={p.name} />
-                </div>
-              </div>
-
-              {/* Secondary cards — indented beneath the parent */}
-              {secondaries.map((s) => (
-                <div
-                  key={s.id}
-                  className="ml-6 bg-white/3 border border-white/10 rounded-xl p-3 flex flex-col gap-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-purple-400 bg-purple-900/40 border border-purple-500/30 px-1.5 py-0.5 rounded font-medium shrink-0">
-                      2nd card
-                    </span>
-                    <p className="text-sm font-medium truncate">{s.name}</p>
-                  </div>
-                  {s.headline && (
-                    <p className="text-xs text-white/40 truncate">{s.headline}</p>
-                  )}
-                  <div className="flex gap-2 flex-wrap">
-                    <Link href={`/p/${s.slug}`} target="_blank" className="text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded-lg transition-colors">View</Link>
-                    <Link href={`/profiles/${s.id}/edit`} className="text-xs bg-indigo-700/40 hover:bg-indigo-600/50 px-2 py-1 rounded-lg transition-colors">Edit</Link>
-                    <ShareQRButton slug={s.slug} name={s.name} appUrl={process.env.APP_URL ?? "http://localhost:3000"} />
+                <div className="mt-5 rounded-3xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-sm uppercase tracking-[0.35em] text-indigo-300 mb-3">Preview</p>
+                  <div className="space-y-2 text-sm text-white/70">
+                    <p>{profile.location}</p>
+                    <p>{profile.email}</p>
                   </div>
                 </div>
-              ))}
-              </div>
-              );
-            })}
+                <div className="mt-5 flex items-center justify-between gap-3">
+                  <p className="text-xs uppercase tracking-[0.35em] text-white/40">QR code</p>
+                  <div className="h-24 w-24 rounded-3xl border border-white/10 bg-white/10 p-2">
+                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=http://localhost:3000/p/${profile.slug}`} alt={`${profile.name} QR code`} className="h-full w-full object-contain" />
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
-        )}
+        </section>
       </div>
     </main>
   );

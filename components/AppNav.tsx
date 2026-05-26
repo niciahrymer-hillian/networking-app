@@ -21,10 +21,10 @@ export default async function AppNav() {
 
         {/* Brand */}
         <Link
-          href={loggedIn ? "/" : "/login"}
-          className="flex items-center gap-2 font-bold text-white hover:text-indigo-300 transition-colors shrink-0"
+          href="/"
+          className="flex items-center gap-3 font-bold text-white hover:text-indigo-300 transition-colors shrink-0"
         >
-          <span className="text-xl">🤝</span>
+          <img src="/logo.svg" alt="Networking Cards" className="h-10 w-auto" />
           <span className="hidden sm:inline text-sm tracking-tight">Networking Cards</span>
         </Link>
 
@@ -32,17 +32,19 @@ export default async function AppNav() {
         {loggedIn && (
           <div className="flex items-center gap-1 flex-1 justify-center">
             <Link
-              href="/"
+              href="/dashboard"
               className="text-sm text-white/60 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
             >
               Dashboard
             </Link>
-            <Link
-              href="/my-profile"
-              className="text-sm text-white/60 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
-            >
-              My profile
-            </Link>
+            {!session.isAdmin && (
+              <Link
+                href="/my-profile"
+                className="text-sm text-white/60 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                My profile
+              </Link>
+            )}
             <Link
               href="/my-connections"
               className="text-sm text-white/60 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
@@ -61,12 +63,35 @@ export default async function AppNav() {
             >
               Scan log
             </Link>
-            <Link
-              href="/profiles/new"
-              className="text-sm text-white/60 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
-            >
-              + Add card
-            </Link>
+            {session.isAdmin ? (
+              <>
+                <Link
+                  href="/profiles/new"
+                  className="text-sm text-white/60 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  + Add profile
+                </Link>
+                <Link
+                  href="/admin/profiles"
+                  className="text-sm text-white/60 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  Admin profiles
+                </Link>
+                <Link
+                  href="/admin/users"
+                  className="text-sm text-white/60 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  Admin users
+                </Link>
+              </>
+            ) : (
+              <Link
+                href="/profiles/new"
+                className="text-sm text-white/60 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                + Add card
+              </Link>
+            )}
           </div>
         )}
 

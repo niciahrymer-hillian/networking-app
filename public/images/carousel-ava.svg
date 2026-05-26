@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" fill="none">
+  <rect width="1200" height="800" rx="70" fill="#0f172a" />
+  <rect x="80" y="80" width="1040" height="640" rx="52" fill="#111827" />
+  <rect x="120" y="120" width="960" height="220" rx="32" fill="#1f2937" />
+  <circle cx="230" cy="220" r="70" fill="#c7d2fe" />
+  <text x="230" y="240" font-family="Inter, sans-serif" font-size="72" font-weight="800" fill="#0f172a" text-anchor="middle">A</text>
+  <text x="360" y="190" font-family="Inter, sans-serif" font-size="48" fill="#f8fafc">Ava Chen</text>
+  <text x="360" y="250" font-family="Inter, sans-serif" font-size="28" fill="#94a3b8">Product Designer</text>
+  <rect x="360" y="320" width="560" height="40" rx="20" fill="#1e293b" />
+  <rect x="360" y="380" width="520" height="30" rx="15" fill="#1e293b" />
+  <rect x="360" y="430" width="580" height="30" rx="15" fill="#1e293b" />
+  <rect x="360" y="490" width="460" height="28" rx="14" fill="#1e293b" />
+  <rect x="840" y="330" width="200" height="200" rx="30" fill="#0f172a" stroke="#4f46e5" stroke-width="6" />
+  <text x="940" y="420" font-family="Inter, sans-serif" font-size="24" fill="#c7d2fe" text-anchor="middle">QR</text>
+  <path d="M900 460h80" stroke="#c7d2fe" stroke-width="8" stroke-linecap="round" />
+</svg>
