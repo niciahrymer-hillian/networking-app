@@ -1,5 +1,5 @@
 "use client";
-// Sign up page — create a new account and verify your email before signing in.
+// Sign up page — create a new account and get signed straight in.
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -12,8 +12,6 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
-  const [verificationUrl, setVerificationUrl] = useState("");
-  const [submittedEmail, setSubmittedEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -32,41 +30,15 @@ export default function SignupPage() {
       body: JSON.stringify({ username, email, password }),
     });
 
-    const data = await res.json();
-    if (res.ok && data.verificationUrl) {
-      setVerificationUrl(data.verificationUrl);
-      setSubmittedEmail(email.trim().toLowerCase());
-      setLoading(false);
+    if (res.ok) {
+      // Account created and signed in by the API — go straight to the dashboard.
+      router.push("/dashboard");
       return;
     }
 
+    const data = await res.json();
     setError(data.error ?? "Sign up failed.");
     setLoading(false);
-  }
-
-  if (verificationUrl) {
-    return (
-      <main className="min-h-screen bg-[#0f0f1a] flex items-center justify-center px-4">
-        <div className="w-full max-w-sm text-center">
-          <div className="text-4xl mb-3">📧</div>
-          <h1 className="text-2xl font-bold text-white mb-2">Verify your email</h1>
-          <p className="text-white/60 mb-6">
-            A verification link is ready for {submittedEmail}. Open the link below to complete signup.
-          </p>
-
-          <Link
-            href={verificationUrl}
-            className="block w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-lg transition-colors"
-          >
-            Verify email now
-          </Link>
-
-          <p className="text-white/50 text-sm mt-4">
-            If your mail service isn't configured, use this link directly.
-          </p>
-        </div>
-      </main>
-    );
   }
 
   return (
@@ -75,7 +47,7 @@ export default function SignupPage() {
         <div className="text-center mb-8">
           <p className="text-4xl mb-3">🤝</p>
           <h1 className="text-2xl font-bold text-white">Create account</h1>
-          <p className="text-white/40 text-sm mt-1">Get your own networking card and verify your email.</p>
+          <p className="text-white/40 text-sm mt-1">Get your own networking card in seconds.</p>
         </div>
 
         <form

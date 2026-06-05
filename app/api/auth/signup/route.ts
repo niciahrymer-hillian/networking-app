@@ -1,8 +1,11 @@
-// POST /api/auth/signup — create a new user account and request email verification.
-// WHY: New accounts must verify an email address before they can sign in.
-// EFFECT: Creates a User row with a verification token and returns a verification link.
+// POST /api/auth/signup — create a new user account and sign them in.
+// WHY: Email verification is not required for MVP — new accounts are usable immediately.
+//      The verify-email routes/fields are kept for optional verification later.
+// EFFECT: Creates a User row and sets an encrypted iron-session cookie.
 
 import { NextRequest, NextResponse } from "next/server";
+import { getIronSession } from "iron-session";
+import { sessionOptions, SessionData } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
@@ -51,29 +54,23 @@ export async function POST(request: NextRequest) {
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  // Generate a 6-digit numeric code for verification
-  const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
-  const verificationExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
   const user = await prisma.user.create({
     data: {
       username,
       email: normalizedEmail,
       passwordHash,
-      emailVerified: false,
-      emailVerificationToken: verificationToken,
-      emailVerificationExpiry: verificationExpiry,
+      emailVerified: false, // not required to sign in; users can verify later via the verify routes
     },
   });
 
-  // Send verification email (optional in dev if SENDGRID_API_KEY missing)
-  try {
-    const { sendVerificationEmail } = await import('@/lib/mail');
-    await sendVerificationEmail(normalizedEmail, verificationToken);
-  } catch (err) {
-    // swallow — user can request code again from verify page
-    console.error('Failed to send verification email during signup', err);
-  }
-
-  return NextResponse.json({ ok: true, email: normalizedEmail }, { status: 201 });
+  // Sign the new user in immediately — no email verification step for MVP.
+  const response = NextResponse.json({ ok: true }, { status: 201 });
+  const session = await getIronSession<SessionData>(request, response, sessionOptions);
+  session.isLoggedIn = true;
+  session.isAdmin = user.isAdmin ?? false;
+  session.userId = user.id;
+  session.username = user.username;
+  await session.save();
+  return response;
 }

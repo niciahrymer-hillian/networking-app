@@ -1,5 +1,5 @@
 // POST /api/auth/login — validates username/email + password and creates a session cookie.
-// WHY: Users must verify their email before signing in. Login uses username or email.
+// WHY: Login uses username or email. Email verification is not required to sign in.
 // EFFECT: Sets an encrypted iron-session cookie with userId + username.
 
 import { NextRequest, NextResponse } from "next/server";
@@ -32,12 +32,6 @@ export async function POST(request: NextRequest) {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
       return NextResponse.json({ error: "Incorrect username/email or password" }, { status: 401 });
-    }
-    if (!user.emailVerified) {
-      return NextResponse.json(
-        { error: "Please verify your email before signing in." },
-        { status: 403 }
-      );
     }
     session.isLoggedIn = true;
     session.isAdmin = user.isAdmin ?? false;
