@@ -7,12 +7,15 @@ import { requireAuth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import DeleteButton from "../DeleteButton";
 import ShareQRButton from "@/components/ShareQRButton";
+import { getAppUrl } from "@/lib/app-url";
 
 export const dynamic = "force-dynamic"; // always fetch fresh profiles
 
 export default async function Dashboard() {
   const session = await requireAuth();
   if (!session?.userId) redirect("/login");
+
+  const appUrl = await getAppUrl();
 
   const profiles = await prisma.profile.findMany({
     where: { userId: session.userId },
@@ -138,7 +141,7 @@ export default async function Dashboard() {
                       ? `${p._count.scans} scan${p._count.scans !== 1 ? "s" : ""}`
                       : "Connections"}
                   </Link>
-                  <ShareQRButton slug={p.slug} name={p.name} appUrl={process.env.APP_URL ?? "http://localhost:3000"} />
+                  <ShareQRButton slug={p.slug} name={p.name} appUrl={appUrl} />
                   <DeleteButton id={p.id} name={p.name} />
                 </div>
               </div>
@@ -161,7 +164,7 @@ export default async function Dashboard() {
                   <div className="flex gap-2 flex-wrap">
                     <Link href={`/p/${s.slug}`} target="_blank" className="text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded-lg transition-colors">View</Link>
                     <Link href={`/profiles/${s.id}/edit`} className="text-xs bg-indigo-700/40 hover:bg-indigo-600/50 px-2 py-1 rounded-lg transition-colors">Edit</Link>
-                    <ShareQRButton slug={s.slug} name={s.name} appUrl={process.env.APP_URL ?? "http://localhost:3000"} />
+                    <ShareQRButton slug={s.slug} name={s.name} appUrl={appUrl} />
                   </div>
                 </div>
               ))}

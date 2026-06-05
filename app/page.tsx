@@ -1,6 +1,8 @@
 import Link from "next/link";
 import LandingCarousel from "@/components/LandingCarousel";
+import QRCanvas from "@/components/QRCanvas";
 import { getSession } from "@/lib/auth";
+import { getAppUrl } from "@/lib/app-url";
 import LogoutButton from "@/app/LogoutButton";
 
 const handshakeImages = [
@@ -46,6 +48,7 @@ const profilePreviews = [
 
 export default async function Home() {
   const session = await getSession();
+  const appUrl = await getAppUrl();
 
   if (session?.isLoggedIn) {
     return (
@@ -68,7 +71,7 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-[#0f0f1a] text-white">
       <div className="mx-auto max-w-6xl px-4 py-10">
-        <LandingCarousel />
+        <LandingCarousel appUrl={appUrl} />
 
         <div className="mt-12 grid gap-12 lg:grid-cols-[1.2fr_0.8fr] items-start">
           <div className="space-y-6">
@@ -147,7 +150,7 @@ export default async function Home() {
                 <div className="mt-5 flex items-center justify-between gap-3">
                   <p className="text-xs uppercase tracking-[0.35em] text-white/40">QR code</p>
                   <div className="h-24 w-24 rounded-3xl border border-white/10 bg-white/10 p-2">
-                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=http://localhost:3000/p/${profile.slug}`} alt={`${profile.name} QR code`} className="h-full w-full object-contain" />
+                      <QRCanvas url={`${appUrl}/p/${profile.slug}`} size={96} className="h-full w-full" />
                   </div>
                 </div>
               </Link>

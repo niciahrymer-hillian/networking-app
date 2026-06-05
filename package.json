@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "launchu": "npm run dev & sleep 3 && open http://localhost:3000 && wait",
+    "launch": "npm run dev & sleep 3 && open http://localhost:3000",
     "seed": "node scripts/seed.js",
     "build": "next build",
     "start": "next start",

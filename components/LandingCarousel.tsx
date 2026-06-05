@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import QRCanvas from "@/components/QRCanvas";
 
 const slides = [
   {
@@ -11,7 +12,6 @@ const slides = [
     company: "Spark Labs",
     headshot: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=240&q=80",
     screenshot: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80",
-    qr: "https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=http://localhost:3000/p/ava-chen",
   },
   {
     slug: "liam-patel",
@@ -20,7 +20,6 @@ const slides = [
     company: "Nexa Ventures",
     headshot: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=80",
     screenshot: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
-    qr: "https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=http://localhost:3000/p/liam-patel",
   },
   {
     slug: "sofia-gomez",
@@ -29,11 +28,10 @@ const slides = [
     company: "Pulse Analytics",
     headshot: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=240&q=80",
     screenshot: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80",
-    qr: "https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=http://localhost:3000/p/sofia-gomez",
   },
 ];
 
-export default function LandingCarousel() {
+export default function LandingCarousel({ appUrl }: { appUrl: string }) {
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -83,7 +81,7 @@ export default function LandingCarousel() {
                       <span>{slide.company}</span>
                     </div>
                     <div className="flex items-center justify-center rounded-3xl bg-white/10 p-3">
-                      <img src={slide.qr} alt={`${slide.name} QR code`} className="h-32 w-32 object-contain" />
+                      <QRCanvas url={`${appUrl}/p/${slide.slug}`} size={128} className="h-32 w-32" />
                     </div>
                   </div>
                 </div>

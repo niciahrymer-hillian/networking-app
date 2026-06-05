@@ -20,6 +20,19 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Environment
+
+Create a `.env.local` file from `.env.example` and set your values before running locally or deploying.
+
+Required values:
+- `SESSION_SECRET` — at least 32 characters for iron-session.
+- `APP_URL` — the public URL for the app, used by QR codes and shared links.
+- `ENCRYPTION_KEY` — 64 hex characters for connection encryption.
+
+Optional production values for file uploads:
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

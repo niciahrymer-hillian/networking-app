@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import ProfileForm, { ProfileFormData } from "@/components/ProfileForm";
 import QRSection from "./QRSection";
+import { getAppUrl } from "@/lib/app-url";
 import SetOwnerButton from "./SetOwnerButton";
 import SetSecondaryButton from "./SetSecondaryButton";
 
@@ -21,6 +22,8 @@ export default async function EditProfilePage({
   const profile = await prisma.profile.findFirst({ where: { id, userId: session.userId } });
 
   if (!profile) notFound();
+
+  const appUrl = await getAppUrl();
 
   // Fetch other profiles to populate the secondary-card link dropdown
   const otherProfiles = await prisma.profile.findMany({
@@ -72,9 +75,9 @@ export default async function EditProfilePage({
             <SetOwnerButton id={profile.id} isOwner={profile.isOwner} />
           </div>
           <p className="text-xs text-white/40 font-mono bg-white/5 px-3 py-2 rounded-lg mb-4 break-all">
-            {process.env.APP_URL ?? "http://localhost:3000"}/p/{profile.slug}
+            {appUrl}/p/{profile.slug}
           </p>
-          <QRSection slug={profile.slug} name={profile.name} appUrl={process.env.APP_URL ?? "http://localhost:3000"} />
+          <QRSection slug={profile.slug} name={profile.name} appUrl={appUrl} />
         </div>
 
         {/* Link this profile as a secondary card of another (two-career support) */}
