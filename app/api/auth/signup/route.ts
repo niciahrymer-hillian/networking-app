@@ -7,7 +7,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { sessionOptions, SessionData } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 
 function normalizeEmail(email: string) {
