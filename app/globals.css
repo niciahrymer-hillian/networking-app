@@ -18,3 +18,25 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   min-height: 100dvh;
 }
+
+/* Blinq-style smooth, creamy entrance motion. Opt-in via .animate-fade-up;
+   stagger with an inline animation-delay. Respects reduced-motion. */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Gentle floating motion for hero/mockup cards (Blinq-style). */
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.animate-floaty { animation: floaty 5.5s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-floaty { animation: none; }
+}

@@ -17,14 +17,14 @@ interface Props {
 export default function ConnectForm({ profileId, profileName, dark = false }: Props) {
   const router = useRouter();
   // Derive Tailwind class fragments from the dark/light context
-  const label = dark ? "text-white/70" : "text-gray-700";
+  const label = dark ? "text-white/70" : "text-slate-700";
   const input = dark
     ? "bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:ring-indigo-400"
-    : "border-gray-300 focus:ring-blue-500";
-  const fileText = dark ? "text-white/40" : "text-gray-500";
+    : "border-slate-300 focus:ring-emerald-500";
+  const fileText = dark ? "text-white/40" : "text-slate-500";
   const fileBtn = dark
     ? "file:bg-indigo-900/60 file:text-indigo-300 hover:file:bg-indigo-800/60"
-    : "file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100";
+    : "file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100";
 
   const [email, setEmail] = useState("");
   const [linkedin, setLinkedin] = useState("");
@@ -135,7 +135,7 @@ export default function ConnectForm({ profileId, profileName, dark = false }: Pr
         </p>
         <button
           onClick={() => router.push("/")}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+          className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
         >
           Go to my dashboard →
         </button>
@@ -220,7 +220,7 @@ export default function ConnectForm({ profileId, profileName, dark = false }: Pr
       </div>
 
       {error && (
-        <p className="text-sm text-red-400 bg-red-900/30 border border-red-700/40 rounded-lg px-3 py-2">
+        <p className={`text-sm rounded-lg px-3 py-2 ${dark ? "text-red-400 bg-red-900/30 border border-red-700/40" : "text-red-600 bg-red-50 border border-red-200"}`}>
           {error}
         </p>
       )}
@@ -276,7 +276,7 @@ export default function ConnectForm({ profileId, profileName, dark = false }: Pr
       <button
         type="submit"
         disabled={submitting}
-        className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-semibold py-3 rounded-lg transition-colors"
+        className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white font-semibold py-3 rounded-lg transition-colors"
       >
         {submitting ? "Sending…" : wantsAccount ? "Connect & create account" : "Connect"}
       </button>
