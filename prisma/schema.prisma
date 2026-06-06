@@ -72,6 +72,14 @@ model Connection {
   githubEnc    String?                            // encrypted GitHub username or URL
   cardFilename String?                            // UUID filename stored outside /public/ (private)
 
+  // Confirm-to-connect (Phase 2): a submission is a *request* until the owner acts.
+  //   pending   — scanner submitted, awaiting the owner's decision (default)
+  //   confirmed — owner accepted; counts toward their network
+  //   declined  — owner rejected; hidden but retained so repeat scans don't re-notify
+  // Default "pending" is deliberate: on Turso, ALTER TABLE ADD COLUMN applies this
+  // to every existing row, so prior connections land in the requests inbox.
+  status       String   @default("pending")
+
   createdAt    DateTime @default(now())
 }
 
