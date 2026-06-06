@@ -27,7 +27,8 @@ export default async function NotificationsPage() {
   const events = [
     ...recentConnections.map((c) => ({
       id: `connection-${c.id}`,
-      type: "New connection",
+      // Confirm-to-connect: a pending submission is a request until the owner acts.
+      type: c.status === "confirmed" ? "New connection" : "New connection request",
       profileId: c.profile.id,
       profileName: c.profile.name,
       createdAt: c.createdAt,

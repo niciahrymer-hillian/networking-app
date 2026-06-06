@@ -21,10 +21,27 @@ export default async function Dashboard() {
     where: { userId: session.userId },
     orderBy: { createdAt: "desc" },
     include: {
-      _count: { select: { connections: true, scans: true } },
+      _count: { select: { scans: true } },
       secondaryProfiles: { select: { id: true } },
     },
   });
+
+  // Confirm-to-connect: count confirmed (network) and pending (requests) per card.
+  // A single groupBy avoids N per-profile queries.
+  const statusGroups = await prisma.connection.groupBy({
+    by: ["profileId", "status"],
+    where: { profile: { userId: session.userId } },
+    _count: { _all: true },
+  });
+  const connectionCounts = new Map<string, { confirmed: number; pending: number }>();
+  for (const g of statusGroups) {
+    const entry = connectionCounts.get(g.profileId) ?? { confirmed: 0, pending: 0 };
+    if (g.status === "confirmed") entry.confirmed = g._count._all;
+    else if (g.status === "pending") entry.pending = g._count._all;
+    connectionCounts.set(g.profileId, entry);
+  }
+  const countsFor = (profileId: string) =>
+    connectionCounts.get(profileId) ?? { confirmed: 0, pending: 0 };
 
   const ownerProfile = profiles.find((p) => p.isOwner);
   // Top-level cards = profiles that are NOT secondary to another
@@ -135,12 +152,20 @@ export default async function Dashboard() {
                     href={`/profiles/${p.id}/connections`}
                     className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-colors"
                   >
-                    {p._count.connections > 0
-                      ? `${p._count.connections} / ${p._count.scans} connected`
+                    {countsFor(p.id).confirmed > 0
+                      ? `${countsFor(p.id).confirmed} / ${p._count.scans} connected`
                       : p._count.scans > 0
                       ? `${p._count.scans} scan${p._count.scans !== 1 ? "s" : ""}`
                       : "Connections"}
                   </Link>
+                  {countsFor(p.id).pending > 0 && (
+                    <Link
+                      href={`/profiles/${p.id}/connections`}
+                      className="text-xs font-medium text-amber-300 bg-amber-900/40 border border-amber-500/30 hover:bg-amber-800/50 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      {countsFor(p.id).pending} pending
+                    </Link>
+                  )}
                   <ShareQRButton slug={p.slug} name={p.name} appUrl={appUrl} />
                   <DeleteButton id={p.id} name={p.name} />
                 </div>
@@ -165,6 +190,11 @@ export default async function Dashboard() {
                     <Link href={`/p/${s.slug}`} target="_blank" className="text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded-lg transition-colors">View</Link>
                     <Link href={`/profiles/${s.id}/edit`} className="text-xs bg-indigo-700/40 hover:bg-indigo-600/50 px-2 py-1 rounded-lg transition-colors">Edit</Link>
                     <ShareQRButton slug={s.slug} name={s.name} appUrl={appUrl} />
+                    {countsFor(s.id).pending > 0 && (
+                      <Link href={`/profiles/${s.id}/connections`} className="text-xs font-medium text-amber-300 bg-amber-900/40 border border-amber-500/30 hover:bg-amber-800/50 px-2 py-1 rounded-lg transition-colors">
+                        {countsFor(s.id).pending} pending
+                      </Link>
+                    )}
                   </div>
                 </div>
               ))}

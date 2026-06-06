@@ -1,6 +1,6 @@
 # Phase 2 — Confirm-to-Connect
 
-Status: **data model + API done; UI pending.**
+Status: **complete** (data model + API + UI). Manual local verification still recommended.
 
 ## What changed and why
 
@@ -52,10 +52,24 @@ is NOT NULL with no default, this breaks — give it a default or make it nullab
 
 Run with `npm test`.
 
-## Still to do (UI — paused for review)
+## UI (done)
 
-1. Connections page: a "Requests" inbox (pending) with Confirm/Decline calling the PATCH
-   route; confirmed rows in the existing categorized view; declined hidden.
-2. Dashboard counts: "X connected" = confirmed only, plus an "N pending" badge.
-3. my-connections + notifications: split confirmed/pending; relabel pending as a request.
-4. ConnectForm success copy: "Request sent — {name} will confirm" (not "You're connected").
+1. Connections page (`app/profiles/[id]/connections/page.tsx`): a "Requests" inbox renders
+   pending submissions with Confirm/Decline (client component `ConnectionActions.tsx` →
+   PATCH + `router.refresh()`). Confirmed rows show in the existing categorized view
+   (filtered to confirmed); declined are hidden. Conversion % is now confirmed/scans.
+2. Dashboard + my-connections: a single `connection.groupBy(['profileId','status'])` yields
+   per-card confirmed/pending counts. "X connected" counts confirmed only; an amber
+   "N pending" badge links to the requests inbox (on both top-level and secondary cards).
+3. Notifications: a pending submission is labelled "New connection request"; confirmed
+   stays "New connection".
+4. ConnectForm success copy: "Request sent! {name} will confirm the connection."
+
+## Manual verification checklist
+
+- Scan a card / submit the connect form → owner's dashboard shows "1 pending"; the
+  connections page lists it under Requests.
+- Confirm → moves into the categorized network list; dashboard count ticks up; pending clears.
+- Decline → disappears from the inbox; re-submitting the *same email* returns ok silently
+  and does NOT create a new request (dedup on emailHash).
+- A second user cannot confirm/decline another owner's connection id (404).

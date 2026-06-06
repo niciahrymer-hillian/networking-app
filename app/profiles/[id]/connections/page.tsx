@@ -1,17 +1,22 @@
 // Admin connections view for a profile.
 // WHY: Server component that fetches decrypted connections from the admin API.
 //      Requires auth — redirects to /login if not authenticated.
-// EFFECT: Renders a categorized list: Email | LinkedIn | GitHub | Card Photos.
+// EFFECT: Confirm-to-connect (Phase 2). Pending submissions appear as a "Requests"
+//         inbox with Confirm/Decline; confirmed ones show in the categorized list
+//         (Email | LinkedIn | GitHub | Card Photos). Declined are hidden.
 
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/crypto";
+import ConnectionActions from "./ConnectionActions";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
+
+export const dynamic = "force-dynamic"; // reflect confirm/decline immediately
 
 export default async function ConnectionsPage({ params }: Props) {
   const session = await requireAuth();
@@ -32,6 +37,7 @@ export default async function ConnectionsPage({ params }: Props) {
   // Decrypt all fields server-side — plain text never touches the DB
   const connections = raw.map((c) => ({
     id: c.id,
+    status: c.status,
     email: c.emailEnc ? decrypt(c.emailEnc) : null,
     linkedin: c.linkedinEnc ? decrypt(c.linkedinEnc) : null,
     github: c.githubEnc ? decrypt(c.githubEnc) : null,
@@ -39,10 +45,14 @@ export default async function ConnectionsPage({ params }: Props) {
     createdAt: c.createdAt,
   }));
 
-  const emails = connections.filter((c) => c.email);
-  const linkedins = connections.filter((c) => c.linkedin);
-  const githubs = connections.filter((c) => c.github);
-  const cards = connections.filter((c) => c.cardFilename);
+  const pending = connections.filter((c) => c.status === "pending");
+  const confirmed = connections.filter((c) => c.status === "confirmed");
+
+  // Categorized views operate on confirmed connections only (the actual network)
+  const emails = confirmed.filter((c) => c.email);
+  const linkedins = confirmed.filter((c) => c.linkedin);
+  const githubs = confirmed.filter((c) => c.github);
+  const cards = confirmed.filter((c) => c.cardFilename);
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-10">
@@ -55,16 +65,58 @@ export default async function ConnectionsPage({ params }: Props) {
           Connections — {profile.name}
         </h1>
         <p className="mt-1 text-gray-500 text-sm">
-          {scanCount} scan{scanCount !== 1 ? "s" : ""} &middot; {connections.length} connection{connections.length !== 1 ? "s" : ""}
+          {scanCount} scan{scanCount !== 1 ? "s" : ""} &middot; {confirmed.length} connection{confirmed.length !== 1 ? "s" : ""}
           {scanCount > 0 && (
             <span className="ml-2 text-gray-400">
-              ({Math.round((connections.length / scanCount) * 100)}% converted)
+              ({Math.round((confirmed.length / scanCount) * 100)}% converted)
+            </span>
+          )}
+          {pending.length > 0 && (
+            <span className="ml-2 font-medium text-amber-600">
+              · {pending.length} pending
             </span>
           )}
         </p>
       </div>
 
-      {connections.length === 0 && (
+      {/* Requests inbox — pending submissions awaiting the owner's decision */}
+      {pending.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-amber-600 mb-3">
+            Requests <span className="ml-1 text-amber-400">({pending.length})</span>
+          </h2>
+          <div className="space-y-2">
+            {pending.map((c) => (
+              <div
+                key={c.id}
+                className="flex items-center justify-between gap-4 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3"
+              >
+                <div className="min-w-0 space-y-0.5 text-sm">
+                  {c.email && <p className="text-gray-700 truncate">✉️ {c.email}</p>}
+                  {c.linkedin && <p className="text-gray-700 truncate">🔗 {c.linkedin}</p>}
+                  {c.github && <p className="text-gray-700 truncate">🐙 {c.github}</p>}
+                  {c.cardFilename && (
+                    <a
+                      href={`/api/private-files/${c.cardFilename}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-700 hover:underline"
+                    >
+                      📇 View card photo
+                    </a>
+                  )}
+                  <p className="text-xs text-gray-400">
+                    {new Date(c.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <ConnectionActions id={c.id} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {confirmed.length === 0 && pending.length === 0 && (
         <p className="text-gray-500 text-sm">No connections yet. Share the QR code!</p>
       )}
 

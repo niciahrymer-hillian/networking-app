@@ -13,9 +13,25 @@ export default async function MyConnectionsPage() {
     where: { userId: session.userId },
     orderBy: { createdAt: "desc" },
     include: {
-      _count: { select: { connections: true, scans: true } },
+      _count: { select: { scans: true } },
     },
   });
+
+  // Confirm-to-connect: confirmed = network, pending = awaiting the owner's decision.
+  const statusGroups = await prisma.connection.groupBy({
+    by: ["profileId", "status"],
+    where: { profile: { userId: session.userId } },
+    _count: { _all: true },
+  });
+  const counts = new Map<string, { confirmed: number; pending: number }>();
+  for (const g of statusGroups) {
+    const entry = counts.get(g.profileId) ?? { confirmed: 0, pending: 0 };
+    if (g.status === "confirmed") entry.confirmed = g._count._all;
+    else if (g.status === "pending") entry.pending = g._count._all;
+    counts.set(g.profileId, entry);
+  }
+  const countsFor = (profileId: string) =>
+    counts.get(profileId) ?? { confirmed: 0, pending: 0 };
 
   return (
     <main className="min-h-screen bg-[#0f0f1a] text-white px-4 py-8">
@@ -34,7 +50,10 @@ export default async function MyConnectionsPage() {
                 <div>
                   <p className="font-semibold">{p.name}</p>
                   <p className="text-xs text-white/50 mt-1">
-                    {p._count.connections} connection{p._count.connections !== 1 ? "s" : ""} • {p._count.scans} scan{p._count.scans !== 1 ? "s" : ""}
+                    {countsFor(p.id).confirmed} connection{countsFor(p.id).confirmed !== 1 ? "s" : ""} • {p._count.scans} scan{p._count.scans !== 1 ? "s" : ""}
+                    {countsFor(p.id).pending > 0 && (
+                      <span className="text-amber-400"> • {countsFor(p.id).pending} pending</span>
+                    )}
                   </p>
                 </div>
                 <Link

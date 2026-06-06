@@ -128,10 +128,10 @@ export default function ConnectForm({ profileId, profileName, dark = false }: Pr
       <div className="text-center py-8 px-6">
         <div className="text-5xl mb-4">🎉</div>
         <h2 className={`text-2xl font-bold mb-2 ${dark ? "text-white" : "text-gray-900"}`}>
-          You&apos;re connected!
+          You&apos;re all set!
         </h2>
         <p className={`mb-5 ${dark ? "text-white/50" : "text-gray-600"}`}>
-          Account created. Go to your dashboard to set up your own card.
+          Account created, and your request was sent. Go to your dashboard to set up your own card.
         </p>
         <button
           onClick={() => router.push("/")}
@@ -148,10 +148,10 @@ export default function ConnectForm({ profileId, profileName, dark = false }: Pr
       <div className="text-center py-8 px-6">
         <div className="text-5xl mb-4">🎉</div>
         <h2 className={`text-2xl font-bold mb-2 ${dark ? "text-white" : "text-gray-900"}`}>
-          You&apos;re connected!
+          Request sent!
         </h2>
         <p className={dark ? "text-white/50" : "text-gray-600"}>
-          {profileName} will be in touch. Great meeting you!
+          {profileName} will confirm the connection. Great meeting you!
         </p>
       </div>
     );
