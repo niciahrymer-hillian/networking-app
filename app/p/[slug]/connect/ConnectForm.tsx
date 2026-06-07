@@ -180,9 +180,11 @@ function GuestConnect({ profileId, profileName, ownerUserId }: { profileId: stri
           cardFilename,
         }),
       });
-      if (!res.ok) {
-        const { error: e2 } = await res.json();
-        throw new Error(e2 ?? "Something went wrong");
+      // Verify we got the API's JSON {ok:true} — not an HTML page from a
+      // redirect (which fetch follows silently and would read as a false success).
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error ?? "Something went wrong");
       }
       setDoneContact(true);
     } catch (err) {

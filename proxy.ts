@@ -1,7 +1,9 @@
 // Route-level auth guard using iron-session in the Edge runtime.
 // WHY: Protecting routes in middleware is more efficient than checking auth in every page/layout —
 //      unauthenticated requests are redirected before any DB or render work happens.
-// EFFECT: All routes except /login, /p/* (public profiles), and /api/auth/* require a valid session.
+// EFFECT: All routes except the public ones (homepage, /p/* profiles, auth pages,
+//         /api/auth/*, and the public connect endpoints /api/connections +
+//         /api/private-upload) require a valid session.
 
 import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
@@ -19,6 +21,8 @@ export default async function proxy(request: NextRequest) {
     pathname === "/forgot-password" ||
     pathname.startsWith("/reset-password/") ||
     pathname.startsWith("/api/auth/") ||
+    pathname === "/api/connections" ||
+    pathname.startsWith("/api/private-upload") ||
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/images/") ||
     pathname === "/logo.svg" ||
