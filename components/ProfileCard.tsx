@@ -33,9 +33,10 @@ interface Props {
   links: Link[];
   firstName: string;
   otherCards: OtherCard[];
+  preview?: boolean; // live-editor preview: render the visual card without the interactive connect form
 }
 
-export default function ProfileCard({ template, colorScheme, profile, links, firstName, otherCards }: Props) {
+export default function ProfileCard({ template, colorScheme, profile, links, firstName, otherCards, preview }: Props) {
   const t = getTemplate(template);
   const p = getPalette(colorScheme);
 
@@ -179,7 +180,11 @@ export default function ProfileCard({ template, colorScheme, profile, links, fir
 
       <Section delay="200ms" label="Let's connect">
         <p className="text-sm text-slate-500 mb-5">Share your details so {firstName} can follow up.</p>
-        <ConnectForm profileId={profile.id} profileName={firstName} />
+        {preview ? (
+          <p className="text-xs text-slate-400 italic">Visitors share their contact details here.</p>
+        ) : (
+          <ConnectForm profileId={profile.id} profileName={firstName} />
+        )}
       </Section>
 
       {otherCards.length > 0 && (

@@ -6,6 +6,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { TEMPLATES, PALETTES } from "@/lib/card-design";
+import ProfileCard from "@/components/ProfileCard";
 
 export interface ProfileFormData {
   id?: string;
@@ -109,7 +110,8 @@ export default function ProfileForm({ initial }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+    <div className="flex flex-col-reverse gap-8 lg:grid lg:grid-cols-[1fr_360px] lg:items-start">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 rounded-3xl bg-white p-6 sm:p-8 shadow-sm ring-1 ring-emerald-900/5">
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg">
           {error}
@@ -303,6 +305,33 @@ export default function ProfileForm({ initial }: Props) {
         </button>
       </div>
     </form>
+
+    {/* Live preview — re-renders from form state as you type/pick (Phase B) */}
+    <aside className="lg:sticky lg:top-24">
+      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Live preview</p>
+      <ProfileCard
+        preview
+        template={form.template}
+        colorScheme={form.colorScheme}
+        profile={{
+          id: initial?.id ?? "preview",
+          slug: "preview",
+          name: form.name || "Your name",
+          headline: form.headline || null,
+          headshotUrl: form.headshotUrl || null,
+          phone: form.phone || null,
+          email: form.email || null,
+          linkedinUrl: form.linkedinUrl || null,
+          githubUrl: form.githubUrl || null,
+          pdfUrl: form.pdfUrl || null,
+          about: form.about || null,
+        }}
+        links={form.links}
+        firstName={(form.name || "there").split(" ")[0]}
+        otherCards={[]}
+      />
+    </aside>
+    </div>
   );
 }
 
