@@ -23,7 +23,7 @@ export default async function ConnectPage({ params }: Props) {
       <div className="bg-white rounded-3xl shadow-xl shadow-emerald-900/5 ring-1 ring-emerald-900/5 w-full max-w-md p-8">
         {/* Greeting */}
         <div className="text-center mb-8">
-          <div className="text-4xl mb-3">👋</div>
+          <div className="text-4xl mb-3"><span className="inline-block animate-wave">👋</span></div>
           <h1 className="text-2xl font-bold text-slate-900">
             Nice to meet you!
           </h1>

@@ -37,7 +37,28 @@ body {
 }
 .animate-floaty { animation: floaty 5.5s ease-in-out infinite; }
 
+/* Friendly waving hand 👋 — pivots from the wrist. */
+@keyframes wave {
+  0%, 60%, 100% { transform: rotate(0deg); }
+  10%, 30%, 50% { transform: rotate(14deg); }
+  20%, 40% { transform: rotate(-8deg); }
+}
+.animate-wave {
+  display: inline-block;
+  transform-origin: 70% 70%;
+  animation: wave 2.2s ease-in-out infinite;
+}
+
+/* Nudge a scroll hint up and down. */
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+.animate-bob { animation: bob 1.6s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up,
-  .animate-floaty { animation: none; }
+  .animate-floaty,
+  .animate-wave,
+  .animate-bob { animation: none; }
 }

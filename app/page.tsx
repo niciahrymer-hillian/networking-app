@@ -1,5 +1,5 @@
 import Link from "next/link";
-import QRCanvas from "@/components/QRCanvas";
+import QRImage from "@/components/QRImage";
 import { getSession } from "@/lib/auth";
 import { getAppUrl } from "@/lib/app-url";
 import LogoutButton from "@/app/LogoutButton";
@@ -70,7 +70,7 @@ export default async function Home() {
               <MiniCard {...samples[0]} />
             </div>
             <div className="absolute -bottom-6 -left-6 rounded-2xl bg-white p-2.5 shadow-xl ring-1 ring-emerald-900/5">
-              <QRCanvas url={`${appUrl}/p/ava-chen`} size={76} className="h-16 w-16" />
+              <QRImage url={`${appUrl}/p/ava-chen`} size={76} className="h-16 w-16" />
             </div>
           </div>
         </div>
@@ -113,7 +113,7 @@ export default async function Home() {
             >
               <MiniCard {...s} />
               <div className="rounded-2xl bg-white p-2 shadow-sm ring-1 ring-emerald-900/5">
-                <QRCanvas url={`${appUrl}/p/${s.slug}`} size={72} className="h-14 w-14" />
+                <QRImage url={`${appUrl}/p/${s.slug}`} size={72} className="h-14 w-14" />
               </div>
               <span className="text-sm font-medium text-emerald-700 group-hover:text-emerald-600">Open {s.name.split(" ")[0]}&apos;s card →</span>
             </Link>
