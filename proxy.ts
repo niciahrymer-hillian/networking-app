@@ -22,6 +22,7 @@ export default async function proxy(request: NextRequest) {
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/images/") ||
     pathname === "/logo.svg" ||
+    pathname === "/logo.png" ||
     pathname.startsWith("/uploads/") ||
     pathname.startsWith("/api/uploads/") ||
     pathname === "/favicon.ico"
@@ -39,6 +40,14 @@ export default async function proxy(request: NextRequest) {
 
   if (!session.isLoggedIn) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Admin area — non-admins are bounced to their dashboard. (The /api/admin/*
+  // routes additionally enforce requireAdmin and return JSON 401/403, so they're
+  // intentionally not redirected here.) isAdmin is stamped into the session at
+  // login, so a freshly-promoted admin just needs to sign in again.
+  if (pathname.startsWith("/admin") && !session.isAdmin) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return response;

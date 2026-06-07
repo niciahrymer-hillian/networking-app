@@ -17,6 +17,9 @@ export default async function AppNav() {
 
   const navLink =
     "text-sm text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition-colors";
+  // Admin links get a distinct tint so it's clear they're superuser-only.
+  const adminLink =
+    "text-sm text-violet-700 hover:bg-violet-50 px-3 py-1.5 rounded-lg transition-colors";
 
   return (
     <nav className="bg-white/80 backdrop-blur-md border-b border-emerald-900/5 px-4 py-3 sticky top-0 z-50">
@@ -27,7 +30,7 @@ export default async function AppNav() {
           href="/"
           className="flex items-center gap-3 font-bold text-slate-900 hover:text-emerald-700 transition-colors shrink-0"
         >
-          <img src="/logo.svg" alt="Networking Cards" className="h-10 w-auto" />
+          <img src="/logo.png" alt="Networking Cards" className="h-10 w-auto rounded-md" />
           <span className="hidden sm:inline text-sm tracking-tight">Networking Cards</span>
         </Link>
 
@@ -43,24 +46,23 @@ export default async function AppNav() {
               </Link>
             )}
             <Link href="/my-connections" className={navLink}>
-              My connections
+              Connections
             </Link>
             <Link href="/notifications" className={navLink}>
-              Notifications
-            </Link>
-            <Link href="/scan-log" className={navLink}>
-              Scan log
+              Activity
             </Link>
             {session.isAdmin ? (
               <>
                 <Link href="/profiles/new" className={navLink}>
                   + Add profile
                 </Link>
-                <Link href="/admin/profiles" className={navLink}>
-                  Admin profiles
+                {/* Admin-only group */}
+                <span className="mx-1 h-4 w-px bg-slate-200" aria-hidden />
+                <Link href="/admin/profiles" className={adminLink}>
+                  Admin · Profiles
                 </Link>
-                <Link href="/admin/users" className={navLink}>
-                  Admin users
+                <Link href="/admin/users" className={adminLink}>
+                  Admin · Users
                 </Link>
               </>
             ) : (

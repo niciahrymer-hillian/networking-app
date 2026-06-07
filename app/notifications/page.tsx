@@ -45,8 +45,15 @@ export default async function NotificationsPage() {
   return (
     <main className="min-h-screen bg-[#f6fbf8] text-slate-900 px-4 py-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-2">Notifications</h1>
-        <p className="text-sm text-slate-500 mb-6">Recent activity for your cards.</p>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold">Activity</h1>
+            <p className="text-sm text-slate-500 mt-1">Recent connections and scans across your cards.</p>
+          </div>
+          <Link href="/scan-log" className="text-sm font-medium text-emerald-700 hover:text-emerald-600 shrink-0">
+            Full scan log →
+          </Link>
+        </div>
 
         {events.length === 0 ? (
           <p className="text-slate-500">No activity yet.</p>
