@@ -7,7 +7,8 @@ import AuthShell, { authInput, authButton } from "@/components/AuthShell";
 
 export default function ForgotPasswordPage() {
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState(""); // dev only — direct link without email
+  const [sent, setSent] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,10 +26,13 @@ export default function ForgotPasswordPage() {
 
     const data = await res.json();
     if (res.ok && data.token) {
+      // Development: the API returns the token so we can link directly.
       setToken(data.token);
       setEmail(data.email ?? null);
     } else if (res.ok) {
-      setToken("not-found");
+      // Production: the link was emailed (same message whether or not the
+      // account exists, so we never reveal which usernames/emails are real).
+      setSent(true);
     } else {
       setError(data.error ?? "Request failed.");
     }
@@ -39,13 +43,9 @@ export default function ForgotPasswordPage() {
     return (
       <AuthShell
         emoji="🔑"
-        title="Reset token ready"
+        title="Reset link ready (dev)"
         subtitle="Use this link to set a new password. Expires in 1 hour."
-        footer={
-          email
-            ? `A reset link was generated for ${email}. If email delivery is configured, check your inbox.`
-            : "If email is not configured, use the direct link above."
-        }
+        footer={email ? `In production this link is emailed to ${email}.` : undefined}
       >
         <Link
           href={`/reset-password/${token}`}
@@ -57,11 +57,11 @@ export default function ForgotPasswordPage() {
     );
   }
 
-  if (token === "not-found") {
+  if (sent) {
     return (
       <AuthShell
-        emoji="📭"
-        title="Check your account"
+        emoji="📬"
+        title="Check your email"
         footer={
           <Link href="/login" className="font-medium text-emerald-700 hover:text-emerald-600 transition-colors">
             Back to sign in
@@ -69,7 +69,8 @@ export default function ForgotPasswordPage() {
         }
       >
         <p className="text-center text-slate-600 text-sm">
-          If that account exists, a reset token was generated.
+          If an account matches, we&apos;ve sent a password reset link. It expires in 1 hour —
+          check your inbox (and spam folder).
         </p>
       </AuthShell>
     );
@@ -79,7 +80,7 @@ export default function ForgotPasswordPage() {
     <AuthShell
       emoji="🔒"
       title="Forgot password"
-      subtitle="Enter the username or email for your account. A password reset link will be generated."
+      subtitle="Enter your username or email and we'll send a password reset link to your inbox."
       footer={
         <Link href="/login" className="text-slate-400 hover:text-slate-600 transition-colors">
           Back to sign in
@@ -100,7 +101,7 @@ export default function ForgotPasswordPage() {
         {error && <p className="text-red-600 text-sm">{error}</p>}
 
         <button type="submit" disabled={loading} className={authButton}>
-          {loading ? "Checking…" : "Generate reset link"}
+          {loading ? "Sending…" : "Send reset link"}
         </button>
       </form>
     </AuthShell>
