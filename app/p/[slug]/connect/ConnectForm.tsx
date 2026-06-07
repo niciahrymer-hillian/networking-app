@@ -11,20 +11,15 @@ import { useRouter } from "next/navigation";
 interface Props {
   profileId: string;
   profileName: string;
-  dark?: boolean; // true when rendered on the dark public profile page
 }
 
-export default function ConnectForm({ profileId, profileName, dark = false }: Props) {
+export default function ConnectForm({ profileId, profileName }: Props) {
   const router = useRouter();
-  // Derive Tailwind class fragments from the dark/light context
-  const label = dark ? "text-white/70" : "text-slate-700";
-  const input = dark
-    ? "bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:ring-indigo-400"
-    : "border-slate-300 focus:ring-emerald-500";
-  const fileText = dark ? "text-white/40" : "text-slate-500";
-  const fileBtn = dark
-    ? "file:bg-indigo-900/60 file:text-indigo-300 hover:file:bg-indigo-800/60"
-    : "file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100";
+  // Shared Tailwind class fragments (the card is always on the bright theme).
+  const label = "text-slate-700";
+  const input = "border-slate-300 focus:ring-emerald-500";
+  const fileText = "text-slate-500";
+  const fileBtn = "file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100";
 
   const [email, setEmail] = useState("");
   const [linkedin, setLinkedin] = useState("");
@@ -127,10 +122,10 @@ export default function ConnectForm({ profileId, profileName, dark = false }: Pr
     return (
       <div className="text-center py-8 px-6">
         <div className="text-5xl mb-4">🎉</div>
-        <h2 className={`text-2xl font-bold mb-2 ${dark ? "text-white" : "text-gray-900"}`}>
+        <h2 className="text-2xl font-bold mb-2 text-gray-900">
           You&apos;re all set!
         </h2>
-        <p className={`mb-5 ${dark ? "text-white/50" : "text-gray-600"}`}>
+        <p className="mb-5 text-gray-600">
           Account created, and your request was sent. Go to your dashboard to set up your own card.
         </p>
         <button
@@ -147,10 +142,10 @@ export default function ConnectForm({ profileId, profileName, dark = false }: Pr
     return (
       <div className="text-center py-8 px-6">
         <div className="text-5xl mb-4">🎉</div>
-        <h2 className={`text-2xl font-bold mb-2 ${dark ? "text-white" : "text-gray-900"}`}>
+        <h2 className="text-2xl font-bold mb-2 text-gray-900">
           Request sent!
         </h2>
-        <p className={dark ? "text-white/50" : "text-gray-600"}>
+        <p className="text-gray-600">
           {profileName} will confirm the connection. Great meeting you!
         </p>
       </div>
@@ -213,36 +208,32 @@ export default function ConnectForm({ profileId, profileName, dark = false }: Pr
           className={`w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium ${fileText} ${fileBtn}`}
         />
         {cardFile && (
-          <p className={`mt-1 text-xs ${dark ? "text-white/40" : "text-gray-500"}`}>
+          <p className="mt-1 text-xs text-gray-500">
             Selected: {cardFile.name} ({(cardFile.size / 1024).toFixed(0)} KB)
           </p>
         )}
       </div>
 
       {error && (
-        <p className={`text-sm rounded-lg px-3 py-2 ${dark ? "text-red-400 bg-red-900/30 border border-red-700/40" : "text-red-600 bg-red-50 border border-red-200"}`}>
+        <p className="text-sm rounded-lg px-3 py-2 text-red-600 bg-red-50 border border-red-200">
           {error}
         </p>
       )}
 
       {/* Optional: create an account to get your own networking card */}
-      <div className={`border rounded-xl overflow-hidden ${dark ? "border-white/10" : "border-gray-200"}`}>
+      <div className="border border-gray-200 rounded-xl overflow-hidden">
         <button
           type="button"
           onClick={() => setWantsAccount((v) => !v)}
-          className={`w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors ${
-            dark
-              ? "text-white/60 hover:text-white/80 bg-white/5"
-              : "text-gray-600 hover:text-gray-800 bg-gray-50"
-          }`}
+          className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors text-gray-600 hover:text-gray-800 bg-gray-50"
         >
           <span>✦ Create your own networking account</span>
           <span className="text-xs opacity-60">{wantsAccount ? "▲ hide" : "▼ show"}</span>
         </button>
 
         {wantsAccount && (
-          <div className={`p-4 space-y-3 ${dark ? "bg-white/5" : "bg-gray-50"}`}>
-            <p className={`text-xs ${dark ? "text-white/40" : "text-gray-500"}`}>
+          <div className="p-4 space-y-3 bg-gray-50">
+            <p className="text-xs text-gray-500">
               Get your own card + QR code to share at events.
             </p>
             <input

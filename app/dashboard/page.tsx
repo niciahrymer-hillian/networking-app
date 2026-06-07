@@ -46,10 +46,6 @@ export default async function Dashboard() {
   const ownerProfile = profiles.find((p) => p.isOwner);
   // Top-level cards = profiles that are NOT secondary to another
   const topLevel = profiles.filter((p) => !p.parentProfileId);
-  // Quick lookup: secondaryId → parent profile object
-  const secondaryOf = new Map(
-    profiles.filter((p) => p.parentProfileId).map((p) => [p.id, p.parentProfileId!])
-  );
 
   return (
     <main className="min-h-screen bg-[#f6fbf8] text-slate-900">

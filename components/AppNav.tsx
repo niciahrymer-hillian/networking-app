@@ -1,24 +1,45 @@
 // AppNav — shared top navigation bar rendered on every page via layout.tsx.
 // WHY: Gives users a consistent way to navigate between dashboard, profile pages,
 //      and auth actions (sign in / sign up / sign out) from anywhere in the app.
-// EFFECT: Server component — reads the iron-session cookie to determine auth state,
-//         then renders appropriate links without an extra client-side round-trip.
+// EFFECT: Server component — reads the iron-session cookie to determine auth state.
+//         On desktop the links render inline; below md they collapse into <MobileMenu>.
 
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { sessionOptions, SessionData } from "@/lib/session";
 import LogoutButton from "@/app/LogoutButton";
+import MobileMenu, { type NavItem } from "@/components/MobileMenu";
 
 export default async function AppNav() {
   const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
-  const loggedIn = session.isLoggedIn;
+  const loggedIn = session.isLoggedIn ?? false;
+  const isAdmin = session.isAdmin ?? false;
   const username = session.username;
+
+  // Single source of truth for the nav links, used by both desktop + mobile.
+  const links: NavItem[] = loggedIn
+    ? [
+        { label: "Dashboard", href: "/dashboard" },
+        ...(!isAdmin ? [{ label: "My profile", href: "/my-profile" }] : []),
+        { label: "Connections", href: "/my-connections" },
+        { label: "Activity", href: "/notifications" },
+        ...(isAdmin
+          ? [
+              { label: "+ Add profile", href: "/profiles/new" },
+              { label: "Admin · Profiles", href: "/admin/profiles", admin: true },
+              { label: "Admin · Users", href: "/admin/users", admin: true },
+            ]
+          : [{ label: "+ Add card", href: "/profiles/new" }]),
+      ]
+    : [];
+
+  const mainLinks = links.filter((l) => !l.admin);
+  const adminLinks = links.filter((l) => l.admin);
 
   const navLink =
     "text-sm text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition-colors";
-  // Admin links get a distinct tint so it's clear they're superuser-only.
-  const adminLink =
+  const adminLinkCls =
     "text-sm text-violet-700 hover:bg-violet-50 px-3 py-1.5 rounded-lg transition-colors";
 
   return (
@@ -34,59 +55,31 @@ export default async function AppNav() {
           <span className="hidden sm:inline text-sm tracking-tight">Networking Cards</span>
         </Link>
 
-        {/* Centre links — only shown when logged in */}
+        {/* Desktop centre links */}
         {loggedIn && (
-          <div className="flex items-center gap-1 flex-1 justify-center">
-            <Link href="/dashboard" className={navLink}>
-              Dashboard
-            </Link>
-            {!session.isAdmin && (
-              <Link href="/my-profile" className={navLink}>
-                My profile
+          <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
+            {mainLinks.map((l) => (
+              <Link key={l.href} href={l.href} className={navLink}>
+                {l.label}
               </Link>
-            )}
-            <Link href="/my-connections" className={navLink}>
-              Connections
-            </Link>
-            <Link href="/notifications" className={navLink}>
-              Activity
-            </Link>
-            {session.isAdmin ? (
-              <>
-                <Link href="/profiles/new" className={navLink}>
-                  + Add profile
-                </Link>
-                {/* Admin-only group */}
-                <span className="mx-1 h-4 w-px bg-slate-200" aria-hidden />
-                <Link href="/admin/profiles" className={adminLink}>
-                  Admin · Profiles
-                </Link>
-                <Link href="/admin/users" className={adminLink}>
-                  Admin · Users
-                </Link>
-              </>
-            ) : (
-              <Link href="/profiles/new" className={navLink}>
-                + Add card
+            ))}
+            {adminLinks.length > 0 && <span className="mx-1 h-4 w-px bg-slate-200" aria-hidden />}
+            {adminLinks.map((l) => (
+              <Link key={l.href} href={l.href} className={adminLinkCls}>
+                {l.label}
               </Link>
-            )}
+            ))}
           </div>
         )}
 
-        {/* Right — auth actions */}
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Desktop auth actions */}
+        <div className="hidden md:flex items-center gap-2 shrink-0">
           {loggedIn ? (
             <>
               {username && (
-                <span className="hidden sm:block text-xs text-slate-400 font-mono">
-                  @{username}
-                </span>
+                <span className="text-xs text-slate-400 font-mono">@{username}</span>
               )}
-              <Link
-                href="/account"
-                className={navLink}
-                title="Account settings"
-              >
+              <Link href="/account" className={navLink} title="Account settings">
                 ⚙︎
               </Link>
               <LogoutButton />
@@ -108,6 +101,9 @@ export default async function AppNav() {
             </>
           )}
         </div>
+
+        {/* Mobile menu (below md) */}
+        <MobileMenu links={links} loggedIn={loggedIn} username={username} />
       </div>
     </nav>
   );

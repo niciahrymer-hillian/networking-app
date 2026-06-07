@@ -68,7 +68,7 @@ export default async function EditProfilePage({
         <ProfileForm initial={initial} />
 
         {/* QR + secondary-card settings, below the editor */}
-        <div className="mt-8 max-w-2xl rounded-3xl bg-white p-6 sm:p-8 shadow-sm ring-1 ring-emerald-900/5">
+        <div id="qr" className="mt-8 max-w-2xl scroll-mt-24 rounded-3xl bg-white p-6 sm:p-8 shadow-sm ring-1 ring-emerald-900/5">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-medium text-slate-600">Public profile link & QR code</p>
             <SetOwnerButton id={profile.id} isOwner={profile.isOwner} />
