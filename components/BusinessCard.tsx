@@ -1,8 +1,8 @@
 "use client";
-// PDF business card viewer — renders a PDF as two "sides" (page 1 = front, page 2 = back).
-// WHY: react-pdf renders PDFs via pdf.js entirely in the browser, so no server-side
-//      PDF-to-image conversion is needed. The CDN worker URL keeps the bundle small.
-// EFFECT: Clicking the card toggles between front and back pages.
+// PDF business card viewer with a smooth 3D flip (page 1 = front, page 2 = back).
+// WHY: react-pdf renders PDFs via pdf.js in the browser. Both pages are rendered
+//      as the two faces of a card that rotates in 3D on tap — a real flip rather
+//      than an instant page swap.
 
 import { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
@@ -16,61 +16,54 @@ interface BusinessCardProps {
   pdfUrl: string;
 }
 
+const face =
+  "rounded-xl overflow-hidden shadow-lg ring-1 ring-black/10 [backface-visibility:hidden]";
+
 export default function BusinessCard({ pdfUrl }: BusinessCardProps) {
   const [numPages, setNumPages] = useState<number>(0);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-    setNumPages(numPages);
-  }
+  const [flipped, setFlipped] = useState(false);
 
   const hasTwoSides = numPages >= 2;
 
   return (
     <div className="flex flex-col items-center gap-3">
-      {/* Card wrapper — cursor pointer shows it's interactive when two sides exist */}
-      <div
-        className={`relative rounded-xl overflow-hidden shadow-lg ring-1 ring-emerald-900/10 ${hasTwoSides ? "cursor-pointer select-none" : ""}`}
-        onClick={() => {
-          if (hasTwoSides) setCurrentPage((p) => (p === 1 ? 2 : 1));
-        }}
-        title={hasTwoSides ? "Click to flip" : undefined}
-      >
-        <Document
-          file={pdfUrl}
-          onLoadSuccess={onDocumentLoadSuccess}
-          loading={
-            <div className="w-80 h-48 bg-slate-100 animate-pulse rounded-xl" />
-          }
+      <div className="[perspective:1400px]">
+        <div
+          className={`relative transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] [transform-style:preserve-3d] ${
+            hasTwoSides ? "cursor-pointer select-none" : ""
+          }`}
+          style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
+          onClick={() => hasTwoSides && setFlipped((f) => !f)}
+          title={hasTwoSides ? "Click to flip" : undefined}
         >
-          <Page
-            pageNumber={currentPage}
-            width={320}
-            renderAnnotationLayer={false}
-            renderTextLayer={false}
-          />
-        </Document>
+          <Document
+            file={pdfUrl}
+            onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+            loading={<div className="w-80 h-48 bg-slate-100 animate-pulse rounded-xl" />}
+          >
+            {/* Front — page 1 */}
+            <div className={face}>
+              <Page pageNumber={1} width={320} renderAnnotationLayer={false} renderTextLayer={false} />
+            </div>
 
-        {/* Flip hint overlay — only shown when PDF has two pages */}
-        {hasTwoSides && (
-          <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
-            {currentPage === 1 ? "Front · tap to flip →" : "← Back · tap to flip"}
-          </div>
-        )}
+            {/* Back — page 2, pre-rotated so it faces forward once flipped */}
+            {hasTwoSides && (
+              <div className={`absolute inset-0 ${face} [transform:rotateY(180deg)]`}>
+                <Page pageNumber={2} width={320} renderAnnotationLayer={false} renderTextLayer={false} />
+              </div>
+            )}
+          </Document>
+        </div>
       </div>
 
-      {/* Dot indicators for front/back */}
       {hasTwoSides && (
-        <div className="flex gap-1.5">
-          {[1, 2].map((p) => (
-            <button
-              key={p}
-              onClick={() => setCurrentPage(p)}
-              className={`w-2 h-2 rounded-full transition-colors ${currentPage === p ? "bg-emerald-500" : "bg-slate-300"}`}
-              aria-label={p === 1 ? "Front" : "Back"}
-            />
-          ))}
-        </div>
+        <button
+          type="button"
+          onClick={() => setFlipped((f) => !f)}
+          className="text-xs font-medium text-slate-500 hover:text-slate-700 transition-colors"
+        >
+          {flipped ? "← Show front" : "Flip to back ⟳"}
+        </button>
       )}
     </div>
   );

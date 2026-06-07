@@ -5,7 +5,9 @@
 
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
+import QRCode from "qrcode";
 import { prisma } from "@/lib/db";
+import { getAppUrl } from "@/lib/app-url";
 import ScanIntro from "@/components/ScanIntro";
 import ProfileCard from "@/components/ProfileCard";
 
@@ -45,6 +47,14 @@ export default async function PublicProfilePage({
     ...(profile.parentProfile ? [profile.parentProfile] : []),
   ];
 
+  // QR for the digital flip-card back — encodes this profile's public URL.
+  const appUrl = await getAppUrl();
+  const qrDataUrl = await QRCode.toDataURL(`${appUrl}/p/${profile.slug}`, {
+    width: 240,
+    margin: 1,
+    color: { dark: "#0f172a", light: "#ffffff" },
+  });
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#f0faf5] via-[#f6fbf8] to-[#eef7f1] text-slate-900 flex flex-col items-center px-4 py-8 sm:py-12">
       <ScanIntro firstName={firstName}>
@@ -67,6 +77,7 @@ export default async function PublicProfilePage({
           links={links}
           firstName={firstName}
           otherCards={otherCards}
+          qrDataUrl={qrDataUrl}
         />
       </ScanIntro>
     </main>

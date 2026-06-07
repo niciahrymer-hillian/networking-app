@@ -8,6 +8,7 @@
 
 import type { CSSProperties } from "react";
 import BusinessCardClient from "@/components/BusinessCardClient";
+import DigitalCard from "@/components/DigitalCard";
 import ConnectForm from "@/app/p/[slug]/connect/ConnectForm";
 import { getPalette, getTemplate, type Template, type ColorScheme } from "@/lib/card-design";
 
@@ -34,9 +35,10 @@ interface Props {
   firstName: string;
   otherCards: OtherCard[];
   preview?: boolean; // live-editor preview: render the visual card without the interactive connect form
+  qrDataUrl?: string; // server-generated QR for the digital flip-card back
 }
 
-export default function ProfileCard({ template, colorScheme, profile, links, firstName, otherCards, preview }: Props) {
+export default function ProfileCard({ template, colorScheme, profile, links, firstName, otherCards, preview, qrDataUrl }: Props) {
   const t = getTemplate(template);
   const p = getPalette(colorScheme);
 
@@ -172,11 +174,25 @@ export default function ProfileCard({ template, colorScheme, profile, links, fir
         </Section>
       )}
 
-      {profile.pdfUrl && (
-        <Section delay="160ms" label="Business card">
+      <Section delay="160ms" label={profile.pdfUrl ? "Business card" : "My card"}>
+        {profile.pdfUrl ? (
           <BusinessCardClient pdfUrl={profile.pdfUrl} />
-        </Section>
-      )}
+        ) : (
+          <DigitalCard
+            name={profile.name}
+            headline={profile.headline}
+            headshotUrl={profile.headshotUrl}
+            email={profile.email}
+            phone={profile.phone}
+            accent={p.accent}
+            bandFrom={p.bandFrom}
+            bandTo={p.bandTo}
+            soft={p.soft}
+            onSoft={p.onSoft}
+            qrDataUrl={qrDataUrl}
+          />
+        )}
+      </Section>
 
       <Section delay="200ms" label="Let's connect">
         <p className="text-sm text-slate-500 mb-5">Share your details so {firstName} can follow up.</p>
