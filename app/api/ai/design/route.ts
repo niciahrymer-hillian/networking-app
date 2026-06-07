@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(suggestion);
   } catch (err) {
     const message = err instanceof Error ? err.message : "AI is unavailable";
-    // 503 — the AI server isn't reachable/configured (e.g. local Ollama from prod).
+    // 503 — the AI server isn't reachable/configured (e.g. missing GROQ_API_KEY).
     return NextResponse.json(
       { error: `Couldn't reach the AI: ${message}` },
       { status: 503 }

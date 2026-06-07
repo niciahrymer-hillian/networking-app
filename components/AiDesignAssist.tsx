@@ -1,5 +1,5 @@
 "use client";
-// "Design with AI" — asks the local Ollama model for a template/palette/font from
+// "Design with AI" — asks a Groq-hosted model for a template/palette/font from
 // the person's info, applies it to the form (live preview updates), and speaks the
 // explanation via ElevenLabs. Speech is best-effort; design works without it.
 

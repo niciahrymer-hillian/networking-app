@@ -1,7 +1,8 @@
-// AI card-design suggestion via a local Ollama server (env-driven).
-// WHY: a small local model picks a template/palette/font from the person's info.
-// NOTE: OLLAMA_BASE_URL must be reachable from wherever the app RUNS. On Vercel
-//       that means a public URL (tunnel) — `localhost` only works in local dev.
+// AI card-design suggestion via Groq (OpenAI-compatible chat completions, env-driven).
+// WHY: a hosted Llama model picks a template/palette/font from the person's info.
+// NOTE: Groq is a public HTTPS API, so this works the same in local dev AND on
+//       Vercel prod — unlike the previous localhost Ollama setup, which couldn't
+//       be reached from Vercel's servers.
 
 import { getTemplate, getColorScheme, getFont, TEMPLATES, PALETTES, FONTS } from "@/lib/card-design";
 
@@ -18,9 +19,10 @@ export async function suggestDesign(input: {
   about?: string;
   vibe?: string;
 }): Promise<DesignSuggestion> {
-  const baseUrl = process.env.OLLAMA_BASE_URL;
-  const model = process.env.OLLAMA_MODEL || "llama3.2:3b";
-  if (!baseUrl) throw new Error("AI isn't configured (set OLLAMA_BASE_URL).");
+  const apiKey = process.env.GROQ_API_KEY;
+  const model = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+  const baseUrl = process.env.GROQ_BASE_URL || "https://api.groq.com/openai/v1";
+  if (!apiKey) throw new Error("AI isn't configured (set GROQ_API_KEY).");
 
   const templates = TEMPLATES.map((t) => t.key).join(", ");
   const palettes = Object.keys(PALETTES).join(", ");
@@ -40,24 +42,31 @@ export async function suggestDesign(input: {
   // Don't let a slow/unreachable model hang the request.
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25000);
-  let data: { message?: { content?: string } };
+  let content: string;
   try {
-    const res = await fetch(`${baseUrl.replace(/\/$/, "")}/api/chat`, {
+    const res = await fetch(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
       signal: controller.signal,
       body: JSON.stringify({
         model,
-        stream: false,
-        format: "json",
+        temperature: 0.7,
+        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
         ],
       }),
     });
-    if (!res.ok) throw new Error(`AI request failed (${res.status})`);
-    data = await res.json();
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      throw new Error(`AI request failed (${res.status})${detail ? `: ${detail.slice(0, 140)}` : ""}`);
+    }
+    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    content = data.choices?.[0]?.message?.content ?? "{}";
   } finally {
     clearTimeout(timeout);
   }
@@ -66,7 +75,7 @@ export async function suggestDesign(input: {
   // to a known value (the validators default on anything invalid).
   let parsed: Record<string, unknown> = {};
   try {
-    parsed = JSON.parse(data?.message?.content ?? "{}");
+    parsed = JSON.parse(content);
   } catch {
     parsed = {};
   }
