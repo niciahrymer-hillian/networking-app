@@ -21,6 +21,7 @@ export default async function AppNav() {
   const links: NavItem[] = loggedIn
     ? [
         { label: "Dashboard", href: "/dashboard" },
+        { label: "Feed", href: "/feed" },
         ...(!isAdmin ? [{ label: "My profile", href: "/my-profile" }] : []),
         { label: "Connections", href: "/my-connections" },
         { label: "Activity", href: "/notifications" },

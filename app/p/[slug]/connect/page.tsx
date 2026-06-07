@@ -4,6 +4,7 @@
 
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
 import ConnectForm from "./ConnectForm";
 
 interface Props {
@@ -17,6 +18,7 @@ export default async function ConnectPage({ params }: Props) {
   if (!profile) notFound();
 
   const firstName = profile.name.split(" ")[0];
+  const session = await getSession();
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#f0faf5] via-white to-[#eef7f1] flex items-start justify-center pt-12 px-4">
@@ -32,7 +34,13 @@ export default async function ConnectPage({ params }: Props) {
           </p>
         </div>
 
-        <ConnectForm profileId={profile.id} profileName={firstName} />
+        <ConnectForm
+          profileId={profile.id}
+          profileName={firstName}
+          ownerUserId={profile.userId}
+          viewerLoggedIn={session.isLoggedIn ?? false}
+          viewerIsOwner={!!session.userId && session.userId === profile.userId}
+        />
       </div>
     </main>
   );

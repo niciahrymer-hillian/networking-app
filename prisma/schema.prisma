@@ -58,7 +58,39 @@ model User {
   resetToken                String?
   resetTokenExpiry          DateTime?
   profiles                  Profile[]
+  posts                     Post[]
+  // Mutual network graph — a connection creates rows in both directions, so
+  // "my network" is simply networkOut.connectedUserId.
+  networkOut                UserConnection[] @relation("NetworkOut")
+  networkIn                 UserConnection[] @relation("NetworkIn")
   createdAt                 DateTime  @default(now())
+}
+
+// A mutual account-to-account network edge (feature: connections feed).
+// WHY: scan-based Connections capture contacts (often non-accounts); this links
+//      two real User accounts so they see each other's posts. Stored directional
+//      (both rows written on connect) for simple "posts from my network" queries.
+model UserConnection {
+  id              String   @id @default(cuid())
+  userId          String                      // the member
+  connectedUserId String                      // who they're connected to
+  user            User     @relation("NetworkOut", fields: [userId], references: [id], onDelete: Cascade)
+  connectedUser   User     @relation("NetworkIn", fields: [connectedUserId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+
+  @@unique([userId, connectedUserId])
+  @@index([userId])
+}
+
+// A post in the connections feed.
+model Post {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([authorId])
 }
 
 // Each Connection = someone who scanned a profile's QR and shared their info.

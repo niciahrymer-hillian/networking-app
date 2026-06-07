@@ -37,9 +37,12 @@ interface Props {
   otherCards: OtherCard[];
   preview?: boolean; // live-editor preview: render the visual card without the interactive connect form
   qrDataUrl?: string; // server-generated QR for the digital flip-card back
+  ownerUserId?: string | null; // card owner's account (for network connect)
+  viewerLoggedIn?: boolean;
+  viewerIsOwner?: boolean;
 }
 
-export default function ProfileCard({ template, colorScheme, font, profile, links, firstName, otherCards, preview, qrDataUrl }: Props) {
+export default function ProfileCard({ template, colorScheme, font, profile, links, firstName, otherCards, preview, qrDataUrl, ownerUserId, viewerLoggedIn, viewerIsOwner }: Props) {
   const t = getTemplate(template);
   const p = getPalette(colorScheme);
 
@@ -197,11 +200,16 @@ export default function ProfileCard({ template, colorScheme, font, profile, link
       </Section>
 
       <Section delay="200ms" label="Let's connect">
-        <p className="text-sm text-slate-500 mb-5">Share your details so {firstName} can follow up.</p>
         {preview ? (
-          <p className="text-xs text-slate-400 italic">Visitors share their contact details here.</p>
+          <p className="text-xs text-slate-400 italic">Visitors connect with you here.</p>
         ) : (
-          <ConnectForm profileId={profile.id} profileName={firstName} />
+          <ConnectForm
+            profileId={profile.id}
+            profileName={firstName}
+            ownerUserId={ownerUserId ?? null}
+            viewerLoggedIn={viewerLoggedIn}
+            viewerIsOwner={viewerIsOwner}
+          />
         )}
       </Section>
 

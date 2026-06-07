@@ -8,6 +8,7 @@ import { headers } from "next/headers";
 import QRCode from "qrcode";
 import { prisma } from "@/lib/db";
 import { getAppUrl } from "@/lib/app-url";
+import { getSession } from "@/lib/auth";
 import ScanIntro from "@/components/ScanIntro";
 import ProfileCard from "@/components/ProfileCard";
 
@@ -55,6 +56,11 @@ export default async function PublicProfilePage({
     color: { dark: "#0f172a", light: "#ffffff" },
   });
 
+  // Viewer context for the account-aware connect flow.
+  const session = await getSession();
+  const viewerLoggedIn = session.isLoggedIn ?? false;
+  const viewerIsOwner = !!session.userId && session.userId === profile.userId;
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#f0faf5] via-[#f6fbf8] to-[#eef7f1] text-slate-900 flex flex-col items-center px-4 py-8 sm:py-12">
       <ScanIntro firstName={firstName}>
@@ -79,6 +85,9 @@ export default async function PublicProfilePage({
           firstName={firstName}
           otherCards={otherCards}
           qrDataUrl={qrDataUrl}
+          ownerUserId={profile.userId}
+          viewerLoggedIn={viewerLoggedIn}
+          viewerIsOwner={viewerIsOwner}
         />
       </ScanIntro>
     </main>

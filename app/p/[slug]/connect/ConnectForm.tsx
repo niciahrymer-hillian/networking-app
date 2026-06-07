@@ -1,276 +1,271 @@
 "use client";
-// /p/[slug]/connect — Public connection capture + optional account creation.
-// WHY: Shown to someone who just scanned a profile QR code.
-//      Lets them share contact info AND optionally create their own account
-//      so they can manage their own networking card.
-// EFFECT: POSTs to /api/connections, then optionally /api/auth/signup.
+// Account-aware connect flow shown on a scanned public card.
+// - Owner viewing own card  → a small note.
+// - Logged-in visitor       → one-tap mutual network connect (feed link).
+// - Logged-out visitor      → account-first: Create account / Sign in (both link
+//                             you into the owner's network), or a "Just contact"
+//                             fallback that leaves contact info without an account.
+//   New sign-ups land on the card designer afterwards (skippable there).
 
 import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Props {
   profileId: string;
   profileName: string;
+  ownerUserId?: string | null;
+  viewerLoggedIn?: boolean;
+  viewerIsOwner?: boolean;
 }
 
-export default function ConnectForm({ profileId, profileName }: Props) {
-  const router = useRouter();
-  // Shared Tailwind class fragments (the card is always on the bright theme).
-  const label = "text-slate-700";
-  const input = "border-slate-300 focus:ring-emerald-500";
-  const fileText = "text-slate-500";
-  const fileBtn = "file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100";
+const inputCls =
+  "w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition";
+const labelCls = "block text-sm font-medium text-slate-700 mb-1";
+const btnPrimary =
+  "w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white font-semibold py-3 rounded-lg transition-colors";
 
-  const [email, setEmail] = useState("");
-  const [linkedin, setLinkedin] = useState("");
-  const [github, setGithub] = useState("");
-  const [cardFile, setCardFile] = useState<File | null>(null);
-  const [wantsAccount, setWantsAccount] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
-  const [createdAccount, setCreatedAccount] = useState(false);
+export default function ConnectForm({ profileId, profileName, ownerUserId, viewerLoggedIn, viewerIsOwner }: Props) {
+  if (viewerIsOwner) {
+    return <p className="text-sm text-slate-400 italic">This is your card — share it to grow your network.</p>;
+  }
+  if (viewerLoggedIn && ownerUserId) {
+    return <NetworkConnect ownerUserId={ownerUserId} name={profileName} />;
+  }
+  return <GuestConnect profileId={profileId} profileName={profileName} ownerUserId={ownerUserId ?? null} />;
+}
+
+async function linkNetwork(ownerUserId: string | null) {
+  if (!ownerUserId) return;
+  await fetch("/api/network/connect", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ownerUserId }),
+  }).catch(() => {});
+}
+
+// --- Logged-in: one-tap mutual connect ---
+function NetworkConnect({ ownerUserId, name }: { ownerUserId: string; name: string }) {
+  const [state, setState] = useState<"idle" | "loading" | "done">("idle");
   const [error, setError] = useState("");
-  const fileRef = useRef<HTMLInputElement>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function connect() {
+    setState("loading");
     setError("");
-
-    if (!email && !linkedin && !github && !cardFile) {
-      setError("Please provide at least one way to connect.");
-      return;
-    }
-
-    if (wantsAccount) {
-      if (!username || !password) {
-        setError("Enter a username and password to create an account.");
-        return;
-      }
-      if (password !== confirmPassword) {
-        setError("Passwords don't match.");
-        return;
-      }
-      if (password.length < 8) {
-        setError("Password must be at least 8 characters.");
-        return;
-      }
-    }
-
-    setSubmitting(true);
-    try {
-      let cardFilename: string | undefined;
-
-      // Upload business card photo first if provided, get back a private filename
-      if (cardFile) {
-        const fd = new FormData();
-        fd.append("file", cardFile);
-        const upRes = await fetch("/api/private-upload", { method: "POST", body: fd });
-        if (!upRes.ok) {
-          const { error: upErr } = await upRes.json();
-          throw new Error(upErr ?? "Photo upload failed");
-        }
-        ({ filename: cardFilename } = await upRes.json());
-      }
-
-      // Save the connection
-      const res = await fetch("/api/connections", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          profileId,
-          email: email.trim() || undefined,
-          linkedin: linkedin.trim() || undefined,
-          github: github.trim() || undefined,
-          cardFilename,
-        }),
-      });
-
-      if (!res.ok) {
-        const { error: apiErr } = await res.json();
-        throw new Error(apiErr ?? "Something went wrong");
-      }
-
-      // Optionally create an account — pre-populate their profile with the info they shared
-      if (wantsAccount) {
-        const signupRes = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password }),
-        });
-        if (!signupRes.ok) {
-          const { error: signupErr } = await signupRes.json();
-          // Connection was already saved — show partial success message
-          setError(`Connected! But account creation failed: ${signupErr}`);
-          setDone(true);
-          return;
-        }
-        setCreatedAccount(true);
-      }
-
-      setDone(true);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setSubmitting(false);
+    const res = await fetch("/api/network/connect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ownerUserId }),
+    });
+    if (res.ok) setState("done");
+    else {
+      const { error: e } = await res.json().catch(() => ({}));
+      setError(e ?? "Something went wrong");
+      setState("idle");
     }
   }
 
-  if (done && createdAccount) {
+  if (state === "done") {
     return (
-      <div className="text-center py-8 px-6">
-        <div className="text-5xl mb-4">🎉</div>
-        <h2 className="text-2xl font-bold mb-2 text-gray-900">
-          You&apos;re all set!
-        </h2>
-        <p className="mb-5 text-gray-600">
-          Account created, and your request was sent. Go to your dashboard to set up your own card.
-        </p>
-        <button
-          onClick={() => router.push("/")}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
-        >
-          Go to my dashboard →
-        </button>
-      </div>
-    );
-  }
-
-  if (done) {
-    return (
-      <div className="text-center py-8 px-6">
-        <div className="text-5xl mb-4">🎉</div>
-        <h2 className="text-2xl font-bold mb-2 text-gray-900">
-          Request sent!
-        </h2>
-        <p className="text-gray-600">
-          {profileName} will confirm the connection. Great meeting you!
-        </p>
+      <div className="text-center py-2">
+        <div className="text-4xl mb-2">🤝</div>
+        <p className="font-semibold text-slate-900">You&apos;re connected with {name}!</p>
+        <p className="text-sm text-slate-500 mt-1 mb-4">You&apos;ll see each other&apos;s posts in your feed.</p>
+        <Link href="/feed" className="inline-block text-sm font-medium text-emerald-700 hover:text-emerald-600">
+          View your feed →
+        </Link>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div>
-        <label className={`block text-sm font-medium mb-1 ${label}`}>
-          Email address
-        </label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 ${input}`}
-        />
+    <div>
+      <p className="text-sm text-slate-500 mb-4">Add {name} to your network — you&apos;ll see each other&apos;s posts in your feed.</p>
+      {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
+      <button onClick={connect} disabled={state === "loading"} className={btnPrimary}>
+        {state === "loading" ? "Connecting…" : `＋ Connect with ${name}`}
+      </button>
+    </div>
+  );
+}
+
+// --- Logged-out: account-first with a contact fallback ---
+function GuestConnect({ profileId, profileName, ownerUserId }: { profileId: string; profileName: string; ownerUserId: string | null }) {
+  const [mode, setMode] = useState<"create" | "signin" | "contact">("create");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [doneContact, setDoneContact] = useState(false);
+
+  // account create
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  // sign in
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
+  const [signinPw, setSigninPw] = useState("");
+  // contact
+  const [cEmail, setCEmail] = useState("");
+  const [linkedin, setLinkedin] = useState("");
+  const [github, setGithub] = useState("");
+  const [cardFile, setCardFile] = useState<File | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    if (!username || !email || !password) return setError("Username, email and password are required.");
+    if (password !== confirm) return setError("Passwords don't match.");
+    if (password.length < 8) return setError("Password must be at least 8 characters.");
+    setBusy(true);
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password }),
+    });
+    if (!res.ok) {
+      const { error: e2 } = await res.json().catch(() => ({}));
+      setError(e2 ?? "Sign up failed.");
+      setBusy(false);
+      return;
+    }
+    await linkNetwork(ownerUserId);
+    // New user → straight into the card designer (skippable via its Dashboard link).
+    window.location.assign("/profiles/new");
+  }
+
+  async function handleSignin(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setBusy(true);
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usernameOrEmail, password: signinPw }),
+    });
+    if (!res.ok) {
+      const { error: e2 } = await res.json().catch(() => ({}));
+      setError(e2 ?? "Sign in failed.");
+      setBusy(false);
+      return;
+    }
+    await linkNetwork(ownerUserId);
+    window.location.assign("/feed");
+  }
+
+  async function handleContact(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    if (!cEmail && !linkedin && !github && !cardFile) return setError("Please provide at least one way to connect.");
+    setBusy(true);
+    try {
+      let cardFilename: string | undefined;
+      if (cardFile) {
+        const fd = new FormData();
+        fd.append("file", cardFile);
+        const up = await fetch("/api/private-upload", { method: "POST", body: fd });
+        if (!up.ok) {
+          const { error: e2 } = await up.json();
+          throw new Error(e2 ?? "Photo upload failed");
+        }
+        ({ filename: cardFilename } = await up.json());
+      }
+      const res = await fetch("/api/connections", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          profileId,
+          email: cEmail.trim() || undefined,
+          linkedin: linkedin.trim() || undefined,
+          github: github.trim() || undefined,
+          cardFilename,
+        }),
+      });
+      if (!res.ok) {
+        const { error: e2 } = await res.json();
+        throw new Error(e2 ?? "Something went wrong");
+      }
+      setDoneContact(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (doneContact) {
+    return (
+      <div className="text-center py-6">
+        <div className="text-4xl mb-2">🎉</div>
+        <p className="font-semibold text-slate-900">Request sent!</p>
+        <p className="text-sm text-slate-500 mt-1">{profileName} will confirm the connection. Great meeting you!</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <p className="text-sm text-slate-500 mb-4">
+        Connect with {profileName} — create an account (or sign in) to follow each other&apos;s posts, or just leave your contact.
+      </p>
+
+      <div className="flex gap-1 mb-4 bg-slate-100 rounded-xl p-1 text-sm">
+        {(["create", "signin", "contact"] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => { setMode(m); setError(""); }}
+            className={`flex-1 py-1.5 rounded-lg transition-colors ${
+              mode === m ? "bg-white shadow-sm font-medium text-slate-900" : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            {m === "create" ? "Create account" : m === "signin" ? "Sign in" : "Just contact"}
+          </button>
+        ))}
       </div>
 
-      <div>
-        <label className={`block text-sm font-medium mb-1 ${label}`}>
-          LinkedIn (username or URL)
-        </label>
-        <input
-          type="text"
-          value={linkedin}
-          onChange={(e) => setLinkedin(e.target.value)}
-          placeholder="linkedin.com/in/yourname"
-          className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 ${input}`}
-        />
-      </div>
+      {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
 
-      <div>
-        <label className={`block text-sm font-medium mb-1 ${label}`}>
-          GitHub (username or URL)
-        </label>
-        <input
-          type="text"
-          value={github}
-          onChange={(e) => setGithub(e.target.value)}
-          placeholder="github.com/yourname"
-          className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 ${input}`}
-        />
-      </div>
-
-      <div>
-        <label className={`block text-sm font-medium mb-1 ${label}`}>
-          Business card photo
-        </label>
-        {/* accept="image/*" + capture="environment" opens rear camera on iPhone/Android */}
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          // eslint-disable-next-line react/no-unknown-property
-          capture="environment"
-          onChange={(e) => setCardFile(e.target.files?.[0] ?? null)}
-          className={`w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium ${fileText} ${fileBtn}`}
-        />
-        {cardFile && (
-          <p className="mt-1 text-xs text-gray-500">
-            Selected: {cardFile.name} ({(cardFile.size / 1024).toFixed(0)} KB)
-          </p>
-        )}
-      </div>
-
-      {error && (
-        <p className="text-sm rounded-lg px-3 py-2 text-red-600 bg-red-50 border border-red-200">
-          {error}
-        </p>
+      {mode === "create" && (
+        <form onSubmit={handleCreate} className="space-y-3">
+          <input className={inputCls} placeholder="Username" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} />
+          <input className={inputCls} type="email" placeholder="Email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input className={inputCls} type="password" placeholder="Password (min 8)" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input className={inputCls} type="password" placeholder="Confirm password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+          <button type="submit" disabled={busy} className={btnPrimary}>{busy ? "Creating…" : `Create account & connect`}</button>
+        </form>
       )}
 
-      {/* Optional: create an account to get your own networking card */}
-      <div className="border border-gray-200 rounded-xl overflow-hidden">
-        <button
-          type="button"
-          onClick={() => setWantsAccount((v) => !v)}
-          className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors text-gray-600 hover:text-gray-800 bg-gray-50"
-        >
-          <span>✦ Create your own networking account</span>
-          <span className="text-xs opacity-60">{wantsAccount ? "▲ hide" : "▼ show"}</span>
-        </button>
+      {mode === "signin" && (
+        <form onSubmit={handleSignin} className="space-y-3">
+          <input className={inputCls} placeholder="Username or email" autoComplete="username" value={usernameOrEmail} onChange={(e) => setUsernameOrEmail(e.target.value)} />
+          <input className={inputCls} type="password" placeholder="Password" autoComplete="current-password" value={signinPw} onChange={(e) => setSigninPw(e.target.value)} />
+          <button type="submit" disabled={busy} className={btnPrimary}>{busy ? "Signing in…" : `Sign in & connect`}</button>
+        </form>
+      )}
 
-        {wantsAccount && (
-          <div className="p-4 space-y-3 bg-gray-50">
-            <p className="text-xs text-gray-500">
-              Get your own card + QR code to share at events.
-            </p>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Choose a username"
-              autoComplete="username"
-              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 ${input}`}
-            />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password (min 8 chars)"
-              autoComplete="new-password"
-              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 ${input}`}
-            />
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm password"
-              autoComplete="new-password"
-              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 ${input}`}
-            />
+      {mode === "contact" && (
+        <form onSubmit={handleContact} className="space-y-3">
+          <div>
+            <label className={labelCls}>Email</label>
+            <input className={inputCls} type="email" placeholder="you@example.com" value={cEmail} onChange={(e) => setCEmail(e.target.value)} />
           </div>
-        )}
-      </div>
-
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white font-semibold py-3 rounded-lg transition-colors"
-      >
-        {submitting ? "Sending…" : wantsAccount ? "Connect & create account" : "Connect"}
-      </button>
-    </form>
+          <div>
+            <label className={labelCls}>LinkedIn</label>
+            <input className={inputCls} placeholder="linkedin.com/in/you" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} />
+          </div>
+          <div>
+            <label className={labelCls}>GitHub</label>
+            <input className={inputCls} placeholder="github.com/you" value={github} onChange={(e) => setGithub(e.target.value)} />
+          </div>
+          <div>
+            <label className={labelCls}>Business card photo</label>
+            {/* eslint-disable-next-line react/no-unknown-property */}
+            <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={(e) => setCardFile(e.target.files?.[0] ?? null)}
+              className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+          </div>
+          <button type="submit" disabled={busy} className={btnPrimary}>{busy ? "Sending…" : "Send contact"}</button>
+        </form>
+      )}
+    </div>
   );
 }
