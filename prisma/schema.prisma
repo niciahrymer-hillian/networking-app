@@ -29,6 +29,7 @@ model Profile {
   font        String       @default("sans")       // typeface: sans | serif | rounded | mono
   isOwner     Boolean      @default(false)        // true = this is the logged-in user's own card
   isQREnabled Boolean      @default(true)         // false = profile is hidden/no QR exposure
+  allowConnectionQrShare Boolean @default(false)  // true = my connections may share this card's QR from my member profile
   userId      String?                             // linked User account (owner of this card)
   user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
   // Secondary card support — a profile can link to a parent profile (different career/role).

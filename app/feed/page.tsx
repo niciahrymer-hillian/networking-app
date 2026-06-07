@@ -1,10 +1,10 @@
 // /feed — the connections feed: posts from your network + your own.
 
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import Composer from "./Composer";
+import PostCard from "@/components/PostCard";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +28,7 @@ export default async function FeedPage() {
         select: {
           username: true,
           profiles: {
-            select: { name: true, slug: true, headshotUrl: true, isOwner: true },
+            select: { name: true, headshotUrl: true, isOwner: true },
             orderBy: { createdAt: "asc" },
           },
         },
@@ -54,31 +54,16 @@ export default async function FeedPage() {
           <div className="mt-6 space-y-3">
             {posts.map((post) => {
               const card = post.author.profiles.find((pr) => pr.isOwner) ?? post.author.profiles[0];
-              const displayName = card?.name ?? `@${post.author.username}`;
               return (
-                <article key={post.id} className="bg-white ring-1 ring-emerald-900/5 shadow-sm rounded-2xl p-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    {card?.headshotUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={card.headshotUrl} alt={displayName} className="w-9 h-9 rounded-full object-cover ring-1 ring-emerald-900/10" />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">
-                        {displayName.charAt(card ? 0 : 1).toUpperCase()}
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      {card ? (
-                        <Link href={`/p/${card.slug}`} className="text-sm font-semibold text-slate-900 hover:text-emerald-700">
-                          {card.name}
-                        </Link>
-                      ) : (
-                        <span className="text-sm font-semibold text-slate-900">@{post.author.username}</span>
-                      )}
-                      <p className="text-xs text-slate-400">{new Date(post.createdAt).toLocaleString()}</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{post.content}</p>
-                </article>
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  author={{
+                    username: post.author.username,
+                    name: card?.name ?? null,
+                    headshotUrl: card?.headshotUrl ?? null,
+                  }}
+                />
               );
             })}
           </div>

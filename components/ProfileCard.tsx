@@ -10,6 +10,7 @@ import type { CSSProperties } from "react";
 import BusinessCardClient from "@/components/BusinessCardClient";
 import DigitalCard from "@/components/DigitalCard";
 import ConnectForm from "@/app/p/[slug]/connect/ConnectForm";
+import ShareQRButton from "@/components/ShareQRButton";
 import { getPalette, getTemplate, getFont, FONTS, type Template, type ColorScheme, type Font } from "@/lib/card-design";
 
 type Link = { label: string; url: string };
@@ -40,9 +41,12 @@ interface Props {
   ownerUserId?: string | null; // card owner's account (for network connect)
   viewerLoggedIn?: boolean;
   viewerIsOwner?: boolean;
+  hideConnect?: boolean; // member-profile view: don't show the "Let's connect" form (someone else's account)
+  shareQr?: boolean; // member-profile view: show a "Share QR" button (gated by the owner's per-card setting)
+  appUrl?: string; // base URL for the shared QR link
 }
 
-export default function ProfileCard({ template, colorScheme, font, profile, links, firstName, otherCards, preview, qrDataUrl, ownerUserId, viewerLoggedIn, viewerIsOwner }: Props) {
+export default function ProfileCard({ template, colorScheme, font, profile, links, firstName, otherCards, preview, qrDataUrl, ownerUserId, viewerLoggedIn, viewerIsOwner, hideConnect, shareQr, appUrl }: Props) {
   const t = getTemplate(template);
   const p = getPalette(colorScheme);
 
@@ -153,6 +157,13 @@ export default function ProfileCard({ template, colorScheme, font, profile, link
         )}
       </section>
 
+      {/* Share QR — only on the member-profile view when the owner allowed it */}
+      {shareQr && (
+        <div className="-mt-1 flex justify-center">
+          <ShareQRButton slug={profile.slug} name={profile.name} appUrl={appUrl} />
+        </div>
+      )}
+
       {/* === Shared body sections === */}
       {profile.about && (
         <Section delay="80ms" label="About">
@@ -199,19 +210,21 @@ export default function ProfileCard({ template, colorScheme, font, profile, link
         )}
       </Section>
 
-      <Section delay="200ms" label="Let's connect">
-        {preview ? (
-          <p className="text-xs text-slate-400 italic">Visitors connect with you here.</p>
-        ) : (
-          <ConnectForm
-            profileId={profile.id}
-            profileName={firstName}
-            ownerUserId={ownerUserId ?? null}
-            viewerLoggedIn={viewerLoggedIn}
-            viewerIsOwner={viewerIsOwner}
-          />
-        )}
-      </Section>
+      {!hideConnect && (
+        <Section delay="200ms" label="Let's connect">
+          {preview ? (
+            <p className="text-xs text-slate-400 italic">Visitors connect with you here.</p>
+          ) : (
+            <ConnectForm
+              profileId={profile.id}
+              profileName={firstName}
+              ownerUserId={ownerUserId ?? null}
+              viewerLoggedIn={viewerLoggedIn}
+              viewerIsOwner={viewerIsOwner}
+            />
+          )}
+        </Section>
+      )}
 
       {otherCards.length > 0 && (
         <Section delay="240ms" label="Also see my other card">

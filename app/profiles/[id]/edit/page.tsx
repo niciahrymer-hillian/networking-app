@@ -9,6 +9,7 @@ import QRSection from "./QRSection";
 import { getAppUrl } from "@/lib/app-url";
 import SetOwnerButton from "./SetOwnerButton";
 import SetSecondaryButton from "./SetSecondaryButton";
+import ShareToggle from "./ShareToggle";
 
 export default async function EditProfilePage({
   params,
@@ -78,6 +79,9 @@ export default async function EditProfilePage({
             {appUrl}/p/{profile.slug}
           </p>
           <QRSection slug={profile.slug} name={profile.name} appUrl={appUrl} />
+
+          {/* Per-card privacy: allow network connections to share this QR */}
+          <ShareToggle id={profile.id} allowed={profile.allowConnectionQrShare} />
 
           {/* Link this profile as a secondary card of another (two-career support) */}
           <SetSecondaryButton
