@@ -10,7 +10,7 @@ import type { CSSProperties } from "react";
 import BusinessCardClient from "@/components/BusinessCardClient";
 import DigitalCard from "@/components/DigitalCard";
 import ConnectForm from "@/app/p/[slug]/connect/ConnectForm";
-import { getPalette, getTemplate, type Template, type ColorScheme } from "@/lib/card-design";
+import { getPalette, getTemplate, getFont, FONTS, type Template, type ColorScheme, type Font } from "@/lib/card-design";
 
 type Link = { label: string; url: string };
 type OtherCard = { slug: string; name: string; headline: string | null };
@@ -18,6 +18,7 @@ type OtherCard = { slug: string; name: string; headline: string | null };
 interface Props {
   template: Template | string;
   colorScheme: ColorScheme | string;
+  font?: Font | string;
   profile: {
     id: string;
     slug: string;
@@ -38,11 +39,11 @@ interface Props {
   qrDataUrl?: string; // server-generated QR for the digital flip-card back
 }
 
-export default function ProfileCard({ template, colorScheme, profile, links, firstName, otherCards, preview, qrDataUrl }: Props) {
+export default function ProfileCard({ template, colorScheme, font, profile, links, firstName, otherCards, preview, qrDataUrl }: Props) {
   const t = getTemplate(template);
   const p = getPalette(colorScheme);
 
-  // CSS vars consumed by the arbitrary utilities below.
+  // CSS vars consumed by the arbitrary utilities below; fontFamily themes the card.
   const vars = {
     "--accent": p.accent,
     "--accent-hover": p.accentHover,
@@ -50,6 +51,7 @@ export default function ProfileCard({ template, colorScheme, profile, links, fir
     "--on-soft": p.onSoft,
     "--band-from": p.bandFrom,
     "--band-to": p.bandTo,
+    fontFamily: FONTS[getFont(font)].css,
   } as CSSProperties;
 
   const initial = profile.name.charAt(0).toUpperCase();

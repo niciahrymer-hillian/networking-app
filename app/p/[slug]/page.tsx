@@ -61,6 +61,7 @@ export default async function PublicProfilePage({
         <ProfileCard
           template={profile.template}
           colorScheme={profile.colorScheme}
+          font={profile.font}
           profile={{
             id: profile.id,
             slug: profile.slug,

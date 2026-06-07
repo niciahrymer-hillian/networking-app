@@ -4,6 +4,7 @@
 
 export type Template = "classic" | "minimal" | "bold" | "split";
 export type ColorScheme = "emerald" | "indigo" | "rose" | "amber" | "violet" | "slate";
+export type Font = "sans" | "serif" | "rounded" | "mono";
 
 export interface Palette {
   label: string;
@@ -22,6 +23,15 @@ export const PALETTES: Record<ColorScheme, Palette> = {
   amber:   { label: "Amber",   accent: "#d97706", accentHover: "#f59e0b", soft: "#fffbeb", bandFrom: "#f59e0b", bandTo: "#fbbf24", onSoft: "#b45309" },
   violet:  { label: "Violet",  accent: "#7c3aed", accentHover: "#8b5cf6", soft: "#f5f3ff", bandFrom: "#8b5cf6", bandTo: "#a78bfa", onSoft: "#6d28d9" },
   slate:   { label: "Slate",   accent: "#334155", accentHover: "#475569", soft: "#f8fafc", bandFrom: "#475569", bandTo: "#64748b", onSoft: "#334155" },
+};
+
+// Font choices use system stacks + the already-loaded Geist vars, so no extra
+// web-font requests. `css` goes straight into fontFamily on the card root.
+export const FONTS: Record<Font, { label: string; css: string }> = {
+  sans: { label: "Sans", css: "var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif" },
+  serif: { label: "Serif", css: "Georgia, 'Times New Roman', serif" },
+  rounded: { label: "Rounded", css: "ui-rounded, 'SF Pro Rounded', 'Segoe UI', system-ui, sans-serif" },
+  mono: { label: "Mono", css: "var(--font-geist-mono), ui-monospace, monospace" },
 };
 
 export const TEMPLATES: { key: Template; label: string; desc: string }[] = [
@@ -43,4 +53,8 @@ export function getTemplate(template: string | null | undefined): Template {
 
 export function getColorScheme(scheme: string | null | undefined): ColorScheme {
   return (scheme as ColorScheme) in PALETTES ? (scheme as ColorScheme) : "emerald";
+}
+
+export function getFont(font: string | null | undefined): Font {
+  return (font as Font) in FONTS ? (font as Font) : "sans";
 }

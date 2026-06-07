@@ -26,6 +26,7 @@ model Profile {
   // existing cards looking exactly as before. Safe to ALTER (have defaults).
   template    String       @default("classic")    // layout: classic | minimal | bold | split
   colorScheme String       @default("emerald")    // palette: emerald | indigo | rose | amber | violet | slate
+  font        String       @default("sans")       // typeface: sans | serif | rounded | mono
   isOwner     Boolean      @default(false)        // true = this is the logged-in user's own card
   isQREnabled Boolean      @default(true)         // false = profile is hidden/no QR exposure
   userId      String?                             // linked User account (owner of this card)

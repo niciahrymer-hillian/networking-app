@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getTemplate, getColorScheme, TEMPLATES, PALETTES } from "@/lib/card-design";
+import { getTemplate, getColorScheme, getFont, TEMPLATES, PALETTES, FONTS } from "@/lib/card-design";
 
 // The validators coerce arbitrary stored/submitted values back into a known
 // template/palette (or the default), so a bad value can never break rendering.
@@ -26,5 +26,18 @@ describe("getColorScheme", () => {
     expect(getColorScheme("")).toBe("emerald");
     expect(getColorScheme(null)).toBe("emerald");
     expect(getColorScheme(undefined)).toBe("emerald");
+  });
+});
+
+describe("getFont", () => {
+  it("accepts every defined font", () => {
+    for (const key of Object.keys(FONTS)) expect(getFont(key)).toBe(key);
+  });
+
+  it("falls back to sans for unknown / empty / nullish", () => {
+    expect(getFont("comic")).toBe("sans");
+    expect(getFont("")).toBe("sans");
+    expect(getFont(null)).toBe("sans");
+    expect(getFont(undefined)).toBe("sans");
   });
 });

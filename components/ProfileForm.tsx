@@ -5,7 +5,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { TEMPLATES, PALETTES } from "@/lib/card-design";
+import { TEMPLATES, PALETTES, FONTS } from "@/lib/card-design";
 import ProfileCard from "@/components/ProfileCard";
 
 export interface ProfileFormData {
@@ -22,6 +22,7 @@ export interface ProfileFormData {
   links: { label: string; url: string }[];
   template: string;
   colorScheme: string;
+  font: string;
 }
 
 interface Props {
@@ -31,7 +32,7 @@ interface Props {
 const EMPTY: ProfileFormData = {
   name: "", email: "", phone: "", headline: "", about: "",
   headshotUrl: "", pdfUrl: "", linkedinUrl: "", githubUrl: "", links: [],
-  template: "classic", colorScheme: "emerald",
+  template: "classic", colorScheme: "emerald", font: "sans",
 };
 
 export default function ProfileForm({ initial }: Props) {
@@ -177,7 +178,7 @@ export default function ProfileForm({ initial }: Props) {
             </button>
           ))}
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap mb-3">
           {Object.entries(PALETTES).map(([key, pal]) => (
             <button
               type="button"
@@ -190,6 +191,21 @@ export default function ProfileForm({ initial }: Props) {
               }`}
               style={{ background: `linear-gradient(135deg, ${pal.bandFrom}, ${pal.bandTo})` }}
             />
+          ))}
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {Object.entries(FONTS).map(([key, f]) => (
+            <button
+              type="button"
+              key={key}
+              onClick={() => set("font", key)}
+              className={`px-3 py-1.5 rounded-lg border text-sm transition-colors ${
+                form.font === key ? "border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500 text-slate-800" : "border-slate-300 text-slate-600 hover:bg-slate-50"
+              }`}
+              style={{ fontFamily: f.css }}
+            >
+              {f.label}
+            </button>
           ))}
         </div>
       </section>
@@ -313,6 +329,7 @@ export default function ProfileForm({ initial }: Props) {
         preview
         template={form.template}
         colorScheme={form.colorScheme}
+        font={form.font}
         profile={{
           id: initial?.id ?? "preview",
           slug: "preview",

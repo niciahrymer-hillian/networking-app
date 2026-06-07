@@ -9,8 +9,12 @@ import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-// Load the pdf.js worker from the CDN matching the installed version
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Bundle the pdf.js worker locally (via the bundler's asset URL handling) instead
+// of fetching it from a CDN — so the flip card never depends on unpkg being up.
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url
+).toString();
 
 interface BusinessCardProps {
   pdfUrl: string;

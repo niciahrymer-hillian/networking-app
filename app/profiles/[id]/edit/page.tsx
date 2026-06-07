@@ -55,6 +55,7 @@ export default async function EditProfilePage({
     links: profile.links ? JSON.parse(profile.links) : [],
     template: profile.template,
     colorScheme: profile.colorScheme,
+    font: profile.font,
   };
 
   return (
