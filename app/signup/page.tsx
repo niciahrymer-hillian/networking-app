@@ -32,8 +32,9 @@ export default function SignupPage() {
     });
 
     if (res.ok) {
-      // Account created and signed in by the API — go straight to the dashboard.
-      router.push("/dashboard");
+      // Account created and signed in by the API — onboard straight into creating
+      // their first card so a new user immediately has something to share.
+      router.push("/profiles/new");
       return;
     }
 

@@ -25,7 +25,7 @@ export default function ShareQRButton({ slug, name, appUrl }: Props) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-colors"
+        className="text-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg transition-colors"
       >
         Share QR
       </button>

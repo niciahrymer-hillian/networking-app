@@ -107,24 +107,24 @@ export default function ProfileForm({ initial }: Props) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       {error && (
-        <div className="bg-red-900/30 border border-red-500/30 text-red-300 text-sm px-4 py-3 rounded-lg">
+        <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
 
       {/* === Headshot === */}
       <section>
-        <label className="block text-sm font-medium text-white/70 mb-2">Headshot</label>
+        <label className="block text-sm font-medium text-slate-700 mb-2">Headshot</label>
         <div className="flex items-center gap-4">
           {form.headshotUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={form.headshotUrl}
               alt="Headshot preview"
-              className="w-16 h-16 rounded-full object-cover border border-white/10"
+              className="w-16 h-16 rounded-full object-cover ring-1 ring-emerald-900/10"
             />
           ) : (
-            <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-white/30 text-2xl">
+            <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-300 text-2xl">
               👤
             </div>
           )}
@@ -132,7 +132,7 @@ export default function ProfileForm({ initial }: Props) {
             <button
               type="button"
               onClick={() => headshotRef.current?.click()}
-              className="text-sm bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors"
+              className="text-sm border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg transition-colors"
               disabled={uploadingHeadshot}
             >
               {uploadingHeadshot ? "Uploading…" : form.headshotUrl ? "Change photo" : "Upload photo"}
@@ -161,13 +161,13 @@ export default function ProfileForm({ initial }: Props) {
 
       {/* === About === */}
       <section>
-        <label className="block text-sm font-medium text-white/70 mb-2">About</label>
+        <label className="block text-sm font-medium text-slate-700 mb-2">About</label>
         <textarea
           value={form.about}
           onChange={(e) => set("about", e.target.value)}
           rows={4}
           placeholder="Paste LinkedIn about section or write a short bio…"
-          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+          className="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition resize-none"
         />
       </section>
 
@@ -180,8 +180,8 @@ export default function ProfileForm({ initial }: Props) {
       {/* === Custom links === */}
       <section>
         <div className="flex items-center justify-between mb-2">
-          <label className="text-sm font-medium text-white/70">Additional links</label>
-          <button type="button" onClick={addLink} className="text-xs text-indigo-400 hover:text-indigo-300">
+          <label className="text-sm font-medium text-slate-700">Additional links</label>
+          <button type="button" onClick={addLink} className="text-xs font-medium text-emerald-700 hover:text-emerald-600">
             + Add link
           </button>
         </div>
@@ -191,18 +191,18 @@ export default function ProfileForm({ initial }: Props) {
               value={link.label}
               onChange={(e) => setLink(i, "label", e.target.value)}
               placeholder="Label (e.g. Portfolio)"
-              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 transition-colors"
+              className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
             />
             <input
               value={link.url}
               onChange={(e) => setLink(i, "url", e.target.value)}
               placeholder="https://…"
-              className="flex-[2] bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 transition-colors"
+              className="flex-[2] bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
             />
             <button
               type="button"
               onClick={() => removeLink(i)}
-              className="text-white/30 hover:text-red-400 transition-colors px-2"
+              className="text-slate-300 hover:text-red-500 transition-colors px-2"
               aria-label="Remove"
             >
               ✕
@@ -213,13 +213,13 @@ export default function ProfileForm({ initial }: Props) {
 
       {/* === PDF Business Card === */}
       <section>
-        <label className="block text-sm font-medium text-white/70 mb-2">
+        <label className="block text-sm font-medium text-slate-700 mb-2">
           Business card PDF{" "}
-          <span className="text-white/30 font-normal">(front = page 1, back = page 2)</span>
+          <span className="text-slate-400 font-normal">(front = page 1, back = page 2)</span>
         </label>
         <div className="flex items-center gap-4">
           {form.pdfUrl && (
-            <span className="text-xs text-indigo-300 bg-indigo-900/30 px-3 py-1 rounded-full">
+            <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
               PDF uploaded ✓
             </span>
           )}
@@ -227,7 +227,7 @@ export default function ProfileForm({ initial }: Props) {
             type="button"
             onClick={() => pdfRef.current?.click()}
             disabled={uploadingPdf}
-            className="text-sm bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors"
+            className="text-sm border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg transition-colors"
           >
             {uploadingPdf ? "Uploading…" : form.pdfUrl ? "Replace PDF" : "Upload PDF"}
           </button>
@@ -249,14 +249,14 @@ export default function ProfileForm({ initial }: Props) {
         <button
           type="submit"
           disabled={saving || uploadingHeadshot || uploadingPdf}
-          className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+          className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-semibold px-6 py-3 rounded-xl shadow-sm shadow-emerald-600/20 transition-colors"
         >
           {saving ? "Saving…" : isEdit ? "Save changes" : "Create profile"}
         </button>
         <button
           type="button"
           onClick={() => router.back()}
-          className="text-white/50 hover:text-white/80 px-4 py-3 transition-colors"
+          className="text-slate-500 hover:text-slate-800 px-4 py-3 transition-colors"
         >
           Cancel
         </button>
@@ -274,14 +274,14 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-white/70 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
-        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 transition-colors"
+        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
       />
     </div>
   );

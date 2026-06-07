@@ -43,24 +43,24 @@ export default async function NotificationsPage() {
   ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   return (
-    <main className="min-h-screen bg-[#0f0f1a] text-white px-4 py-8">
+    <main className="min-h-screen bg-[#f6fbf8] text-slate-900 px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-2">Notifications</h1>
-        <p className="text-sm text-white/50 mb-6">Recent activity for your cards.</p>
+        <p className="text-sm text-slate-500 mb-6">Recent activity for your cards.</p>
 
         {events.length === 0 ? (
-          <p className="text-white/50">No activity yet.</p>
+          <p className="text-slate-500">No activity yet.</p>
         ) : (
           <div className="space-y-2">
             {events.map((event) => (
-              <div key={event.id} className="bg-white/5 border border-white/10 rounded-lg px-4 py-3 flex items-center justify-between gap-3">
+              <div key={event.id} className="bg-white ring-1 ring-emerald-900/5 shadow-sm rounded-xl px-4 py-3 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-medium">{event.type}</p>
-                  <p className="text-xs text-white/50 mt-1">{event.profileName}</p>
+                  <p className="text-xs text-slate-500 mt-1">{event.profileName}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-xs text-white/50">{new Date(event.createdAt).toLocaleString()}</p>
-                  <Link href={`/profiles/${event.profileId}/connections`} className="text-xs text-indigo-400 hover:text-indigo-300">
+                  <p className="text-xs text-slate-400">{new Date(event.createdAt).toLocaleString()}</p>
+                  <Link href={`/profiles/${event.profileId}/connections`} className="text-xs font-medium text-emerald-700 hover:text-emerald-600">
                     Open
                   </Link>
                 </div>

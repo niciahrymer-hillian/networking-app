@@ -34,31 +34,31 @@ export default async function MyConnectionsPage() {
     counts.get(profileId) ?? { confirmed: 0, pending: 0 };
 
   return (
-    <main className="min-h-screen bg-[#0f0f1a] text-white px-4 py-8">
+    <main className="min-h-screen bg-[#f6fbf8] text-slate-900 px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold">My Connections</h1>
-          <p className="text-sm text-white/50 mt-1">Per-card connection and scan totals.</p>
+          <p className="text-sm text-slate-500 mt-1">Per-card connection and scan totals.</p>
         </div>
 
         {profiles.length === 0 ? (
-          <p className="text-white/50">No profiles yet. Create your first one to start collecting connections.</p>
+          <p className="text-slate-500">No profiles yet. Create your first one to start collecting connections.</p>
         ) : (
           <div className="grid gap-3">
             {profiles.map((p) => (
-              <div key={p.id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between gap-4">
+              <div key={p.id} className="bg-white ring-1 ring-emerald-900/5 shadow-sm rounded-xl p-4 flex items-center justify-between gap-4">
                 <div>
                   <p className="font-semibold">{p.name}</p>
-                  <p className="text-xs text-white/50 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     {countsFor(p.id).confirmed} connection{countsFor(p.id).confirmed !== 1 ? "s" : ""} • {p._count.scans} scan{p._count.scans !== 1 ? "s" : ""}
                     {countsFor(p.id).pending > 0 && (
-                      <span className="text-amber-400"> • {countsFor(p.id).pending} pending</span>
+                      <span className="font-medium text-amber-600"> • {countsFor(p.id).pending} pending</span>
                     )}
                   </p>
                 </div>
                 <Link
                   href={`/profiles/${p.id}/connections`}
-                  className="text-xs bg-indigo-600 hover:bg-indigo-500 px-3 py-2 rounded-lg transition-colors"
+                  className="text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-lg transition-colors"
                 >
                   View details
                 </Link>
