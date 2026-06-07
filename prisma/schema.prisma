@@ -64,6 +64,7 @@ model User {
   // "my network" is simply networkOut.connectedUserId.
   networkOut                UserConnection[] @relation("NetworkOut")
   networkIn                 UserConnection[] @relation("NetworkIn")
+  dashboardLayout           String?                       // JSON: ordered list of dashboard tile ids ("widget:x" | "card:<id>")
   createdAt                 DateTime  @default(now())
 }
 
