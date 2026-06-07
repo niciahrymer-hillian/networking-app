@@ -7,6 +7,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { TEMPLATES, PALETTES, FONTS } from "@/lib/card-design";
 import ProfileCard from "@/components/ProfileCard";
+import AiDesignAssist from "@/components/AiDesignAssist";
 
 export interface ProfileFormData {
   id?: string;
@@ -207,6 +208,17 @@ export default function ProfileForm({ initial }: Props) {
               {f.label}
             </button>
           ))}
+        </div>
+
+        <div className="mt-3">
+          <AiDesignAssist
+            name={form.name}
+            headline={form.headline}
+            about={form.about}
+            onApply={(d) =>
+              setForm((f) => ({ ...f, template: d.template, colorScheme: d.colorScheme, font: d.font }))
+            }
+          />
         </div>
       </section>
 
