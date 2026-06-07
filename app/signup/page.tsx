@@ -2,12 +2,10 @@
 // Sign up page — create a new account and get signed straight in.
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AuthShell, { authInput, authButton } from "@/components/AuthShell";
 
 export default function SignupPage() {
-  const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,8 +31,10 @@ export default function SignupPage() {
 
     if (res.ok) {
       // Account created and signed in by the API — onboard straight into creating
-      // their first card so a new user immediately has something to share.
-      router.push("/profiles/new");
+      // their first card. Hard navigation (not router.push) so the browser sends
+      // the new session cookie on a fresh request instead of serving the stale,
+      // logged-out App Router cache (which bounced the user back to signup).
+      window.location.assign("/profiles/new");
       return;
     }
 

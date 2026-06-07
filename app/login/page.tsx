@@ -2,12 +2,10 @@
 // Login page — username or email + password gate for the dashboard.
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AuthShell, { authInput, authButton } from "@/components/AuthShell";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -25,7 +23,10 @@ export default function LoginPage() {
     });
 
     if (res.ok) {
-      router.push("/");
+      // Hard navigation (not router.push) so the browser makes a fresh request
+      // with the new session cookie — a soft nav would serve the stale,
+      // logged-out page from the App Router cache and bounce back to login.
+      window.location.assign("/dashboard");
     } else {
       const data = await res.json();
       setError(data.error ?? "Incorrect username/email or password.");
