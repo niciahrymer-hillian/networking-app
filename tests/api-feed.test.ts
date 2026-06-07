@@ -72,7 +72,7 @@ describe("POST /api/posts", () => {
     const res = await createPost(req({ content: "  hello network  " }));
     expect(res.status).toBe(201);
     expect(mockCreatePost).toHaveBeenCalledWith(
-      expect.objectContaining({ data: { authorId: "u1", content: "hello network" } })
+      expect.objectContaining({ data: expect.objectContaining({ authorId: "u1", content: "hello network" }) })
     );
   });
 });

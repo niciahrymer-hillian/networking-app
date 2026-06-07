@@ -87,8 +87,13 @@ model Post {
   id        String   @id @default(cuid())
   authorId  String
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  content   String
+  content   String                          // caption/body (markdown allowed)
+  mediaUrl  String?                          // optional attachment URL
+  mediaType String?                          // image | audio | video
+  linkUrl   String?                          // external link / YouTube URL (embedded at render)
+  tags      String?                          // JSON array of hashtag strings
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([authorId])
 }

@@ -17,7 +17,17 @@ const ALLOWED_TYPES = new Set([
   "image/webp",
   "image/gif",
   "application/pdf",
+  // Feed media
+  "audio/mpeg",
+  "audio/mp4",
+  "audio/wav",
+  "audio/ogg",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
 ]);
+// NOTE: Vercel caps the request body at ~4.5 MB, so larger files (esp. video)
+// need a future direct-to-storage upload. Images + short clips are fine.
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 
 export async function POST(request: NextRequest) {
