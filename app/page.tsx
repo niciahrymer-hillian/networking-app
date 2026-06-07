@@ -17,13 +17,13 @@ export default async function Home() {
 
   if (session?.isLoggedIn) {
     return (
-      <main className="min-h-screen bg-[#0f0f1a] text-white flex items-center justify-center px-4 py-10">
-        <div className="mx-auto w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-xl shadow-black/20">
-          <p className="text-sm uppercase tracking-[0.35em] text-emerald-300 mb-2">Signed in</p>
+      <main className="min-h-screen bg-gradient-to-b from-[#f0faf5] via-white to-[#eef7f1] text-slate-900 flex items-center justify-center px-4 py-10">
+        <div className="mx-auto w-full max-w-2xl rounded-3xl bg-white p-8 text-center shadow-xl shadow-emerald-900/5 ring-1 ring-emerald-900/5">
+          <p className="text-sm uppercase tracking-[0.35em] text-emerald-600 mb-2">Signed in</p>
           <h1 className="text-3xl font-semibold mb-4">@{session.username}</h1>
-          <p className="text-white/60 mb-8">Quick access to your dashboard and cards.</p>
+          <p className="text-slate-500 mb-8">Quick access to your dashboard and cards.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/dashboard" className="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500">
+            <Link href="/dashboard" className="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-emerald-600/20 transition hover:bg-emerald-500">
               Go to Dashboard
             </Link>
             <LogoutButton />
@@ -35,21 +35,8 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#f0faf5] via-white to-[#eef7f1] text-slate-900 overflow-hidden">
-      {/* Nav */}
-      <nav className="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between">
-        <span className="font-bold text-lg tracking-tight">🤝 Networking</span>
-        <div className="flex items-center gap-2">
-          <Link href="/login" className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-            Sign in
-          </Link>
-          <Link href="/signup" className="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-500 transition-colors">
-            Create card
-          </Link>
-        </div>
-      </nav>
-
       {/* Hero */}
-      <section className="relative mx-auto max-w-6xl px-4 pt-8 pb-20 grid gap-14 lg:grid-cols-2 items-center">
+      <section className="relative mx-auto max-w-6xl px-4 pt-12 pb-20 grid gap-14 lg:grid-cols-2 items-center">
         {/* Decorative blobs */}
         <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-emerald-300/30 blur-3xl" />
         <div className="pointer-events-none absolute top-40 right-0 h-72 w-72 rounded-full bg-teal-300/30 blur-3xl" />

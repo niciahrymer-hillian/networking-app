@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0f0f1a;
-  --foreground: #e8e8f0;
+  /* Bright "Connection Emerald" base — creamy off-white + slate ink. */
+  --background: #f6fbf8;
+  --foreground: #0f172a;
 }
 
 @theme inline {

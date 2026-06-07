@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import AuthShell, { authInput, authButton } from "@/components/AuthShell";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -42,74 +43,64 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0f0f1a] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <p className="text-4xl mb-3">🤝</p>
-          <h1 className="text-2xl font-bold text-white">Create account</h1>
-          <p className="text-white/40 text-sm mt-1">Get your own networking card in seconds.</p>
-        </div>
-
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col gap-4"
-        >
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Username (min 3 chars)"
-            autoFocus
-            autoComplete="username"
-            required
-            className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 transition-colors"
-          />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email address"
-            autoComplete="email"
-            required
-            className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 transition-colors"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password (min 8 chars)"
-            autoComplete="new-password"
-            required
-            className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 transition-colors"
-          />
-          <input
-            type="password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            placeholder="Confirm password"
-            autoComplete="new-password"
-            required
-            className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 transition-colors"
-          />
-
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium py-3 rounded-lg transition-colors"
-          >
-            {loading ? "Creating account…" : "Create account"}
-          </button>
-        </form>
-
-        <p className="text-center mt-4 text-sm text-white/40">
+    <AuthShell
+      emoji="🤝"
+      title="Create account"
+      subtitle="Get your own networking card in seconds."
+      footer={
+        <>
           Already have an account?{" "}
-          <Link href="/login" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+          <Link href="/login" className="font-medium text-emerald-700 hover:text-emerald-600 transition-colors">
             Sign in
           </Link>
-        </p>
-      </div>
-    </main>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Username (min 3 chars)"
+          autoFocus
+          autoComplete="username"
+          required
+          className={authInput}
+        />
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email address"
+          autoComplete="email"
+          required
+          className={authInput}
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password (min 8 chars)"
+          autoComplete="new-password"
+          required
+          className={authInput}
+        />
+        <input
+          type="password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          placeholder="Confirm password"
+          autoComplete="new-password"
+          required
+          className={authInput}
+        />
+
+        {error && <p className="text-red-600 text-sm">{error}</p>}
+
+        <button type="submit" disabled={loading} className={authButton}>
+          {loading ? "Creating account…" : "Create account"}
+        </button>
+      </form>
+    </AuthShell>
   );
 }

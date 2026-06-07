@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import AuthShell, { authInput, authButton } from "@/components/AuthShell";
 
 export default function ForgotPasswordPage() {
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
@@ -36,91 +37,72 @@ export default function ForgotPasswordPage() {
 
   if (token && token !== "not-found") {
     return (
-      <main className="min-h-screen bg-[#0f0f1a] flex items-center justify-center px-4">
-        <div className="w-full max-w-sm">
-          <div className="text-center mb-6">
-            <p className="text-4xl mb-3">🔑</p>
-            <h1 className="text-2xl font-bold text-white">Reset token ready</h1>
-            <p className="text-white/40 text-sm mt-1">Use this link to set a new password. Expires in 1 hour.</p>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-            <Link
-              href={`/reset-password/${token}`}
-              className="block w-full text-center bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-lg transition-colors"
-            >
-              Set new password →
-            </Link>
-          </div>
-          {email && (
-            <p className="text-white/50 text-sm mt-4">
-              A reset link was generated for {email}. If email delivery is configured, check your inbox.
-            </p>
-          )}
-          {!email && (
-            <p className="text-white/50 text-sm mt-4">
-              If email is not configured, use the direct link above.
-            </p>
-          )}
-        </div>
-      </main>
+      <AuthShell
+        emoji="🔑"
+        title="Reset token ready"
+        subtitle="Use this link to set a new password. Expires in 1 hour."
+        footer={
+          email
+            ? `A reset link was generated for ${email}. If email delivery is configured, check your inbox.`
+            : "If email is not configured, use the direct link above."
+        }
+      >
+        <Link
+          href={`/reset-password/${token}`}
+          className="block w-full text-center bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition-colors"
+        >
+          Set new password →
+        </Link>
+      </AuthShell>
     );
   }
 
   if (token === "not-found") {
     return (
-      <main className="min-h-screen bg-[#0f0f1a] flex items-center justify-center px-4">
-        <div className="w-full max-w-sm text-center">
-          <p className="text-white/60">If that account exists, a reset token was generated.</p>
-          <Link href="/login" className="mt-4 inline-block text-indigo-400 hover:text-indigo-300 text-sm">
+      <AuthShell
+        emoji="📭"
+        title="Check your account"
+        footer={
+          <Link href="/login" className="font-medium text-emerald-700 hover:text-emerald-600 transition-colors">
             Back to sign in
           </Link>
-        </div>
-      </main>
+        }
+      >
+        <p className="text-center text-slate-600 text-sm">
+          If that account exists, a reset token was generated.
+        </p>
+      </AuthShell>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#0f0f1a] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <p className="text-4xl mb-3">🔒</p>
-          <h1 className="text-2xl font-bold text-white">Forgot password</h1>
-          <p className="text-white/40 text-sm mt-1 leading-relaxed">
-            Enter the username or email for your account. A password reset link will be generated.
-          </p>
-        </div>
+    <AuthShell
+      emoji="🔒"
+      title="Forgot password"
+      subtitle="Enter the username or email for your account. A password reset link will be generated."
+      footer={
+        <Link href="/login" className="text-slate-400 hover:text-slate-600 transition-colors">
+          Back to sign in
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <input
+          type="text"
+          value={usernameOrEmail}
+          onChange={(e) => setUsernameOrEmail(e.target.value)}
+          placeholder="Username or email"
+          autoFocus
+          required
+          className={authInput}
+        />
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col gap-4"
-        >
-          <input
-            type="text"
-            value={usernameOrEmail}
-            onChange={(e) => setUsernameOrEmail(e.target.value)}
-            placeholder="Username or email"
-            autoFocus
-            required
-            className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 transition-colors"
-          />
+        {error && <p className="text-red-600 text-sm">{error}</p>}
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium py-3 rounded-lg transition-colors"
-          >
-            {loading ? "Checking…" : "Generate reset link"}
-          </button>
-        </form>
-
-        <p className="text-center mt-4 text-sm">
-          <Link href="/login" className="text-white/40 hover:text-white/60 transition-colors">
-            Back to sign in
-          </Link>
-        </p>
-      </div>
-    </main>
+        <button type="submit" disabled={loading} className={authButton}>
+          {loading ? "Checking…" : "Generate reset link"}
+        </button>
+      </form>
+    </AuthShell>
   );
 }
