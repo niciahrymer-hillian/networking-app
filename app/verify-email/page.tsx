@@ -40,7 +40,7 @@ export default function VerifyEmail() {
     <AuthShell emoji="✉️" title="Verify your email">
       {step === 'enter' && (
         <div className="flex flex-col gap-3">
-          <p className="text-sm text-slate-500">Enter the email you signed up with to receive a 6-digit verification code.</p>
+          <p className="text-sm text-muted">Enter the email you signed up with to receive a 6-digit verification code.</p>
           <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className={authInput} />
           <button onClick={sendCode} className={authButton}>Send code</button>
         </div>
@@ -48,20 +48,20 @@ export default function VerifyEmail() {
 
       {step === 'code' && (
         <div className="flex flex-col gap-3">
-          <p className="text-sm text-slate-500">Enter the 6-digit code sent to <strong className="text-slate-700">{email}</strong>.</p>
+          <p className="text-sm text-muted">Enter the 6-digit code sent to <strong className="text-body">{email}</strong>.</p>
           <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="123456" className={authInput} />
           <div className="flex gap-3">
             <button onClick={verify} className={authButton}>Verify</button>
-            <button onClick={sendCode} className="flex-1 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-medium py-3 rounded-xl transition-colors">Resend</button>
+            <button onClick={sendCode} className="flex-1 border border-line-strong bg-surface hover:bg-elevated text-body font-medium py-3 rounded-xl transition-colors">Resend</button>
           </div>
         </div>
       )}
 
       {step === 'done' && (
-        <p className="text-slate-700">Verified — redirecting to sign in…</p>
+        <p className="text-body">Verified — redirecting to sign in…</p>
       )}
 
-      {message && <p className="mt-4 text-sm text-slate-500">{message}</p>}
+      {message && <p className="mt-4 text-sm text-muted">{message}</p>}
     </AuthShell>
   );
 }

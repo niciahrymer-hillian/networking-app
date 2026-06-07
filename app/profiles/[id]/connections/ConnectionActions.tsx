@@ -35,7 +35,7 @@ export default function ConnectionActions({ id }: { id: string }) {
 
   return (
     <div className="flex items-center gap-2 shrink-0">
-      {error && <span className="text-xs text-red-600 mr-1">{error}</span>}
+      {error && <span className="text-xs text-red-600 dark:text-red-400 mr-1">{error}</span>}
       <button
         onClick={() => decide("confirmed")}
         disabled={busy}

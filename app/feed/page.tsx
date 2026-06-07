@@ -37,17 +37,17 @@ export default async function FeedPage() {
   });
 
   return (
-    <main className="min-h-screen bg-[#f6fbf8] text-slate-900 px-4 py-8">
+    <main className="min-h-screen bg-background text-foreground px-4 py-8">
       <div className="max-w-xl mx-auto">
         <h1 className="text-2xl font-bold mb-1">Feed</h1>
-        <p className="text-sm text-slate-500 mb-6">
+        <p className="text-sm text-muted mb-6">
           Posts from your network — {network.length} connection{network.length !== 1 ? "s" : ""}.
         </p>
 
         <Composer />
 
         {posts.length === 0 ? (
-          <p className="text-slate-500 text-sm mt-8 text-center">
+          <p className="text-muted text-sm mt-8 text-center">
             Nothing here yet. Share an update above, or connect with more people (scan their card!) to fill your feed.
           </p>
         ) : (

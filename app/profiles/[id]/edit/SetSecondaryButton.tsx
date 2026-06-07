@@ -42,28 +42,28 @@ export default function SetSecondaryButton({ id, parentProfileId, parentName, ot
   }
 
   return (
-    <div className="mt-6 pt-6 border-t border-slate-100">
-      <p className="text-sm font-medium text-slate-600 mb-2">Secondary card</p>
-      <p className="text-xs text-slate-500 mb-4">
+    <div className="mt-6 pt-6 border-t border-line">
+      <p className="text-sm font-medium text-body mb-2">Secondary card</p>
+      <p className="text-xs text-muted mb-4">
         If you have two careers, link this card to a primary card. Both will reference each other on the public page.
       </p>
 
       {parentProfileId ? (
         // Currently linked — show parent name + unlink button
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg">
+          <span className="text-sm text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 px-3 py-1.5 rounded-lg">
             ✦ Secondary of: <strong>{parentName}</strong>
           </span>
           <button
             disabled={busy}
             onClick={() => setParent(null)}
-            className="text-xs text-slate-500 hover:text-slate-800 disabled:opacity-50 transition-colors"
+            className="text-xs text-muted hover:text-foreground disabled:opacity-50 transition-colors"
           >
             {busy ? "Unlinking…" : "Unlink"}
           </button>
         </div>
       ) : otherProfiles.length === 0 ? (
-        <p className="text-xs text-slate-400 italic">Add another profile first to link cards together.</p>
+        <p className="text-xs text-muted italic">Add another profile first to link cards together.</p>
       ) : (
         // No parent — show dropdown to pick one
         <div className="flex items-center gap-3 flex-wrap">
@@ -71,7 +71,7 @@ export default function SetSecondaryButton({ id, parentProfileId, parentName, ot
             disabled={busy}
             defaultValue=""
             onChange={(e) => e.target.value && setParent(e.target.value)}
-            className="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
+            className="bg-surface border border-line-strong text-foreground text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
           >
             <option value="" disabled>
               Link as secondary of…
@@ -82,11 +82,11 @@ export default function SetSecondaryButton({ id, parentProfileId, parentName, ot
               </option>
             ))}
           </select>
-          {busy && <span className="text-xs text-slate-500">Saving…</span>}
+          {busy && <span className="text-xs text-muted">Saving…</span>}
         </div>
       )}
 
-      {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-xs text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );
 }

@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 
 // Shared field + primary-button styles — import into the form pages.
 export const authInput =
-  "w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition";
+  "w-full bg-surface border border-line-strong rounded-xl px-4 py-3 text-foreground placeholder-muted focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition";
 
 export const authButton =
   "w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors";
@@ -26,21 +26,21 @@ export default function AuthShell({
   footer?: ReactNode;
 }) {
   return (
-    <main className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-[#f0faf5] via-white to-[#eef7f1] flex items-center justify-center px-4 py-10">
+    <main className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-[#f0faf5] via-white to-[#eef7f1] dark:from-[#0b1220] dark:via-[#0b1220] dark:to-[#0b1220] flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           {emoji && <p className="text-4xl mb-3">{emoji}</p>}
-          <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{title}</h1>
           {subtitle && (
-            <p className="text-slate-500 text-sm mt-1 leading-relaxed">{subtitle}</p>
+            <p className="text-muted text-sm mt-1 leading-relaxed">{subtitle}</p>
           )}
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-xl shadow-emerald-900/5 ring-1 ring-emerald-900/5">
+        <div className="bg-surface rounded-2xl p-6 shadow-xl shadow-emerald-900/5 ring-1 ring-line">
           {children}
         </div>
 
-        {footer && <div className="text-center mt-4 text-sm text-slate-500">{footer}</div>}
+        {footer && <div className="text-center mt-4 text-sm text-muted">{footer}</div>}
       </div>
     </main>
   );

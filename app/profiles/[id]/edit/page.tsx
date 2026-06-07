@@ -60,9 +60,9 @@ export default async function EditProfilePage({
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#f0faf5] via-white to-[#eef7f1] text-slate-900">
+    <main className="min-h-screen bg-gradient-to-b from-[#f0faf5] via-white to-[#eef7f1] dark:from-[#0b1220] dark:via-[#0b1220] dark:to-[#0b1220] text-foreground">
       <div className="max-w-5xl mx-auto px-4 py-10">
-        <Link href="/dashboard" className="text-sm text-emerald-700 hover:text-emerald-600 transition-colors">
+        <Link href="/dashboard" className="text-sm text-emerald-700 dark:text-emerald-300 hover:text-emerald-600 transition-colors">
           ← Dashboard
         </Link>
         <h1 className="mt-4 mb-8 text-2xl font-bold tracking-tight">Edit — {profile.name}</h1>
@@ -70,12 +70,12 @@ export default async function EditProfilePage({
         <ProfileForm initial={initial} />
 
         {/* QR + secondary-card settings, below the editor */}
-        <div id="qr" className="mt-8 max-w-2xl scroll-mt-24 rounded-3xl bg-white p-6 sm:p-8 shadow-sm ring-1 ring-emerald-900/5">
+        <div id="qr" className="mt-8 max-w-2xl scroll-mt-24 rounded-3xl bg-surface p-6 sm:p-8 shadow-sm ring-1 ring-line">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-slate-600">Public profile link & QR code</p>
+            <p className="text-sm font-medium text-body">Public profile link & QR code</p>
             <SetOwnerButton id={profile.id} isOwner={profile.isOwner} />
           </div>
-          <p className="text-xs text-slate-500 font-mono bg-slate-50 ring-1 ring-slate-100 px-3 py-2 rounded-lg mb-4 break-all">
+          <p className="text-xs text-muted font-mono bg-elevated ring-1 ring-line px-3 py-2 rounded-lg mb-4 break-all">
             {appUrl}/p/{profile.slug}
           </p>
           <QRSection slug={profile.slug} name={profile.name} appUrl={appUrl} />

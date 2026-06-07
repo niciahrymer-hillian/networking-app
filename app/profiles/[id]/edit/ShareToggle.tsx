@@ -40,18 +40,18 @@ export default function ShareToggle({ id, allowed }: Props) {
         disabled={saving}
         onClick={toggle}
         className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
-          on ? "bg-emerald-500" : "bg-slate-300"
+          on ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"
         }`}
       >
         <span
-          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-surface shadow transition-transform ${
             on ? "translate-x-5" : "translate-x-0"
           }`}
         />
       </button>
       <span className="text-sm">
-        <span className="font-medium text-slate-700">Let my connections share this QR</span>
-        <span className="block text-xs text-slate-500">
+        <span className="font-medium text-body">Let my connections share this QR</span>
+        <span className="block text-xs text-muted">
           When on, people in your network can share this card&apos;s QR from your profile.
         </span>
       </span>

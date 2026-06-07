@@ -81,10 +81,10 @@ export default function Composer() {
     setBusy(false);
   }
 
-  const field = "w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500";
+  const field = "w-full bg-surface border border-line rounded-xl px-3 py-2 text-sm text-foreground placeholder-muted focus:outline-none focus:ring-2 focus:ring-emerald-500";
 
   return (
-    <form onSubmit={submit} className="bg-white ring-1 ring-emerald-900/5 shadow-sm rounded-2xl p-4 space-y-2">
+    <form onSubmit={submit} className="bg-surface ring-1 ring-line shadow-sm rounded-2xl p-4 space-y-2">
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
@@ -95,23 +95,23 @@ export default function Composer() {
       />
 
       {media && (
-        <div className="flex items-center justify-between bg-slate-50 rounded-lg px-3 py-2 text-xs text-slate-600">
+        <div className="flex items-center justify-between bg-elevated rounded-lg px-3 py-2 text-xs text-body">
           <span className="truncate">📎 {media.type}: {media.name}</span>
-          <button type="button" onClick={() => setMedia(null)} className="text-slate-400 hover:text-red-500 ml-2">✕</button>
+          <button type="button" onClick={() => setMedia(null)} className="text-muted hover:text-red-500 ml-2">✕</button>
         </div>
       )}
 
       <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="Link or YouTube URL (optional)" className={field} />
       <input value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} placeholder="Tags (e.g. design networking)" className={field} />
 
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
 
       <div className="flex items-center justify-between pt-1">
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={uploading}
-          className="text-sm text-slate-500 hover:text-emerald-700 transition-colors"
+          className="text-sm text-muted hover:text-emerald-700 transition-colors"
         >
           {uploading ? "Uploading…" : "📷 Add media"}
         </button>

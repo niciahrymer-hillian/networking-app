@@ -62,7 +62,7 @@ export default async function MemberProfilePage({
   const links: Link[] = card?.links ? JSON.parse(card.links) : [];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#f0faf5] via-[#f6fbf8] to-[#eef7f1] text-slate-900 px-4 py-8 sm:py-12">
+    <main className="min-h-screen bg-gradient-to-b from-[#f0faf5] via-[#f6fbf8] to-[#eef7f1] dark:from-[#0b1220] dark:via-[#0b1220] dark:to-[#0b1220] text-foreground px-4 py-8 sm:py-12">
       <div className="mx-auto max-w-5xl lg:grid lg:grid-cols-[minmax(0,26rem)_1fr] lg:items-start lg:gap-8">
         {/* Left — read-only QR card */}
         <div className="flex flex-col items-center lg:sticky lg:top-24">
@@ -93,12 +93,12 @@ export default async function MemberProfilePage({
               appUrl={appUrl}
             />
           ) : (
-            <div className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-emerald-900/5">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-2xl font-bold text-emerald-700">
+            <div className="w-full max-w-md rounded-3xl bg-surface p-8 text-center shadow-sm ring-1 ring-line">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-2xl font-bold text-emerald-700 dark:text-emerald-300">
                 {user.username.charAt(0).toUpperCase()}
               </div>
-              <h1 className="mt-3 text-xl font-bold text-slate-900">@{user.username}</h1>
-              <p className="mt-1 text-sm text-slate-500">This member hasn&apos;t set up a card yet.</p>
+              <h1 className="mt-3 text-xl font-bold text-foreground">@{user.username}</h1>
+              <p className="mt-1 text-sm text-muted">This member hasn&apos;t set up a card yet.</p>
             </div>
           )}
         </div>
@@ -107,7 +107,7 @@ export default async function MemberProfilePage({
         <div className="mt-8 lg:mt-0">
           <h2 className="mb-4 text-lg font-bold tracking-tight">{displayName}&apos;s posts</h2>
           {user.posts.length === 0 ? (
-            <p className="rounded-2xl bg-white px-4 py-8 text-center text-sm text-slate-500 ring-1 ring-emerald-900/5">
+            <p className="rounded-2xl bg-surface px-4 py-8 text-center text-sm text-muted ring-1 ring-line">
               No posts yet.
             </p>
           ) : (

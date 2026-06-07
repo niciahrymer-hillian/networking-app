@@ -113,26 +113,26 @@ export default function ProfileForm({ initial }: Props) {
 
   return (
     <div className="flex flex-col-reverse gap-8 lg:grid lg:grid-cols-[1fr_360px] lg:items-start">
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6 rounded-3xl bg-white p-6 sm:p-8 shadow-sm ring-1 ring-emerald-900/5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 rounded-3xl bg-surface p-6 sm:p-8 shadow-sm ring-1 ring-line">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg">
+        <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 text-sm px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
 
       {/* === Headshot === */}
       <section>
-        <label className="block text-sm font-medium text-slate-700 mb-2">Headshot</label>
+        <label className="block text-sm font-medium text-body mb-2">Headshot</label>
         <div className="flex items-center gap-4">
           {form.headshotUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={form.headshotUrl}
               alt="Headshot preview"
-              className="w-16 h-16 rounded-full object-cover ring-1 ring-emerald-900/10"
+              className="w-16 h-16 rounded-full object-cover ring-1 ring-line"
             />
           ) : (
-            <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-300 text-2xl">
+            <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-300 text-2xl">
               👤
             </div>
           )}
@@ -140,7 +140,7 @@ export default function ProfileForm({ initial }: Props) {
             <button
               type="button"
               onClick={() => headshotRef.current?.click()}
-              className="text-sm border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg transition-colors"
+              className="text-sm border border-line-strong bg-surface hover:bg-elevated text-body px-4 py-2 rounded-lg transition-colors"
               disabled={uploadingHeadshot}
             >
               {uploadingHeadshot ? "Uploading…" : form.headshotUrl ? "Change photo" : "Upload photo"}
@@ -161,7 +161,7 @@ export default function ProfileForm({ initial }: Props) {
 
       {/* === Card style (template + palette) === */}
       <section>
-        <label className="block text-sm font-medium text-slate-700 mb-2">Card style</label>
+        <label className="block text-sm font-medium text-body mb-2">Card style</label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
           {TEMPLATES.map((tpl) => (
             <button
@@ -170,12 +170,12 @@ export default function ProfileForm({ initial }: Props) {
               onClick={() => set("template", tpl.key)}
               className={`rounded-xl border px-3 py-2 text-left text-xs transition-colors ${
                 form.template === tpl.key
-                  ? "border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500"
-                  : "border-slate-300 hover:bg-slate-50"
+                  ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 ring-1 ring-emerald-500"
+                  : "border-line-strong hover:bg-elevated"
               }`}
             >
-              <span className="block font-semibold text-slate-800">{tpl.label}</span>
-              <span className="block text-slate-500 leading-tight">{tpl.desc}</span>
+              <span className="block font-semibold text-foreground">{tpl.label}</span>
+              <span className="block text-muted leading-tight">{tpl.desc}</span>
             </button>
           ))}
         </div>
@@ -188,7 +188,7 @@ export default function ProfileForm({ initial }: Props) {
               title={pal.label}
               aria-label={pal.label}
               className={`w-8 h-8 rounded-full transition-transform ${
-                form.colorScheme === key ? "ring-2 ring-offset-2 ring-slate-400 scale-110" : "hover:scale-105"
+                form.colorScheme === key ? "ring-2 ring-offset-2 ring-line-strong scale-110" : "hover:scale-105"
               }`}
               style={{ background: `linear-gradient(135deg, ${pal.bandFrom}, ${pal.bandTo})` }}
             />
@@ -201,7 +201,7 @@ export default function ProfileForm({ initial }: Props) {
               key={key}
               onClick={() => set("font", key)}
               className={`px-3 py-1.5 rounded-lg border text-sm transition-colors ${
-                form.font === key ? "border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500 text-slate-800" : "border-slate-300 text-slate-600 hover:bg-slate-50"
+                form.font === key ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 ring-1 ring-emerald-500 text-foreground" : "border-line-strong text-body hover:bg-elevated"
               }`}
               style={{ fontFamily: f.css }}
             >
@@ -232,13 +232,13 @@ export default function ProfileForm({ initial }: Props) {
 
       {/* === About === */}
       <section>
-        <label className="block text-sm font-medium text-slate-700 mb-2">About</label>
+        <label className="block text-sm font-medium text-body mb-2">About</label>
         <textarea
           value={form.about}
           onChange={(e) => set("about", e.target.value)}
           rows={4}
           placeholder="Paste LinkedIn about section or write a short bio…"
-          className="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition resize-none"
+          className="w-full bg-surface border border-line-strong rounded-lg px-4 py-3 text-foreground placeholder-muted focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition resize-none"
         />
       </section>
 
@@ -251,8 +251,8 @@ export default function ProfileForm({ initial }: Props) {
       {/* === Custom links === */}
       <section>
         <div className="flex items-center justify-between mb-2">
-          <label className="text-sm font-medium text-slate-700">Additional links</label>
-          <button type="button" onClick={addLink} className="text-xs font-medium text-emerald-700 hover:text-emerald-600">
+          <label className="text-sm font-medium text-body">Additional links</label>
+          <button type="button" onClick={addLink} className="text-xs font-medium text-emerald-700 dark:text-emerald-300 hover:text-emerald-600">
             + Add link
           </button>
         </div>
@@ -262,18 +262,18 @@ export default function ProfileForm({ initial }: Props) {
               value={link.label}
               onChange={(e) => setLink(i, "label", e.target.value)}
               placeholder="Label (e.g. Portfolio)"
-              className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+              className="flex-1 bg-surface border border-line-strong rounded-lg px-3 py-2 text-sm text-foreground placeholder-muted focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
             />
             <input
               value={link.url}
               onChange={(e) => setLink(i, "url", e.target.value)}
               placeholder="https://…"
-              className="flex-[2] bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+              className="flex-[2] bg-surface border border-line-strong rounded-lg px-3 py-2 text-sm text-foreground placeholder-muted focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
             />
             <button
               type="button"
               onClick={() => removeLink(i)}
-              className="text-slate-300 hover:text-red-500 transition-colors px-2"
+              className="text-muted hover:text-red-500 transition-colors px-2"
               aria-label="Remove"
             >
               ✕
@@ -284,13 +284,13 @@ export default function ProfileForm({ initial }: Props) {
 
       {/* === PDF Business Card === */}
       <section>
-        <label className="block text-sm font-medium text-slate-700 mb-2">
+        <label className="block text-sm font-medium text-body mb-2">
           Business card PDF{" "}
-          <span className="text-slate-400 font-normal">(front = page 1, back = page 2)</span>
+          <span className="text-muted font-normal">(front = page 1, back = page 2)</span>
         </label>
         <div className="flex items-center gap-4">
           {form.pdfUrl && (
-            <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
+            <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 rounded-full">
               PDF uploaded ✓
             </span>
           )}
@@ -298,7 +298,7 @@ export default function ProfileForm({ initial }: Props) {
             type="button"
             onClick={() => pdfRef.current?.click()}
             disabled={uploadingPdf}
-            className="text-sm border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg transition-colors"
+            className="text-sm border border-line-strong bg-surface hover:bg-elevated text-body px-4 py-2 rounded-lg transition-colors"
           >
             {uploadingPdf ? "Uploading…" : form.pdfUrl ? "Replace PDF" : "Upload PDF"}
           </button>
@@ -327,7 +327,7 @@ export default function ProfileForm({ initial }: Props) {
         <button
           type="button"
           onClick={() => router.back()}
-          className="text-slate-500 hover:text-slate-800 px-4 py-3 transition-colors"
+          className="text-muted hover:text-foreground px-4 py-3 transition-colors"
         >
           Cancel
         </button>
@@ -336,7 +336,7 @@ export default function ProfileForm({ initial }: Props) {
 
     {/* Live preview — re-renders from form state as you type/pick (Phase B) */}
     <aside className="lg:sticky lg:top-24">
-      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Live preview</p>
+      <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Live preview</p>
       <ProfileCard
         preview
         template={form.template}
@@ -373,14 +373,14 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-body mb-1">{label}</label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
-        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+        className="w-full bg-surface border border-line-strong rounded-lg px-4 py-2.5 text-foreground placeholder-muted focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
       />
     </div>
   );

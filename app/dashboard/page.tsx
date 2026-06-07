@@ -120,24 +120,24 @@ export default async function Dashboard() {
 
   // --- Tile: Recent Activity widget ---
   const activityTile = (
-    <div className="flex h-full flex-col rounded-2xl bg-white p-4 shadow-sm ring-1 ring-emerald-900/5">
+    <div className="flex h-full flex-col rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-line">
       <div className="mb-3 flex items-center justify-between">
         <p className="font-semibold">Recent activity</p>
         {totalPending > 0 && (
-          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
+          <span className="rounded-full bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-300 ring-1 ring-amber-200">
             {totalPending} pending
           </span>
         )}
       </div>
       {activity.length === 0 ? (
-        <p className="text-sm text-slate-400">No activity yet. Share your QR to get scans and connections.</p>
+        <p className="text-sm text-muted">No activity yet. Share your QR to get scans and connections.</p>
       ) : (
         <ul className="flex flex-col gap-2.5">
           {activity.map((a) => (
             <li key={a.id} className="flex items-start gap-2.5 text-sm">
               <span className="shrink-0">{a.emoji}</span>
-              <span className="min-w-0 flex-1 text-slate-600">{a.text}</span>
-              <span className="shrink-0 text-xs text-slate-400">{timeAgo(a.when)}</span>
+              <span className="min-w-0 flex-1 text-body">{a.text}</span>
+              <span className="shrink-0 text-xs text-muted">{timeAgo(a.when)}</span>
             </li>
           ))}
         </ul>
@@ -151,8 +151,8 @@ export default async function Dashboard() {
     return (
       <div className="flex flex-col gap-2">
         <div
-          className={`bg-white rounded-2xl p-4 flex flex-col gap-3 shadow-sm transition-shadow hover:shadow-md ${
-            p.isOwner ? "ring-2 ring-emerald-400" : "ring-1 ring-emerald-900/5"
+          className={`bg-surface rounded-2xl p-4 flex flex-col gap-3 shadow-sm transition-shadow hover:shadow-md ${
+            p.isOwner ? "ring-2 ring-emerald-400" : "ring-1 ring-line"
           }`}
         >
           {/* Headshot + name */}
@@ -162,10 +162,10 @@ export default async function Dashboard() {
               <img
                 src={p.headshotUrl}
                 alt={p.name}
-                className="rounded-full object-cover w-12 h-12 ring-1 ring-emerald-900/10"
+                className="rounded-full object-cover w-12 h-12 ring-1 ring-line"
               />
             ) : (
-              <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-xl font-bold text-emerald-700">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center text-xl font-bold text-emerald-700 dark:text-emerald-300">
                 {p.name.charAt(0).toUpperCase()}
               </div>
             )}
@@ -173,21 +173,21 @@ export default async function Dashboard() {
               <div className="flex items-center gap-2">
                 <p className="font-semibold truncate">{p.name}</p>
                 {p.isOwner && (
-                  <span className="text-[10px] font-medium text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded shrink-0">
+                  <span className="text-[10px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-500/20 px-1.5 py-0.5 rounded shrink-0">
                     My card
                   </span>
                 )}
               </div>
-              {p.headline && <p className="text-xs text-slate-500 truncate">{p.headline}</p>}
+              {p.headline && <p className="text-xs text-muted truncate">{p.headline}</p>}
             </div>
           </div>
 
           {/* Action buttons */}
-          <div className="flex gap-2 flex-wrap mt-auto pt-2 border-t border-slate-100">
+          <div className="flex gap-2 flex-wrap mt-auto pt-2 border-t border-line">
             <Link
               href={`/p/${p.slug}`}
               target="_blank"
-              className="text-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg transition-colors"
+              className="text-xs border border-line bg-surface hover:bg-elevated text-body px-3 py-1.5 rounded-lg transition-colors"
             >
               View public
             </Link>
@@ -199,13 +199,13 @@ export default async function Dashboard() {
             </Link>
             <Link
               href={`/profiles/${p.id}/edit#qr`}
-              className="text-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg transition-colors"
+              className="text-xs border border-line bg-surface hover:bg-elevated text-body px-3 py-1.5 rounded-lg transition-colors"
             >
               Regenerate QR
             </Link>
             <Link
               href={`/profiles/${p.id}/connections`}
-              className="text-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg transition-colors"
+              className="text-xs border border-line bg-surface hover:bg-elevated text-body px-3 py-1.5 rounded-lg transition-colors"
             >
               {countsFor(p.id).confirmed > 0
                 ? `${countsFor(p.id).confirmed} / ${p._count.scans} connected`
@@ -216,7 +216,7 @@ export default async function Dashboard() {
             {countsFor(p.id).pending > 0 && (
               <Link
                 href={`/profiles/${p.id}/connections`}
-                className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition-colors"
+                className="text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition-colors"
               >
                 {countsFor(p.id).pending} pending
               </Link>
@@ -230,21 +230,21 @@ export default async function Dashboard() {
         {secondaries.map((s) => (
           <div
             key={s.id}
-            className="ml-6 bg-white ring-1 ring-emerald-900/5 shadow-sm rounded-xl p-3 flex flex-col gap-2"
+            className="ml-6 bg-surface ring-1 ring-line shadow-sm rounded-xl p-3 flex flex-col gap-2"
           >
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-teal-700 bg-teal-50 border border-teal-200 px-1.5 py-0.5 rounded font-medium shrink-0">
+              <span className="text-[10px] text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30 px-1.5 py-0.5 rounded font-medium shrink-0">
                 2nd card
               </span>
               <p className="text-sm font-medium truncate">{s.name}</p>
             </div>
-            {s.headline && <p className="text-xs text-slate-500 truncate">{s.headline}</p>}
+            {s.headline && <p className="text-xs text-muted truncate">{s.headline}</p>}
             <div className="flex gap-2 flex-wrap">
-              <Link href={`/p/${s.slug}`} target="_blank" className="text-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-2 py-1 rounded-lg transition-colors">View</Link>
+              <Link href={`/p/${s.slug}`} target="_blank" className="text-xs border border-line bg-surface hover:bg-elevated text-body px-2 py-1 rounded-lg transition-colors">View</Link>
               <Link href={`/profiles/${s.id}/edit`} className="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-2 py-1 rounded-lg transition-colors">Edit</Link>
               <ShareQRButton slug={s.slug} name={s.name} appUrl={appUrl} />
               {countsFor(s.id).pending > 0 && (
-                <Link href={`/profiles/${s.id}/connections`} className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-2 py-1 rounded-lg transition-colors">
+                <Link href={`/profiles/${s.id}/connections`} className="text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 hover:bg-amber-100 px-2 py-1 rounded-lg transition-colors">
                   {countsFor(s.id).pending} pending
                 </Link>
               )}
@@ -262,14 +262,14 @@ export default async function Dashboard() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#f6fbf8] text-slate-900">
+    <main className="min-h-screen bg-background text-foreground">
       {/* Page toolbar — AppNav (in layout) handles brand + global nav + auth */}
       {ownerProfile && (
         <div className="px-4 py-2 max-w-5xl mx-auto w-full flex justify-end">
           <Link
             href={`/p/${ownerProfile.slug}`}
             target="_blank"
-            className="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors"
+            className="text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors"
           >
             ✦ View my card
           </Link>
@@ -285,9 +285,9 @@ export default async function Dashboard() {
         </div>
 
         {profiles.length === 0 ? (
-          <div className="text-center py-24 text-slate-400">
+          <div className="text-center py-24 text-muted">
             <p className="text-5xl mb-4">👋</p>
-            <p className="text-lg text-slate-600">No cards yet.</p>
+            <p className="text-lg text-body">No cards yet.</p>
             <p className="text-sm mt-3">
               <Link href="/profiles/new" className="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-emerald-600/20 transition hover:bg-emerald-500">
                 Create your first card

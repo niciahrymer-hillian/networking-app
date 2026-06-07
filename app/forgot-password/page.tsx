@@ -63,12 +63,12 @@ export default function ForgotPasswordPage() {
         emoji="📬"
         title="Check your email"
         footer={
-          <Link href="/login" className="font-medium text-emerald-700 hover:text-emerald-600 transition-colors">
+          <Link href="/login" className="font-medium text-emerald-700 dark:text-emerald-300 hover:text-emerald-600 transition-colors">
             Back to sign in
           </Link>
         }
       >
-        <p className="text-center text-slate-600 text-sm">
+        <p className="text-center text-body text-sm">
           If an account matches, we&apos;ve sent a password reset link. It expires in 1 hour —
           check your inbox (and spam folder).
         </p>
@@ -82,7 +82,7 @@ export default function ForgotPasswordPage() {
       title="Forgot password"
       subtitle="Enter your username or email and we'll send a password reset link to your inbox."
       footer={
-        <Link href="/login" className="text-slate-400 hover:text-slate-600 transition-colors">
+        <Link href="/login" className="text-muted hover:text-body transition-colors">
           Back to sign in
         </Link>
       }
@@ -98,7 +98,7 @@ export default function ForgotPasswordPage() {
           className={authInput}
         />
 
-        {error && <p className="text-red-600 text-sm">{error}</p>}
+        {error && <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>}
 
         <button type="submit" disabled={loading} className={authButton}>
           {loading ? "Sending…" : "Send reset link"}

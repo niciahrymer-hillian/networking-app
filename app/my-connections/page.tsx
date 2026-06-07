@@ -34,22 +34,22 @@ export default async function MyConnectionsPage() {
     counts.get(profileId) ?? { confirmed: 0, pending: 0 };
 
   return (
-    <main className="min-h-screen bg-[#f6fbf8] text-slate-900 px-4 py-8">
+    <main className="min-h-screen bg-background text-foreground px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold">My Connections</h1>
-          <p className="text-sm text-slate-500 mt-1">Per-card connection and scan totals.</p>
+          <p className="text-sm text-muted mt-1">Per-card connection and scan totals.</p>
         </div>
 
         {profiles.length === 0 ? (
-          <p className="text-slate-500">No profiles yet. Create your first one to start collecting connections.</p>
+          <p className="text-muted">No profiles yet. Create your first one to start collecting connections.</p>
         ) : (
           <div className="grid gap-3">
             {profiles.map((p) => (
-              <div key={p.id} className="bg-white ring-1 ring-emerald-900/5 shadow-sm rounded-xl p-4 flex items-center justify-between gap-4">
+              <div key={p.id} className="bg-surface ring-1 ring-line shadow-sm rounded-xl p-4 flex items-center justify-between gap-4">
                 <div>
                   <p className="font-semibold">{p.name}</p>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-muted mt-1">
                     {countsFor(p.id).confirmed} connection{countsFor(p.id).confirmed !== 1 ? "s" : ""} • {p._count.scans} scan{p._count.scans !== 1 ? "s" : ""}
                     {countsFor(p.id).pending > 0 && (
                       <span className="font-medium text-amber-600"> • {countsFor(p.id).pending} pending</span>

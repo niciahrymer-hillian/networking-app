@@ -51,7 +51,7 @@ export default function SignupPage() {
       footer={
         <>
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-emerald-700 hover:text-emerald-600 transition-colors">
+          <Link href="/login" className="font-medium text-emerald-700 dark:text-emerald-300 hover:text-emerald-600 transition-colors">
             Sign in
           </Link>
         </>
@@ -96,7 +96,7 @@ export default function SignupPage() {
           className={authInput}
         />
 
-        {error && <p className="text-red-600 text-sm">{error}</p>}
+        {error && <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>}
 
         <button type="submit" disabled={loading} className={authButton}>
           {loading ? "Creating account…" : "Create account"}

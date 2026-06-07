@@ -25,7 +25,7 @@ export default function ShareQRButton({ slug, name, appUrl }: Props) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="text-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg transition-colors"
+        className="text-xs border border-line bg-surface hover:bg-elevated text-body px-3 py-1.5 rounded-lg transition-colors"
       >
         Share QR
       </button>
@@ -38,15 +38,15 @@ export default function ShareQRButton({ slug, name, appUrl }: Props) {
         >
           {/* Modal — stop click propagation so clicking inside doesn't close it */}
           <div
-            className="animate-fade-up bg-white ring-1 ring-emerald-900/5 shadow-xl shadow-emerald-900/10 rounded-3xl p-6 flex flex-col items-center gap-4 w-full max-w-xs"
+            className="animate-fade-up bg-surface ring-1 ring-line shadow-xl shadow-emerald-900/10 rounded-3xl p-6 flex flex-col items-center gap-4 w-full max-w-xs"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-base font-semibold text-slate-900">{name}</h2>
+            <h2 className="text-base font-semibold text-foreground">{name}</h2>
             <QRCodeDisplay url={url} profileName={name} />
-            <p className="text-xs text-slate-400 text-center break-all">{url}</p>
+            <p className="text-xs text-muted text-center break-all">{url}</p>
             <button
               onClick={() => setOpen(false)}
-              className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
+              className="text-sm text-muted hover:text-body transition-colors"
             >
               Close
             </button>

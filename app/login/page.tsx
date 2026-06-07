@@ -41,10 +41,10 @@ export default function LoginPage() {
       subtitle="Sign in to manage your profiles"
       footer={
         <div className="flex justify-between">
-          <Link href="/signup" className="font-medium text-emerald-700 hover:text-emerald-600 transition-colors">
+          <Link href="/signup" className="font-medium text-emerald-700 dark:text-emerald-300 hover:text-emerald-600 transition-colors">
             Create account
           </Link>
-          <Link href="/forgot-password" className="text-slate-400 hover:text-slate-600 transition-colors">
+          <Link href="/forgot-password" className="text-muted hover:text-body transition-colors">
             Forgot password?
           </Link>
         </div>
@@ -71,7 +71,7 @@ export default function LoginPage() {
           className={authInput}
         />
 
-        {error && <p className="text-red-600 text-sm">{error}</p>}
+        {error && <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>}
 
         <button type="submit" disabled={loading} className={authButton}>
           {loading ? "Signing in…" : "Sign in"}

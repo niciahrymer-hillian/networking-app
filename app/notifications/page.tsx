@@ -43,31 +43,31 @@ export default async function NotificationsPage() {
   ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   return (
-    <main className="min-h-screen bg-[#f6fbf8] text-slate-900 px-4 py-8">
+    <main className="min-h-screen bg-background text-foreground px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold">Activity</h1>
-            <p className="text-sm text-slate-500 mt-1">Recent connections and scans across your cards.</p>
+            <p className="text-sm text-muted mt-1">Recent connections and scans across your cards.</p>
           </div>
-          <Link href="/scan-log" className="text-sm font-medium text-emerald-700 hover:text-emerald-600 shrink-0">
+          <Link href="/scan-log" className="text-sm font-medium text-emerald-700 dark:text-emerald-300 hover:text-emerald-600 shrink-0">
             Full scan log →
           </Link>
         </div>
 
         {events.length === 0 ? (
-          <p className="text-slate-500">No activity yet.</p>
+          <p className="text-muted">No activity yet.</p>
         ) : (
           <div className="space-y-2">
             {events.map((event) => (
-              <div key={event.id} className="bg-white ring-1 ring-emerald-900/5 shadow-sm rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+              <div key={event.id} className="bg-surface ring-1 ring-line shadow-sm rounded-xl px-4 py-3 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-medium">{event.type}</p>
-                  <p className="text-xs text-slate-500 mt-1">{event.profileName}</p>
+                  <p className="text-xs text-muted mt-1">{event.profileName}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-xs text-slate-400">{new Date(event.createdAt).toLocaleString()}</p>
-                  <Link href={`/profiles/${event.profileId}/connections`} className="text-xs font-medium text-emerald-700 hover:text-emerald-600">
+                  <p className="text-xs text-muted">{new Date(event.createdAt).toLocaleString()}</p>
+                  <Link href={`/profiles/${event.profileId}/connections`} className="text-xs font-medium text-emerald-700 dark:text-emerald-300 hover:text-emerald-600">
                     Open
                   </Link>
                 </div>

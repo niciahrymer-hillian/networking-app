@@ -89,7 +89,7 @@ export default async function ConnectionsPage({ params }: Props) {
             {pending.map((c) => (
               <div
                 key={c.id}
-                className="flex items-center justify-between gap-4 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3"
+                className="flex items-center justify-between gap-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg px-4 py-3"
               >
                 <div className="min-w-0 space-y-0.5 text-sm">
                   {c.email && <p className="text-gray-700 truncate">✉️ {c.email}</p>}

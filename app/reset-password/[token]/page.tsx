@@ -66,7 +66,7 @@ export default function ResetPasswordPage({
           className={authInput}
         />
 
-        {error && <p className="text-red-600 text-sm">{error}</p>}
+        {error && <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>}
 
         <button type="submit" disabled={loading} className={authButton}>
           {loading ? "Saving…" : "Set password"}

@@ -1,14 +1,46 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: the .dark class on <html> activates dark tokens AND any
+   dark:* utilities. (Tailwind v4 defaults dark: to prefers-color-scheme; we want
+   a manual toggle, so we redefine the variant to key off the .dark class.) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Semantic NEUTRAL tokens only — the emerald "Connection Emerald" accent palette
+   is untouched (emerald/teal/amber/violet utilities stay as-is, with dark:* tuning
+   added per-component). Light values equal the previous hard-coded colors, so light
+   mode is visually identical; .dark swaps them for an accessible dark palette.
+   Components reference these via bg-surface / text-foreground / border-line etc. */
 :root {
-  /* Bright "Connection Emerald" base — creamy off-white + slate ink. */
-  --background: #f6fbf8;
-  --foreground: #0f172a;
+  --background: #f6fbf8;   /* page canvas (was bg-[#f6fbf8]) */
+  --surface: #ffffff;      /* cards (was bg-white) */
+  --elevated: #f8fafc;     /* nested panels / inputs (was bg-slate-50) */
+  --foreground: #0f172a;   /* headings / primary text (was text-slate-900) */
+  --body: #334155;         /* body text (was text-slate-600/700) */
+  --muted: #64748b;        /* secondary text (was text-slate-400/500) */
+  --line: #e2e8f0;         /* borders / rings (was slate-200 / emerald-900-5) */
+  --line-strong: #cbd5e1;  /* input borders (was border-slate-300) */
+}
+
+.dark {
+  --background: #0b1220;
+  --surface: #151f30;
+  --elevated: #1e293b;
+  --foreground: #e7edf3;
+  --body: #c2ccd9;
+  --muted: #8b98a9;
+  --line: #2a3850;
+  --line-strong: #3b4a63;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
   --color-foreground: var(--foreground);
+  --color-body: var(--body);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

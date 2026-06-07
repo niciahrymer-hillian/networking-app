@@ -19,14 +19,14 @@ interface Props {
 }
 
 const inputCls =
-  "w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition";
-const labelCls = "block text-sm font-medium text-slate-700 mb-1";
+  "w-full bg-surface border border-line-strong rounded-lg px-3 py-2 text-sm text-foreground placeholder-muted focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition";
+const labelCls = "block text-sm font-medium text-body mb-1";
 const btnPrimary =
   "w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white font-semibold py-3 rounded-lg transition-colors";
 
 export default function ConnectForm({ profileId, profileName, ownerUserId, viewerLoggedIn, viewerIsOwner }: Props) {
   if (viewerIsOwner) {
-    return <p className="text-sm text-slate-400 italic">This is your card — share it to grow your network.</p>;
+    return <p className="text-sm text-muted italic">This is your card — share it to grow your network.</p>;
   }
   if (viewerLoggedIn && ownerUserId) {
     return <NetworkConnect ownerUserId={ownerUserId} name={profileName} />;
@@ -68,9 +68,9 @@ function NetworkConnect({ ownerUserId, name }: { ownerUserId: string; name: stri
     return (
       <div className="text-center py-2">
         <div className="text-4xl mb-2">🤝</div>
-        <p className="font-semibold text-slate-900">You&apos;re connected with {name}!</p>
-        <p className="text-sm text-slate-500 mt-1 mb-4">You&apos;ll see each other&apos;s posts in your feed.</p>
-        <Link href="/feed" className="inline-block text-sm font-medium text-emerald-700 hover:text-emerald-600">
+        <p className="font-semibold text-foreground">You&apos;re connected with {name}!</p>
+        <p className="text-sm text-muted mt-1 mb-4">You&apos;ll see each other&apos;s posts in your feed.</p>
+        <Link href="/feed" className="inline-block text-sm font-medium text-emerald-700 dark:text-emerald-300 hover:text-emerald-600">
           View your feed →
         </Link>
       </div>
@@ -79,8 +79,8 @@ function NetworkConnect({ ownerUserId, name }: { ownerUserId: string; name: stri
 
   return (
     <div>
-      <p className="text-sm text-slate-500 mb-4">Add {name} to your network — you&apos;ll see each other&apos;s posts in your feed.</p>
-      {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
+      <p className="text-sm text-muted mb-4">Add {name} to your network — you&apos;ll see each other&apos;s posts in your feed.</p>
+      {error && <p className="text-sm text-red-600 dark:text-red-400 mb-2">{error}</p>}
       <button onClick={connect} disabled={state === "loading"} className={btnPrimary}>
         {state === "loading" ? "Connecting…" : `＋ Connect with ${name}`}
       </button>
@@ -196,26 +196,26 @@ function GuestConnect({ profileId, profileName, ownerUserId }: { profileId: stri
     return (
       <div className="text-center py-6">
         <div className="text-4xl mb-2">🎉</div>
-        <p className="font-semibold text-slate-900">Request sent!</p>
-        <p className="text-sm text-slate-500 mt-1">{profileName} will confirm the connection. Great meeting you!</p>
+        <p className="font-semibold text-foreground">Request sent!</p>
+        <p className="text-sm text-muted mt-1">{profileName} will confirm the connection. Great meeting you!</p>
       </div>
     );
   }
 
   return (
     <div>
-      <p className="text-sm text-slate-500 mb-4">
+      <p className="text-sm text-muted mb-4">
         Connect with {profileName} — create an account (or sign in) to follow each other&apos;s posts, or just leave your contact.
       </p>
 
-      <div className="flex gap-1 mb-4 bg-slate-100 rounded-xl p-1 text-sm">
+      <div className="flex gap-1 mb-4 bg-elevated rounded-xl p-1 text-sm">
         {(["create", "signin", "contact"] as const).map((m) => (
           <button
             key={m}
             type="button"
             onClick={() => { setMode(m); setError(""); }}
             className={`flex-1 py-1.5 rounded-lg transition-colors ${
-              mode === m ? "bg-white shadow-sm font-medium text-slate-900" : "text-slate-500 hover:text-slate-700"
+              mode === m ? "bg-surface shadow-sm font-medium text-foreground" : "text-muted hover:text-body"
             }`}
           >
             {m === "create" ? "Create account" : m === "signin" ? "Sign in" : "Just contact"}
@@ -223,7 +223,7 @@ function GuestConnect({ profileId, profileName, ownerUserId }: { profileId: stri
         ))}
       </div>
 
-      {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-400 mb-3">{error}</p>}
 
       {mode === "create" && (
         <form onSubmit={handleCreate} className="space-y-3">
@@ -261,7 +261,7 @@ function GuestConnect({ profileId, profileName, ownerUserId }: { profileId: stri
             <label className={labelCls}>Business card photo</label>
             {/* eslint-disable-next-line react/no-unknown-property */}
             <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={(e) => setCardFile(e.target.files?.[0] ?? null)}
-              className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+              className="w-full text-sm text-muted file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
           </div>
           <button type="submit" disabled={busy} className={btnPrimary}>{busy ? "Sending…" : "Send contact"}</button>
         </form>

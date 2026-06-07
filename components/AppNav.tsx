@@ -10,6 +10,7 @@ import { getIronSession } from "iron-session";
 import { sessionOptions, SessionData } from "@/lib/session";
 import LogoutButton from "@/app/LogoutButton";
 import MobileMenu, { type NavItem } from "@/components/MobileMenu";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default async function AppNav() {
   const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
@@ -39,18 +40,18 @@ export default async function AppNav() {
   const adminLinks = links.filter((l) => l.admin);
 
   const navLink =
-    "text-sm text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition-colors";
+    "text-sm text-muted hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 px-3 py-1.5 rounded-lg transition-colors";
   const adminLinkCls =
-    "text-sm text-violet-700 hover:bg-violet-50 px-3 py-1.5 rounded-lg transition-colors";
+    "text-sm text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-500/10 px-3 py-1.5 rounded-lg transition-colors";
 
   return (
-    <nav className="bg-white/80 backdrop-blur-md border-b border-emerald-900/5 px-4 py-3 sticky top-0 z-50">
+    <nav className="bg-surface/80 backdrop-blur-md border-b border-line px-4 py-3 sticky top-0 z-50">
       <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
 
         {/* Brand */}
         <Link
           href="/"
-          className="flex items-center gap-3 font-bold text-slate-900 hover:text-emerald-700 transition-colors shrink-0"
+          className="flex items-center gap-3 font-bold text-foreground hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors shrink-0"
         >
           <img src="/logo.png" alt="Networking Cards" className="h-10 w-auto rounded-md" />
           <span className="hidden sm:inline text-sm tracking-tight">Networking Cards</span>
@@ -64,7 +65,7 @@ export default async function AppNav() {
                 {l.label}
               </Link>
             ))}
-            {adminLinks.length > 0 && <span className="mx-1 h-4 w-px bg-slate-200" aria-hidden />}
+            {adminLinks.length > 0 && <span className="mx-1 h-4 w-px bg-line" aria-hidden />}
             {adminLinks.map((l) => (
               <Link key={l.href} href={l.href} className={adminLinkCls}>
                 {l.label}
@@ -78,7 +79,7 @@ export default async function AppNav() {
           {loggedIn ? (
             <>
               {username && (
-                <span className="text-xs text-slate-400 font-mono">@{username}</span>
+                <span className="text-xs text-muted font-mono">@{username}</span>
               )}
               <Link href="/account" className={navLink} title="Account settings">
                 ⚙︎
@@ -89,7 +90,7 @@ export default async function AppNav() {
             <>
               <Link
                 href="/login"
-                className="text-sm text-slate-600 hover:text-slate-900 transition-colors px-3 py-1.5"
+                className="text-sm text-body hover:text-foreground transition-colors px-3 py-1.5"
               >
                 Sign in
               </Link>
@@ -102,6 +103,9 @@ export default async function AppNav() {
             </>
           )}
         </div>
+
+        {/* Theme toggle — always visible (mobile + desktop) */}
+        <ThemeToggle />
 
         {/* Mobile menu (below md) */}
         <MobileMenu links={links} loggedIn={loggedIn} username={username} />

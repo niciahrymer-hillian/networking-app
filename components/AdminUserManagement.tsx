@@ -54,15 +54,15 @@ export default function AdminUserManagement({ users }: { users: User[] }) {
   return (
     <div className="space-y-4">
       {sortedUsers.map((user) => (
-        <div key={user.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+        <div key={user.id} className="bg-elevated border border-line rounded-2xl p-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <p className="text-sm font-medium text-slate-900">{user.username}</p>
-              <p className="text-xs text-slate-500">
+              <p className="text-sm font-medium text-foreground">{user.username}</p>
+              <p className="text-xs text-muted">
                 {user.email ?? "No email"} · {user.isAdmin ? "Admin" : "User"} · {user.emailVerified ? "Verified" : "Unverified"}
               </p>
             </div>
-            <p className="text-xs text-slate-400">Created {new Date(user.createdAt).toLocaleString()}</p>
+            <p className="text-xs text-muted">Created {new Date(user.createdAt).toLocaleString()}</p>
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
@@ -71,7 +71,7 @@ export default function AdminUserManagement({ users }: { users: User[] }) {
               value={passwords[user.id] || ""}
               onChange={(e) => setPasswords((prev) => ({ ...prev, [user.id]: e.target.value }))}
               placeholder="New password"
-              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+              className="w-full bg-surface border border-line-strong rounded-lg px-4 py-3 text-sm text-foreground placeholder-muted focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
             />
             <button
               type="button"
@@ -84,7 +84,7 @@ export default function AdminUserManagement({ users }: { users: User[] }) {
           </div>
 
           {status[user.id] && (
-            <p className="mt-3 text-sm text-slate-600">{status[user.id]}</p>
+            <p className="mt-3 text-sm text-body">{status[user.id]}</p>
           )}
         </div>
       ))}

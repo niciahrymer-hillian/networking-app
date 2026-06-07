@@ -27,7 +27,7 @@ export default function MobileMenu({
 
   const item = (admin?: boolean) =>
     `px-3 py-2 rounded-lg text-sm transition-colors ${
-      admin ? "text-violet-700 hover:bg-violet-50" : "text-slate-600 hover:bg-emerald-50"
+      admin ? "text-violet-700 dark:text-violet-300 hover:bg-violet-50" : "text-body hover:bg-emerald-50"
     }`;
 
   return (
@@ -36,7 +36,7 @@ export default function MobileMenu({
         onClick={() => setOpen((o) => !o)}
         aria-label="Menu"
         aria-expanded={open}
-        className="p-2 rounded-lg text-slate-600 hover:bg-emerald-50 transition-colors"
+        className="p-2 rounded-lg text-body hover:bg-emerald-50 transition-colors"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           {open ? <><path d="M6 6l12 12" /><path d="M18 6L6 18" /></> : <><path d="M3 6h18" /><path d="M3 12h18" /><path d="M3 18h18" /></>}
@@ -47,18 +47,18 @@ export default function MobileMenu({
         <>
           {/* click-away backdrop */}
           <div className="fixed inset-0 z-40" onClick={close} aria-hidden />
-          <div className="absolute right-3 top-14 z-50 w-56 rounded-2xl bg-white shadow-xl ring-1 ring-black/5 p-2 flex flex-col">
+          <div className="absolute right-3 top-14 z-50 w-56 rounded-2xl bg-surface shadow-xl ring-1 ring-line p-2 flex flex-col">
             {links.map((l) => (
               <Link key={l.href} href={l.href} onClick={close} className={item(l.admin)}>
                 {l.label}
               </Link>
             ))}
 
-            <div className="my-1 h-px bg-slate-100" />
+            <div className="my-1 h-px bg-elevated" />
 
             {loggedIn ? (
               <>
-                {username && <p className="px-3 py-1 text-xs text-slate-400 font-mono">@{username}</p>}
+                {username && <p className="px-3 py-1 text-xs text-muted font-mono">@{username}</p>}
                 <Link href="/account" onClick={close} className={item()}>
                   Account settings
                 </Link>

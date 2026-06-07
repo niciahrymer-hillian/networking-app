@@ -62,7 +62,7 @@ export default async function PublicProfilePage({
   const viewerIsOwner = !!session.userId && session.userId === profile.userId;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#f0faf5] via-[#f6fbf8] to-[#eef7f1] text-slate-900 flex flex-col items-center px-4 py-8 sm:py-12">
+    <main className="min-h-screen bg-gradient-to-b from-[#f0faf5] via-[#f6fbf8] to-[#eef7f1] dark:from-[#0b1220] dark:via-[#0b1220] dark:to-[#0b1220] text-foreground flex flex-col items-center px-4 py-8 sm:py-12">
       <ScanIntro firstName={firstName}>
         <ProfileCard
           template={profile.template}

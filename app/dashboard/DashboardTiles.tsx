@@ -51,7 +51,7 @@ function SortableTile({ id, children }: { id: string; children: ReactNode }) {
         <button
           type="button"
           aria-label="Drag to reorder tile"
-          className="absolute top-2 right-2 z-10 cursor-grab touch-none rounded-md px-1.5 py-0.5 leading-none text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-500 active:cursor-grabbing"
+          className="absolute top-2 right-2 z-10 cursor-grab touch-none rounded-md px-1.5 py-0.5 leading-none text-muted transition-colors hover:bg-slate-100 dark:hover:bg-white/10 hover:text-muted active:cursor-grabbing"
           {...attributes}
           {...listeners}
         >
