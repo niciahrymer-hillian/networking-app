@@ -22,6 +22,10 @@ model Profile {
   linkedinUrl String?
   githubUrl   String?
   links       String?                             // JSON: [{label, url}, ...]
+  // Card designer (Phase A): visual style of the public card. Defaults keep
+  // existing cards looking exactly as before. Safe to ALTER (have defaults).
+  template    String       @default("classic")    // layout: classic | minimal | bold | split
+  colorScheme String       @default("emerald")    // palette: emerald | indigo | rose | amber | violet | slate
   isOwner     Boolean      @default(false)        // true = this is the logged-in user's own card
   isQREnabled Boolean      @default(true)         // false = profile is hidden/no QR exposure
   userId      String?                             // linked User account (owner of this card)

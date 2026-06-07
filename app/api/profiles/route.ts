@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { v4 as uuidv4 } from "uuid";
+import { getTemplate, getColorScheme } from "@/lib/card-design";
 
 export async function GET() {
   const session = await requireAuth();
@@ -43,6 +44,8 @@ export async function POST(request: NextRequest) {
       githubUrl: body.githubUrl?.trim() || null,
       // Custom links stored as JSON string — [{label, url}, ...]
       links: body.links?.length ? JSON.stringify(body.links) : null,
+      template: getTemplate(body.template),
+      colorScheme: getColorScheme(body.colorScheme),
     },
   });
 

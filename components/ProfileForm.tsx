@@ -5,6 +5,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { TEMPLATES, PALETTES } from "@/lib/card-design";
 
 export interface ProfileFormData {
   id?: string;
@@ -18,6 +19,8 @@ export interface ProfileFormData {
   linkedinUrl: string;
   githubUrl: string;
   links: { label: string; url: string }[];
+  template: string;
+  colorScheme: string;
 }
 
 interface Props {
@@ -27,6 +30,7 @@ interface Props {
 const EMPTY: ProfileFormData = {
   name: "", email: "", phone: "", headline: "", about: "",
   headshotUrl: "", pdfUrl: "", linkedinUrl: "", githubUrl: "", links: [],
+  template: "classic", colorScheme: "emerald",
 };
 
 export default function ProfileForm({ initial }: Props) {
@@ -148,6 +152,43 @@ export default function ProfileForm({ initial }: Props) {
               }}
             />
           </div>
+        </div>
+      </section>
+
+      {/* === Card style (template + palette) === */}
+      <section>
+        <label className="block text-sm font-medium text-slate-700 mb-2">Card style</label>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+          {TEMPLATES.map((tpl) => (
+            <button
+              type="button"
+              key={tpl.key}
+              onClick={() => set("template", tpl.key)}
+              className={`rounded-xl border px-3 py-2 text-left text-xs transition-colors ${
+                form.template === tpl.key
+                  ? "border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500"
+                  : "border-slate-300 hover:bg-slate-50"
+              }`}
+            >
+              <span className="block font-semibold text-slate-800">{tpl.label}</span>
+              <span className="block text-slate-500 leading-tight">{tpl.desc}</span>
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {Object.entries(PALETTES).map(([key, pal]) => (
+            <button
+              type="button"
+              key={key}
+              onClick={() => set("colorScheme", key)}
+              title={pal.label}
+              aria-label={pal.label}
+              className={`w-8 h-8 rounded-full transition-transform ${
+                form.colorScheme === key ? "ring-2 ring-offset-2 ring-slate-400 scale-110" : "hover:scale-105"
+              }`}
+              style={{ background: `linear-gradient(135deg, ${pal.bandFrom}, ${pal.bandTo})` }}
+            />
+          ))}
         </div>
       </section>
 

@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+import { getTemplate, getColorScheme } from "@/lib/card-design";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -50,6 +51,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
       linkedinUrl: body.linkedinUrl?.trim() || null,
       githubUrl: body.githubUrl?.trim() || null,
       links: body.links?.length ? JSON.stringify(body.links) : null,
+      template: getTemplate(body.template),
+      colorScheme: getColorScheme(body.colorScheme),
     },
   });
 

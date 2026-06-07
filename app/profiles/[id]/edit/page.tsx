@@ -53,6 +53,8 @@ export default async function EditProfilePage({
     linkedinUrl: profile.linkedinUrl ?? "",
     githubUrl: profile.githubUrl ?? "",
     links: profile.links ? JSON.parse(profile.links) : [],
+    template: profile.template,
+    colorScheme: profile.colorScheme,
   };
 
   return (
