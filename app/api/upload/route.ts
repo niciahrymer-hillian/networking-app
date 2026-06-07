@@ -57,6 +57,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: publicUrl });
   }
 
+  // Production without Supabase configured: fail loudly. Writing to local disk on
+  // Vercel "succeeds" but the file lives on an ephemeral filesystem and is gone by
+  // the next request — so the upload silently disappears. A clear error is better.
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json(
+      {
+        error:
+          "File storage is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in the deployment environment and create a public 'uploads' Storage bucket.",
+      },
+      { status: 503 }
+    );
+  }
+
   // Dev fallback: save to local UPLOAD_DIR and serve via /api/uploads/
   const uploadDir = process.env.UPLOAD_DIR ?? join(process.cwd(), "public", "uploads");
   await mkdir(uploadDir, { recursive: true });

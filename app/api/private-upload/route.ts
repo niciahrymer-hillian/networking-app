@@ -43,6 +43,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ filename });
   }
 
+  // Production without Supabase configured: fail loudly rather than writing to
+  // Vercel's ephemeral disk (the file would vanish on the next request).
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json(
+      {
+        error:
+          "File storage is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in the deployment environment and create a private 'private-uploads' Storage bucket.",
+      },
+      { status: 503 }
+    );
+  }
+
   // Dev fallback: save to local private directory
   const uploadDir = process.env.PRIVATE_UPLOAD_DIR ?? join(process.cwd(), "data", "private-uploads");
   await mkdir(uploadDir, { recursive: true });

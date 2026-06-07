@@ -18,7 +18,9 @@ function isEmail(email: string) {
 }
 
 export async function POST(request: NextRequest) {
-  if (process.env.NODE_ENV === "production" && process.env.ALLOW_SIGNUP !== "true") {
+  // Signup is open by default. Set DISABLE_SIGNUP=true to turn it into an
+  // admin-only/closed deployment (kill-switch).
+  if (process.env.DISABLE_SIGNUP === "true") {
     return NextResponse.json({ error: "Sign up is disabled" }, { status: 403 });
   }
 
