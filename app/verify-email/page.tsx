@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import AuthShell, { authInput, authButton } from "@/components/AuthShell";
 
 export default function VerifyEmail() {
   const [email, setEmail] = useState("");
@@ -36,34 +37,31 @@ export default function VerifyEmail() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0f0f1a] flex items-center justify-center px-4">
-      <div className="w-full max-w-md p-6 rounded-2xl bg-white/5 border border-white/10 text-white">
-        <h1 className="text-2xl font-semibold mb-4">Verify your email</h1>
-        {step === 'enter' && (
-          <>
-            <p className="text-sm text-white/60 mb-4">Enter the email you signed up with to receive a 6-digit verification code.</p>
-            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="w-full mb-3 rounded-md bg-transparent border border-white/10 p-3 text-white" />
-            <button onClick={sendCode} className="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-md">Send code</button>
-          </>
-        )}
+    <AuthShell emoji="✉️" title="Verify your email">
+      {step === 'enter' && (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-slate-500">Enter the email you signed up with to receive a 6-digit verification code.</p>
+          <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className={authInput} />
+          <button onClick={sendCode} className={authButton}>Send code</button>
+        </div>
+      )}
 
-        {step === 'code' && (
-          <>
-            <p className="text-sm text-white/60 mb-4">Enter the 6-digit code sent to <strong>{email}</strong>.</p>
-            <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="123456" className="w-full mb-3 rounded-md bg-transparent border border-white/10 p-3 text-white" />
-            <div className="flex gap-3">
-              <button onClick={verify} className="flex-1 bg-indigo-600 hover:bg-indigo-500 py-3 rounded-md">Verify</button>
-              <button onClick={sendCode} className="flex-1 border border-white/10 py-3 rounded-md">Resend</button>
-            </div>
-          </>
-        )}
+      {step === 'code' && (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-slate-500">Enter the 6-digit code sent to <strong className="text-slate-700">{email}</strong>.</p>
+          <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="123456" className={authInput} />
+          <div className="flex gap-3">
+            <button onClick={verify} className={authButton}>Verify</button>
+            <button onClick={sendCode} className="flex-1 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-medium py-3 rounded-xl transition-colors">Resend</button>
+          </div>
+        </div>
+      )}
 
-        {step === 'done' && (
-          <p className="text-white">Verified — redirecting to sign in…</p>
-        )}
+      {step === 'done' && (
+        <p className="text-slate-700">Verified — redirecting to sign in…</p>
+      )}
 
-        {message && <p className="mt-4 text-sm text-white/70">{message}</p>}
-      </div>
-    </main>
+      {message && <p className="mt-4 text-sm text-slate-500">{message}</p>}
+    </AuthShell>
   );
 }

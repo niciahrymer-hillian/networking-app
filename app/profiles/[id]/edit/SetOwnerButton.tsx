@@ -17,7 +17,7 @@ export default function SetOwnerButton({ id, isOwner }: Props) {
 
   if (isOwner) {
     return (
-      <span className="flex items-center gap-1.5 text-xs font-medium text-indigo-400 bg-indigo-900/40 border border-indigo-500/30 px-3 py-1.5 rounded-lg">
+      <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg">
         ✦ My card
       </span>
     );
@@ -34,7 +34,7 @@ export default function SetOwnerButton({ id, isOwner }: Props) {
     <button
       onClick={handleClick}
       disabled={loading}
-      className="text-xs text-white/40 hover:text-white/70 border border-white/10 hover:border-white/20 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+      className="text-xs text-slate-500 hover:text-slate-800 border border-slate-300 hover:border-slate-400 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
     >
       {loading ? "Setting…" : "Set as my card"}
     </button>

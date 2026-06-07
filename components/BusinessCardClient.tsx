@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 const BusinessCard = dynamic(() => import("@/components/BusinessCard"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-48 bg-white/5 rounded-xl animate-pulse" />
+    <div className="w-full h-48 bg-slate-100 rounded-xl animate-pulse" />
   ),
 });
 

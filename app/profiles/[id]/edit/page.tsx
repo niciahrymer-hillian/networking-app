@@ -56,37 +56,36 @@ export default async function EditProfilePage({
   };
 
   return (
-    <main className="min-h-screen bg-[#0f0f1a] text-white">
-      <header className="border-b border-white/10 px-4 py-4 max-w-2xl mx-auto flex items-center gap-3">
-        <Link href="/" className="text-white/40 hover:text-white/70 transition-colors text-sm">
+    <main className="min-h-screen bg-gradient-to-b from-[#f0faf5] via-white to-[#eef7f1] text-slate-900">
+      <div className="max-w-2xl mx-auto px-4 py-10">
+        <Link href="/dashboard" className="text-sm text-emerald-700 hover:text-emerald-600 transition-colors">
           ← Dashboard
         </Link>
-        <span className="text-white/20">/</span>
-        <h1 className="text-lg font-semibold">Edit — {profile.name}</h1>
-      </header>
+        <h1 className="mt-4 mb-8 text-2xl font-bold tracking-tight">Edit — {profile.name}</h1>
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <ProfileForm initial={initial} />
+        <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-sm ring-1 ring-emerald-900/5">
+          <ProfileForm initial={initial} />
 
-        {/* QR code preview for the public link */}
-        <div className="mt-10 pt-8 border-t border-white/10">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-white/60">Public profile link & QR code</p>
-            <SetOwnerButton id={profile.id} isOwner={profile.isOwner} />
+          {/* QR code preview for the public link */}
+          <div className="mt-10 pt-8 border-t border-slate-100">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-slate-600">Public profile link & QR code</p>
+              <SetOwnerButton id={profile.id} isOwner={profile.isOwner} />
+            </div>
+            <p className="text-xs text-slate-500 font-mono bg-slate-50 ring-1 ring-slate-100 px-3 py-2 rounded-lg mb-4 break-all">
+              {appUrl}/p/{profile.slug}
+            </p>
+            <QRSection slug={profile.slug} name={profile.name} appUrl={appUrl} />
           </div>
-          <p className="text-xs text-white/40 font-mono bg-white/5 px-3 py-2 rounded-lg mb-4 break-all">
-            {appUrl}/p/{profile.slug}
-          </p>
-          <QRSection slug={profile.slug} name={profile.name} appUrl={appUrl} />
-        </div>
 
-        {/* Link this profile as a secondary card of another (two-career support) */}
-        <SetSecondaryButton
-          id={profile.id}
-          parentProfileId={profile.parentProfileId ?? null}
-          parentName={parentProfile?.name ?? null}
-          otherProfiles={otherProfiles}
-        />
+          {/* Link this profile as a secondary card of another (two-career support) */}
+          <SetSecondaryButton
+            id={profile.id}
+            parentProfileId={profile.parentProfileId ?? null}
+            parentName={parentProfile?.name ?? null}
+            otherProfiles={otherProfiles}
+          />
+        </div>
       </div>
     </main>
   );

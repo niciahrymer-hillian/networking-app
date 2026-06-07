@@ -39,7 +39,7 @@ export default function QRCodeDisplay({ url, profileName, actionLabel = "Downloa
       <canvas ref={canvasRef} className="rounded-lg shadow-md" />
       <button
         onClick={handleDownload}
-        className="text-sm text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors"
+        className="text-sm text-emerald-700 hover:text-emerald-600 underline underline-offset-2 transition-colors"
       >
         {actionLabel}
       </button>

@@ -54,15 +54,15 @@ export default function AdminUserManagement({ users }: { users: User[] }) {
   return (
     <div className="space-y-4">
       {sortedUsers.map((user) => (
-        <div key={user.id} className="bg-white/5 border border-white/10 rounded-2xl p-4">
+        <div key={user.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <p className="text-sm text-white/70">{user.username}</p>
-              <p className="text-xs text-white/40">
+              <p className="text-sm font-medium text-slate-900">{user.username}</p>
+              <p className="text-xs text-slate-500">
                 {user.email ?? "No email"} · {user.isAdmin ? "Admin" : "User"} · {user.emailVerified ? "Verified" : "Unverified"}
               </p>
             </div>
-            <p className="text-xs text-white/40">Created {new Date(user.createdAt).toLocaleString()}</p>
+            <p className="text-xs text-slate-400">Created {new Date(user.createdAt).toLocaleString()}</p>
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
@@ -71,20 +71,20 @@ export default function AdminUserManagement({ users }: { users: User[] }) {
               value={passwords[user.id] || ""}
               onChange={(e) => setPasswords((prev) => ({ ...prev, [user.id]: e.target.value }))}
               placeholder="New password"
-              className="w-full bg-slate-950/80 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-white/40 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
             />
             <button
               type="button"
               onClick={() => resetUserPassword(user.id)}
               disabled={loading[user.id]}
-              className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-3 rounded-lg transition-colors"
+              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-semibold px-4 py-3 rounded-lg transition-colors"
             >
               {loading[user.id] ? "Resetting…" : "Reset password"}
             </button>
           </div>
 
           {status[user.id] && (
-            <p className="mt-3 text-sm text-white/70">{status[user.id]}</p>
+            <p className="mt-3 text-sm text-slate-600">{status[user.id]}</p>
           )}
         </div>
       ))}

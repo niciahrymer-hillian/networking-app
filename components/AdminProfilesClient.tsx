@@ -84,11 +84,11 @@ export default function AdminProfilesClient() {
   }
 
   if (loading) {
-    return <div className="text-center text-white/60">Loading profiles...</div>;
+    return <div className="text-center text-slate-500">Loading profiles...</div>;
   }
 
   if (profiles.length === 0) {
-    return <div className="text-center text-white/60">No profiles found.</div>;
+    return <div className="text-center text-slate-500">No profiles found.</div>;
   }
 
   return (
@@ -96,26 +96,26 @@ export default function AdminProfilesClient() {
       {profiles.map((profile) => (
         <div
           key={profile.id}
-          className="bg-white/5 border border-white/10 rounded-2xl p-4"
+          className="bg-slate-50 border border-slate-200 rounded-2xl p-4"
         >
           <div className="flex flex-col gap-4">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <p className="text-sm font-medium text-white">{profile.name}</p>
+                  <p className="text-sm font-medium text-slate-900">{profile.name}</p>
                   {profile.isOwner && (
-                    <span className="text-xs px-2 py-1 bg-indigo-500/20 text-indigo-200 rounded">
+                    <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded">
                       Owner
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-white/40 font-mono mb-2">
+                <p className="text-xs text-slate-400 font-mono mb-2">
                   Slug: {profile.slug}
                 </p>
-                <p className="text-xs text-white/50 mb-2">
+                <p className="text-xs text-slate-500 mb-2">
                   {profile.user ? `Owner: ${profile.user.username}` : "No owner"}
                 </p>
-                <p className="text-xs text-white/40">
+                <p className="text-xs text-slate-400">
                   {profile.email || "No email"} · Created{" "}
                   {new Date(profile.createdAt).toLocaleDateString()}
                 </p>
@@ -126,10 +126,10 @@ export default function AdminProfilesClient() {
               <button
                 onClick={() => toggleQR(profile.id)}
                 disabled={togglingQR === profile.id}
-                className={`flex-1 text-sm font-medium px-3 py-2 rounded-lg transition-colors ${
+                className={`flex-1 text-sm font-medium px-3 py-2 rounded-lg border transition-colors ${
                   profile.isQREnabled
-                    ? "bg-green-600/20 text-green-200 hover:bg-green-600/30"
-                    : "bg-red-600/20 text-red-200 hover:bg-red-600/30"
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                    : "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
                 } disabled:opacity-50`}
               >
                 {togglingQR === profile.id
@@ -142,7 +142,7 @@ export default function AdminProfilesClient() {
               <Link
                 href={`/p/${profile.slug}`}
                 target="_blank"
-                className="flex-1 text-sm font-medium px-3 py-2 rounded-lg bg-indigo-600/20 text-indigo-200 hover:bg-indigo-600/30 transition-colors text-center"
+                className="flex-1 text-sm font-medium px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors text-center"
               >
                 View public
               </Link>
@@ -150,7 +150,7 @@ export default function AdminProfilesClient() {
               <button
                 onClick={() => deleteProfile(profile.id)}
                 disabled={deleting === profile.id}
-                className="flex-1 text-sm font-medium px-3 py-2 rounded-lg bg-red-600/20 text-red-200 hover:bg-red-600/30 transition-colors disabled:opacity-50"
+                className="flex-1 text-sm font-medium px-3 py-2 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors disabled:opacity-50"
               >
                 {deleting === profile.id ? "Deleting..." : "Delete"}
               </button>

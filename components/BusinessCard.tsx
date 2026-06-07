@@ -30,7 +30,7 @@ export default function BusinessCard({ pdfUrl }: BusinessCardProps) {
     <div className="flex flex-col items-center gap-3">
       {/* Card wrapper — cursor pointer shows it's interactive when two sides exist */}
       <div
-        className={`relative rounded-xl overflow-hidden shadow-lg border border-white/10 ${hasTwoSides ? "cursor-pointer select-none" : ""}`}
+        className={`relative rounded-xl overflow-hidden shadow-lg ring-1 ring-emerald-900/10 ${hasTwoSides ? "cursor-pointer select-none" : ""}`}
         onClick={() => {
           if (hasTwoSides) setCurrentPage((p) => (p === 1 ? 2 : 1));
         }}
@@ -40,7 +40,7 @@ export default function BusinessCard({ pdfUrl }: BusinessCardProps) {
           file={pdfUrl}
           onLoadSuccess={onDocumentLoadSuccess}
           loading={
-            <div className="w-80 h-48 bg-white/5 animate-pulse rounded-xl" />
+            <div className="w-80 h-48 bg-slate-100 animate-pulse rounded-xl" />
           }
         >
           <Page
@@ -66,7 +66,7 @@ export default function BusinessCard({ pdfUrl }: BusinessCardProps) {
             <button
               key={p}
               onClick={() => setCurrentPage(p)}
-              className={`w-2 h-2 rounded-full transition-colors ${currentPage === p ? "bg-indigo-400" : "bg-white/30"}`}
+              className={`w-2 h-2 rounded-full transition-colors ${currentPage === p ? "bg-emerald-500" : "bg-slate-300"}`}
               aria-label={p === 1 ? "Front" : "Back"}
             />
           ))}

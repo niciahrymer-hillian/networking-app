@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AuthShell, { authButton } from "@/components/AuthShell";
 
 export default function VerifyEmailPage({ params }: { params: Promise<{ token: string }> }) {
   const router = useRouter();
@@ -29,19 +30,14 @@ export default function VerifyEmailPage({ params }: { params: Promise<{ token: s
   }, [params]);
 
   return (
-    <main className="min-h-screen bg-[#0f0f1a] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm text-center">
-        <div className="text-4xl mb-3">{status === "success" ? "✅" : status === "error" ? "❌" : "⌛"}</div>
-        <h1 className="text-2xl font-bold text-white mb-2">Email verification</h1>
-        <p className="text-white/60 mb-6">{message}</p>
-        <button
-          type="button"
-          onClick={() => router.push("/login")}
-          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-lg transition-colors"
-        >
-          Go to sign in
-        </button>
-      </div>
-    </main>
+    <AuthShell
+      emoji={status === "success" ? "✅" : status === "error" ? "❌" : "⌛"}
+      title="Email verification"
+      subtitle={message}
+    >
+      <button type="button" onClick={() => router.push("/login")} className={authButton}>
+        Go to sign in
+      </button>
+    </AuthShell>
   );
 }

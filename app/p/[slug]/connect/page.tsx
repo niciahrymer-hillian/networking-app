@@ -19,15 +19,15 @@ export default async function ConnectPage({ params }: Props) {
   const firstName = profile.name.split(" ")[0];
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-start justify-center pt-12 px-4">
-      <div className="bg-white rounded-2xl shadow-sm border w-full max-w-md p-8">
+    <main className="min-h-screen bg-gradient-to-b from-[#f0faf5] via-white to-[#eef7f1] flex items-start justify-center pt-12 px-4">
+      <div className="bg-white rounded-3xl shadow-xl shadow-emerald-900/5 ring-1 ring-emerald-900/5 w-full max-w-md p-8">
         {/* Greeting */}
         <div className="text-center mb-8">
           <div className="text-4xl mb-3">👋</div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-slate-900">
             Nice to meet you!
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-slate-500">
             Share your details so {firstName} can follow up.
           </p>
         </div>
