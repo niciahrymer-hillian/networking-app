@@ -1,7 +1,5 @@
 # Networking-App
 
-> 📣 **New here?** Read the [Project Pitch](PITCH.md) to learn about the problem, solution, and vision behind Networking-App.
-
 Networking-App is a full-stack professional networking platform designed to modernize how people build and maintain professional relationships. Instead of relying on traditional paper business cards, users create dynamic digital profiles that can be shared instantly through QR codes, making networking more accessible, interactive, and long-lasting.
 
 The platform combines professional profiles, digital business cards, portfolio showcases, networking tools, and engagement analytics into a single experience for students, professionals, entrepreneurs, and community builders.
