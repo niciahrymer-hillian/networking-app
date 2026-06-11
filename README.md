@@ -1,49 +1,147 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Networking-App
 
-## Getting Started
+> 📣 **New here?** Read the [Project Pitch](PITCH.md) to learn about the problem, solution, and vision behind Networking-App.
 
-First, run the development server:
+Networking-App is a full-stack professional networking platform designed to modernize how people build and maintain professional relationships. Instead of relying on traditional paper business cards, users create dynamic digital profiles that can be shared instantly through QR codes, making networking more accessible, interactive, and long-lasting.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The platform combines professional profiles, digital business cards, portfolio showcases, networking tools, and engagement analytics into a single experience for students, professionals, entrepreneurs, and community builders.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Why Networking-App Was Built
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Traditional networking often ends after the initial exchange of contact information. Paper business cards are easily lost, contact details become outdated, and valuable professional connections can fade over time.
 
-## Environment
+Networking-App was built to:
 
-Create a `.env.local` file from `.env.example` and set your values before running locally or deploying.
+* Modernize professional networking
+* Replace traditional paper business cards
+* Simplify professional information sharing
+* Create lasting professional connections
+* Provide a platform for showcasing projects and achievements
+* Encourage ongoing engagement after networking events
 
-Required values:
-- `SESSION_SECRET` — at least 32 characters for iron-session.
-- `APP_URL` — the public URL for the app, used by QR codes and shared links.
-- `ENCRYPTION_KEY` — 64 hex characters for connection encryption.
+---
 
-Optional production values for file uploads:
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
+## Key Features
 
-## Learn More
+### Digital Professional Profiles
 
-To learn more about Next.js, take a look at the following resources:
+* Create customizable professional profiles
+* Share experience, skills, and achievements
+* Display professional information in one place
+* Maintain an up-to-date digital presence
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### QR-Powered Networking
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+* Generate unique QR codes
+* Instantly share profiles at events and meetings
+* Eliminate the need for paper business cards
+* Provide quick access to contact information and portfolios
 
-## Deploy on Vercel
+### Portfolio Showcase
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+* Highlight projects and accomplishments
+* Showcase technical and professional work
+* Display certifications, skills, and experience
+* Create a personal professional brand
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Professional Networking
+
+* Connect with other users
+* Build and manage a professional network
+* Maintain relationships after events
+* Expand networking opportunities beyond in-person interactions
+
+### Analytics & Engagement
+
+* Track profile visits
+* Monitor QR code scans
+* Measure engagement with shared content
+* Gain insights into networking activity
+
+---
+
+## Tech Stack
+
+| Layer             | Technologies                                        |
+| ----------------- | --------------------------------------------------- |
+| Frontend          | Next.js, React, TypeScript, Tailwind CSS, shadcn/ui |
+| Backend           | Next.js API Routes, TypeScript, Prisma ORM          |
+| Database          | PostgreSQL, Supabase                                |
+| Authentication    | Supabase Auth                                       |
+| Realtime Features | Supabase Realtime                                   |
+| QR Technology     | react-qr-code, qrcode                               |
+| UI & Animation    | Framer Motion                                       |
+| Deployment        | Vercel, GitHub Actions                              |
+
+---
+
+## Platform Workflows
+
+### Professionals
+
+* Create and customize a digital profile
+* Generate a personal QR code
+* Share professional information instantly
+* Showcase projects and achievements
+* Build and manage professional connections
+
+### Event Attendees
+
+* Scan QR codes to access profiles
+* Connect with professionals instantly
+* Discover portfolios and experience
+* Save connections for future engagement
+
+### Community Builders
+
+* Facilitate networking opportunities
+* Support professional communities
+* Encourage engagement between members
+* Improve event networking experiences
+
+---
+
+## Impact
+
+Networking-App aims to improve professional networking by making connections easier to create, maintain, and grow over time.
+
+The platform demonstrates how modern web technologies, realtime communication, and digital identity tools can transform traditional networking into an ongoing professional relationship-building experience.
+
+---
+
+## Screenshots
+
+The screenshots included throughout this repository demonstrate:
+
+* User onboarding experiences
+* Profile creation workflows
+* Digital profile management
+* QR code generation and sharing
+* Portfolio showcase functionality
+* Professional networking features
+* Analytics dashboards
+* Responsive user interface design
+
+---
+
+## Future Roadmap
+
+* Enhanced portfolio customization
+* Professional recommendations
+* Event management integrations
+* Advanced networking analytics
+* Team and organization profiles
+* AI-assisted networking suggestions
+
+---
+
+## Repository Structure
+
+* `app/` — Application routes and pages
+* `components/` — Reusable UI components
+* `lib/` — Utilities and application services
+* `public/` — Static assets
+* `PITCH.md` — Product overview and vision
+* `README.md` — Project documentation
