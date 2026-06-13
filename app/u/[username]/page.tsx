@@ -30,7 +30,10 @@ export default async function MemberProfilePage({
       posts: {
         orderBy: { createdAt: "desc" },
         take: 100,
-        include: { reactions: { select: { emoji: true, userId: true } } },
+        include: {
+          reactions: { select: { emoji: true, userId: true } },
+          _count: { select: { comments: true } },
+        },
       },
     },
   });
@@ -125,7 +128,7 @@ export default async function MemberProfilePage({
                   if (r.userId === viewerId) mine = r.emoji;
                 }
                 const counts = [...byEmoji.entries()].map(([emoji, count]) => ({ emoji, count })).sort((a, b) => b.count - a.count);
-                return <PostCard key={post.id} post={post} reactions={counts} viewerReaction={mine} />;
+                return <PostCard key={post.id} post={post} reactions={counts} viewerReaction={mine} commentCount={post._count.comments} />;
               })}
             </div>
           )}

@@ -34,6 +34,7 @@ export default async function FeedPage() {
         },
       },
       reactions: { select: { emoji: true, userId: true } },
+      _count: { select: { comments: true } },
     },
   });
 
@@ -79,6 +80,7 @@ export default async function FeedPage() {
                   }}
                   reactions={counts}
                   viewerReaction={mine}
+                  commentCount={post._count.comments}
                 />
               );
             })}

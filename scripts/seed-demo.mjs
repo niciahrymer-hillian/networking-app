@@ -299,6 +299,7 @@ async function main() {
   for (const sql of [
     "DELETE FROM UserConnection WHERE id LIKE 'demouc-%'",
     "DELETE FROM Reaction WHERE id LIKE 'demoreact-%'",
+    "DELETE FROM Comment WHERE id LIKE 'democomment-%'",
     "DELETE FROM Post WHERE id LIKE 'demopost-%'",
     "DELETE FROM Connection WHERE id LIKE 'democonn-%'",
     "DELETE FROM Scan WHERE id LIKE 'demoscan-%'",
@@ -417,6 +418,35 @@ async function main() {
         sql: "INSERT INTO Reaction (id, postId, userId, emoji, createdAt) VALUES (?,?,?,?,?)",
         args: [`demoreact-${rid++}`, p.id, userId, emoji, iso(pi * 3 + k)],
       });
+    }
+  });
+
+  // --- Seeded comments + replies (so threads feel real) ---
+  const COMMENT_LINES = [
+    "This is great — congrats! 🎉", "Love this. Saving for later.", "So well put — couldn't agree more.",
+    "Huge. Thanks for sharing the details.", "This resonates a lot right now.", "Inspiring stuff 🙌",
+    "Needed to hear this today.", "Spot on, especially the last point.", "Big fan of this approach.",
+    "Adding this to my notes 📝", "How did the rollout go on your end?", "Curious what tooling you used here?",
+  ];
+  const REPLY_LINES = ["Thank you! 🙏", "Appreciate that!", "Glad it landed 😄", "100% — let's chat more.", "Means a lot, thanks!", "Happy to share more, DM me."];
+  let cid = 0;
+  postMeta.forEach((p, pi) => {
+    const pool = allReactors.filter((u) => u !== p.authorId);
+    const nComments = pi % 4 === 0 ? 0 : 1 + (pi % 3); // 0..3
+    for (let k = 0; k < nComments; k++) {
+      const commenter = pool[(pi * 2 + k) % pool.length];
+      const commentId = `democomment-${cid++}`;
+      stmts.push({
+        sql: "INSERT INTO Comment (id, postId, authorId, parentId, body, createdAt) VALUES (?,?,?,?,?,?)",
+        args: [commentId, p.id, commenter, null, COMMENT_LINES[(pi + k) % COMMENT_LINES.length], iso(pi * 2 + k)],
+      });
+      if ((pi + k) % 3 === 0) {
+        const replier = (pi + k) % 2 === 0 ? p.authorId : pool[(pi + k + 1) % pool.length];
+        stmts.push({
+          sql: "INSERT INTO Comment (id, postId, authorId, parentId, body, createdAt) VALUES (?,?,?,?,?,?)",
+          args: [`democomment-${cid++}`, p.id, replier, commentId, REPLY_LINES[(pi + k) % REPLY_LINES.length], iso(Math.max(0, pi * 2 + k - 1))],
+        });
+      }
     }
   });
 

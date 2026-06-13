@@ -62,6 +62,7 @@ model User {
   profiles                  Profile[]
   posts                     Post[]
   reactions                 Reaction[]
+  comments                  Comment[]
   // Mutual network graph — a connection creates rows in both directions, so
   // "my network" is simply networkOut.connectedUserId.
   networkOut                UserConnection[] @relation("NetworkOut")
@@ -99,8 +100,26 @@ model Post {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   reactions Reaction[]
+  comments  Comment[]
 
   @@index([authorId])
+}
+
+// Comment on a post. A reply sets parentId to another comment (one level of
+// threading — replies to replies still attach to the top-level comment's thread).
+model Comment {
+  id        String    @id @default(cuid())
+  postId    String
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+  body      String
+  createdAt DateTime  @default(now())
+
+  @@index([postId])
 }
 
 // Emoji reaction on a post (LinkedIn-style: one reaction per user per post; the

@@ -8,6 +8,7 @@
 
 import Link from "next/link";
 import PostReactions, { type ReactionCount } from "@/components/PostReactions";
+import PostComments from "@/components/PostComments";
 
 export type FeedPost = {
   id: string;
@@ -43,12 +44,13 @@ export function parseTags(json: string | null): string[] {
 }
 
 export default function PostCard({
-  post, author, reactions = [], viewerReaction = null,
+  post, author, reactions = [], viewerReaction = null, commentCount = 0,
 }: {
   post: FeedPost;
   author?: PostAuthor | null;
   reactions?: ReactionCount[];
   viewerReaction?: string | null;
+  commentCount?: number;
 }) {
   const tags = parseTags(post.tags);
   const yt = post.linkUrl ? youTubeId(post.linkUrl) : null;
@@ -129,6 +131,7 @@ export default function PostCard({
       )}
 
       <PostReactions postId={post.id} counts={reactions} mine={viewerReaction} />
+      <PostComments postId={post.id} initialCount={commentCount} />
     </article>
   );
 }
