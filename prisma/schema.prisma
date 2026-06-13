@@ -63,6 +63,10 @@ model User {
   posts                     Post[]
   reactions                 Reaction[]
   comments                  Comment[]
+  conversationsCreated      Conversation[]            @relation("ConvCreator")
+  conversationParticipants  ConversationParticipant[]
+  messages                  Message[]
+  messageReactions          MessageReaction[]
   // Mutual network graph — a connection creates rows in both directions, so
   // "my network" is simply networkOut.connectedUserId.
   networkOut                UserConnection[] @relation("NetworkOut")
@@ -101,8 +105,63 @@ model Post {
   updatedAt DateTime @updatedAt
   reactions Reaction[]
   comments  Comment[]
+  sharedInMessages Message[] @relation("SharedPost")
 
   @@index([authorId])
+}
+
+// === Messaging: DMs + group "conversation rooms" (one unified model) ===
+
+model Conversation {
+  id           String   @id @default(cuid())
+  isGroup      Boolean  @default(false)        // false = 1:1 DM, true = group room
+  name         String?                          // group room name (null for DMs)
+  createdById  String
+  createdBy    User     @relation("ConvCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  participants ConversationParticipant[]
+  messages     Message[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isAdmin        Boolean      @default(false)   // group admin: rename, add/remove, delegate
+  createdAt      DateTime     @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body           String?                          // text (null when sharing only a post)
+  sharedPostId   String?                          // a feed post shared into the chat
+  sharedPost     Post?        @relation("SharedPost", fields: [sharedPostId], references: [id], onDelete: SetNull)
+  createdAt      DateTime     @default(now())
+  reactions      MessageReaction[]
+
+  @@index([conversationId])
+}
+
+model MessageReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji     String
+  createdAt DateTime @default(now())
+
+  @@unique([messageId, userId])
 }
 
 // Comment on a post. A reply sets parentId to another comment (one level of

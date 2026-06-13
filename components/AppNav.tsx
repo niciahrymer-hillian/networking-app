@@ -23,6 +23,7 @@ export default async function AppNav() {
     ? [
         { label: "Dashboard", href: "/dashboard" },
         { label: "Feed", href: "/feed" },
+        { label: "Messages", href: "/messages" },
         ...(!isAdmin ? [{ label: "My profile", href: "/my-profile" }] : []),
         { label: "Connections", href: "/my-connections" },
         { label: "Activity", href: "/notifications" },

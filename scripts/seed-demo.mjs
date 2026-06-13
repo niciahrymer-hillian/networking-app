@@ -300,6 +300,10 @@ async function main() {
     "DELETE FROM UserConnection WHERE id LIKE 'demouc-%'",
     "DELETE FROM Reaction WHERE id LIKE 'demoreact-%'",
     "DELETE FROM Comment WHERE id LIKE 'democomment-%'",
+    "DELETE FROM MessageReaction WHERE id LIKE 'demomr-%'",
+    "DELETE FROM Message WHERE id LIKE 'demomsg-%'",
+    "DELETE FROM ConversationParticipant WHERE id LIKE 'demopart-%'",
+    "DELETE FROM Conversation WHERE id LIKE 'democonv-%'",
     "DELETE FROM Post WHERE id LIKE 'demopost-%'",
     "DELETE FROM Connection WHERE id LIKE 'democonn-%'",
     "DELETE FROM Scan WHERE id LIKE 'demoscan-%'",
@@ -449,6 +453,55 @@ async function main() {
       }
     }
   });
+
+  // --- Seeded conversations: DMs (with shared posts + reactions) + a group room ---
+  let convN = 0, msgN = 0, mrN = 0;
+  const makeConvo = ({ isGroup = false, name = null, creator, members, admins = [], msgs }) => {
+    const cid = `democonv-${convN++}`;
+    stmts.push({ sql: "INSERT INTO Conversation (id, isGroup, name, createdById, createdAt, updatedAt) VALUES (?,?,?,?,?,?)", args: [cid, isGroup ? 1 : 0, name, creator, iso(2000), iso(5)] });
+    const all = [creator, ...members.filter((m) => m !== creator)];
+    const adminSet = new Set(isGroup ? [creator, ...admins] : []);
+    all.forEach((uid, i) => {
+      stmts.push({ sql: "INSERT INTO ConversationParticipant (id, conversationId, userId, isAdmin, createdAt) VALUES (?,?,?,?,?)", args: [`demopart-${cid}-${i}`, cid, uid, adminSet.has(uid) ? 1 : 0, iso(2000)] });
+    });
+    msgs.forEach((m) => {
+      const mid = `demomsg-${msgN++}`;
+      stmts.push({ sql: "INSERT INTO Message (id, conversationId, senderId, body, sharedPostId, createdAt) VALUES (?,?,?,?,?,?)", args: [mid, cid, m.from, m.body ?? null, m.shared ?? null, iso(m.mins)] });
+      (m.reacts ?? []).forEach((r) => {
+        stmts.push({ sql: "INSERT INTO MessageReaction (id, messageId, userId, emoji, createdAt) VALUES (?,?,?,?,?)", args: [`demomr-${mrN++}`, mid, r.by, r.emoji, iso(m.mins)] });
+      });
+    });
+  };
+  const U = (n) => `demo-${n}`;
+  makeConvo({ creator: U("liam"), members: [U("ava")], msgs: [
+    { from: U("liam"), mins: 120, body: "Hey Ava! Loved your onboarding post — those drop-off numbers are wild. 👀" },
+    { from: U("ava"), mins: 110, body: "Thanks Liam! Happy to walk you through what we changed.", reacts: [{ by: U("liam"), emoji: "❤️" }] },
+    { from: U("liam"), mins: 90, body: "Would love that. Also — thought of you, sharing this:" },
+    { from: U("liam"), mins: 89, shared: "demopost-sofia-1", reacts: [{ by: U("ava"), emoji: "🎉" }] },
+    { from: U("ava"), mins: 30, body: "Oh this is perfect, thank you! 🙌" },
+  ] });
+  makeConvo({ creator: U("sofia"), members: [U("ava")], msgs: [
+    { from: U("sofia"), mins: 200, body: "Coffee this week? Want to pick your brain on research ops." },
+    { from: U("ava"), mins: 180, body: "Yes! Thursday works 😄", reacts: [{ by: U("sofia"), emoji: "👍" }] },
+  ] });
+  makeConvo({ creator: U("noah"), members: [U("maya")], msgs: [
+    { from: U("noah"), mins: 300, body: "Congrats on crossing 1k users 🎉 huge milestone.", reacts: [{ by: U("maya"), emoji: "❤️" }] },
+    { from: U("maya"), mins: 290, body: "Thank you! Couldn't have done it without the early believers." },
+  ] });
+  if (targets[0]) {
+    makeConvo({ creator: targets[0].id, members: [U("ava")], msgs: [
+      { from: targets[0].id, mins: 60, body: "Welcome to the network! 👋 Great to be connected." },
+      { from: U("ava"), mins: 55, body: "Likewise — excited to keep in touch here!" },
+    ] });
+  }
+  makeConvo({ isGroup: true, name: "Demo Day Crew", creator: U("ava"), admins: [U("maya")],
+    members: [U("liam"), U("sofia"), U("maya"), U("noah")], msgs: [
+    { from: U("ava"), mins: 500, body: "Welcome to the Demo Day crew! 🎉 Let's keep each other posted on launches." },
+    { from: U("liam"), mins: 480, body: "Pumped to be here.", reacts: [{ by: U("ava"), emoji: "👏" }, { by: U("sofia"), emoji: "🎉" }] },
+    { from: U("sofia"), mins: 460, body: "Sharing the deck from today 👇" },
+    { from: U("noah"), mins: 300, body: "Who's up for a working session Friday?" },
+    { from: U("maya"), mins: 120, body: "I'm in — I'll book a room. 📅", reacts: [{ by: U("noah"), emoji: "👍" }] },
+  ] });
 
   await db.batch(stmts, "write");
 

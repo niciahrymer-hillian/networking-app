@@ -9,6 +9,7 @@
 import Link from "next/link";
 import PostReactions, { type ReactionCount } from "@/components/PostReactions";
 import PostComments from "@/components/PostComments";
+import ShareToDM from "@/components/ShareToDM";
 
 export type FeedPost = {
   id: string;
@@ -131,7 +132,10 @@ export default function PostCard({
       )}
 
       <PostReactions postId={post.id} counts={reactions} mine={viewerReaction} />
-      <PostComments postId={post.id} initialCount={commentCount} />
+      <div className="flex items-start gap-1">
+        <div className="min-w-0 flex-1"><PostComments postId={post.id} initialCount={commentCount} /></div>
+        <ShareToDM postId={post.id} />
+      </div>
     </article>
   );
 }
