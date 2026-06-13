@@ -6,6 +6,7 @@ import Link from "next/link";
 import AuthShell, { authInput, authButton } from "@/components/AuthShell";
 
 export default function SignupPage() {
+  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,7 +27,7 @@ export default function SignupPage() {
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, email, password }),
+      body: JSON.stringify({ name, username, email, password }),
     });
 
     if (res.ok) {
@@ -60,10 +61,19 @@ export default function SignupPage() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
           type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Full name (e.g. Ava Chen)"
+          autoFocus
+          autoComplete="name"
+          required
+          className={authInput}
+        />
+        <input
+          type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder="Username (min 3 chars)"
-          autoFocus
+          placeholder="Username — lowercase letters, numbers, _"
           autoComplete="username"
           required
           className={authInput}

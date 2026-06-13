@@ -3,11 +3,17 @@
 // WHY: Gives the user a safe, in-app way to update their credentials without
 //      needing direct DB access.
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AccountPage() {
   const router = useRouter();
+  // Account-level identity (name + avatar) — separate from any card.
+  const [acctName, setAcctName] = useState("");
+  const [acctAvatar, setAcctAvatar] = useState<string | null>(null);
+  const [idSaving, setIdSaving] = useState(false);
+  const [idSaved, setIdSaved] = useState(false);
+  const avatarRef = useRef<HTMLInputElement>(null);
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -17,6 +23,38 @@ export default function AccountPage() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/account").then((r) => r.json()).then((d) => {
+      setAcctName(d?.name ?? "");
+      setAcctAvatar(d?.avatarUrl ?? null);
+    }).catch(() => {});
+  }, []);
+
+  async function saveIdentity(e: React.FormEvent) {
+    e.preventDefault();
+    setIdSaving(true);
+    setIdSaved(false);
+    try {
+      await fetch("/api/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: acctName, avatarUrl: acctAvatar ?? "" }),
+      });
+      setIdSaved(true);
+      router.refresh();
+    } finally {
+      setIdSaving(false);
+    }
+  }
+
+  async function uploadAvatar(file: File) {
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    if (res.ok && data.url) setAcctAvatar(data.url);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -74,8 +112,38 @@ export default function AccountPage() {
       <div className="w-full max-w-xl space-y-6">
         <div>
           <h1 className="text-2xl font-bold mb-2">Account Settings</h1>
-          <p className="text-sm text-muted">Change your password or generate a reset link if you don’t know your current password.</p>
+          <p className="text-sm text-muted">Update your identity, change your password, or generate a reset link.</p>
         </div>
+
+        {/* Account-level identity (separate from any card) */}
+        <form onSubmit={saveIdentity} className="bg-surface ring-1 ring-line shadow-sm rounded-2xl p-6 space-y-4">
+          <div>
+            <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Your identity</h2>
+            <p className="text-sm text-muted mt-1">Your account name + photo — how you appear in the feed, messages, and your profile. Your individual cards can still have their own names.</p>
+          </div>
+          <div className="flex items-center gap-4">
+            {acctAvatar ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={acctAvatar} alt="" className="h-16 w-16 rounded-full object-cover ring-1 ring-line" />
+            ) : (
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                {(acctName || "?").charAt(0).toUpperCase()}
+              </div>
+            )}
+            <button type="button" onClick={() => avatarRef.current?.click()} className="text-sm border border-line-strong bg-surface hover:bg-elevated text-body px-4 py-2 rounded-lg transition-colors">
+              Upload photo
+            </button>
+            <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAvatar(f); }} />
+          </div>
+          <div>
+            <label className="block text-xs text-muted mb-1">Display name</label>
+            <input value={acctName} onChange={(e) => setAcctName(e.target.value)} placeholder="e.g. Ava Chen" className={input} />
+          </div>
+          {idSaved && <p className="text-emerald-700 dark:text-emerald-300 text-sm">Identity saved.</p>}
+          <button type="submit" disabled={idSaving} className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors">
+            {idSaving ? "Saving…" : "Save identity"}
+          </button>
+        </form>
 
         <form onSubmit={handleSubmit} className="bg-surface ring-1 ring-line shadow-sm rounded-2xl p-6 space-y-4">
           <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Change Password</h2>

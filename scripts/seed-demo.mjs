@@ -284,7 +284,7 @@ async function main() {
     if (u.rows.length === 0) { console.warn(`⚠️  skipping ${email} — no such user`); continue; }
     const id = u.rows[0].id;
     const p = await db.execute({
-      sql: "SELECT id FROM Profile WHERE userId = ? ORDER BY isOwner DESC, createdAt ASC LIMIT 1",
+      sql: "SELECT id, name, headshotUrl FROM Profile WHERE userId = ? ORDER BY isOwner DESC, createdAt ASC LIMIT 1",
       args: [id],
     });
     if (p.rows.length === 0) { console.warn(`⚠️  skipping ${email} — no profile/card`); continue; }
@@ -292,6 +292,11 @@ async function main() {
     targets.push({ email, key, id, username: u.rows[0].username, profileId: p.rows[0].id });
     // Mark their card as owner so the "My card" highlight + /u page work.
     await db.execute({ sql: "UPDATE Profile SET isOwner = 1 WHERE id = ?", args: [p.rows[0].id] });
+    // Seed account-level identity (name + avatar) from their primary card if unset.
+    await db.execute({
+      sql: "UPDATE User SET name = COALESCE(name, ?), avatarUrl = COALESCE(avatarUrl, ?) WHERE id = ?",
+      args: [p.rows[0].name, p.rows[0].headshotUrl, id],
+    });
   }
   if (targets.length === 0) throw new Error("No valid target accounts found.");
 
@@ -355,8 +360,8 @@ async function main() {
     //   @noahkim  ·  noah@example.com  ·  Noah Kim
     const handle = c.name.toLowerCase().replace(/[^a-z0-9]/g, "");
     stmts.push({
-      sql: "INSERT INTO User (id, username, email, emailVerified, isAdmin, passwordHash, createdAt) VALUES (?,?,?,1,0,?,?)",
-      args: [uid, handle, `${c.username}@example.com`, pw, iso(5000)],
+      sql: "INSERT INTO User (id, username, name, avatarUrl, email, emailVerified, isAdmin, passwordHash, createdAt) VALUES (?,?,?,?,?,1,0,?,?)",
+      args: [uid, handle, c.name, c.headshot, `${c.username}@example.com`, pw, iso(5000)],
     });
     stmts.push({
       sql: "INSERT INTO Profile (id, slug, name, headline, headshotUrl, email, phone, linkedinUrl, githubUrl, template, cardTemplate, colorScheme, font, isOwner, isQREnabled, allowConnectionQrShare, userId, createdAt, updatedAt) VALUES (?,?,?,?,?, ?,?,?,?, ?, ?, ?, ?, 1, 1, ?, ?, ?, ?)",

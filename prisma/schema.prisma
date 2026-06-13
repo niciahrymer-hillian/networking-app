@@ -51,6 +51,8 @@ model Profile {
 model User {
   id                        String    @id @default(cuid())
   username                  String    @unique
+  name                      String?                       // account-level display name (identity; cards may differ)
+  avatarUrl                 String?                       // account-level avatar; falls back to primary card photo
   email                     String?   @unique
   emailVerified             Boolean   @default(false)
   emailVerificationToken    String?

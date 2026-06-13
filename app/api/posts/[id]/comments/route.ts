@@ -10,17 +10,19 @@ type Params = { params: Promise<{ id: string }> };
 
 const authorSelect = {
   username: true,
+  name: true,
+  avatarUrl: true,
   profiles: { select: { name: true, headshotUrl: true, isOwner: true }, orderBy: { createdAt: "asc" as const } },
 };
 
-function shape(c: { id: string; body: string; createdAt: Date; parentId: string | null; author: { username: string; profiles: { name: string; headshotUrl: string | null; isOwner: boolean }[] } }) {
+function shape(c: { id: string; body: string; createdAt: Date; parentId: string | null; author: { username: string; name: string | null; avatarUrl: string | null; profiles: { name: string; headshotUrl: string | null; isOwner: boolean }[] } }) {
   const card = c.author.profiles.find((p) => p.isOwner) ?? c.author.profiles[0];
   return {
     id: c.id,
     body: c.body,
     createdAt: c.createdAt,
     parentId: c.parentId,
-    author: { username: c.author.username, name: card?.name ?? null, headshotUrl: card?.headshotUrl ?? null },
+    author: { username: c.author.username, name: c.author.name ?? card?.name ?? null, headshotUrl: c.author.avatarUrl ?? card?.headshotUrl ?? null },
   };
 }
 

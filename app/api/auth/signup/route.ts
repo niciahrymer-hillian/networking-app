@@ -33,10 +33,11 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json().catch(() => ({}));
-  const { username: rawUsername, email, password } = body as {
+  const { username: rawUsername, email, password, name } = body as {
     username?: string;
     email?: string;
     password?: string;
+    name?: string;
   };
 
   if (!rawUsername || !email || !password) {
@@ -68,6 +69,7 @@ export async function POST(request: NextRequest) {
   const user = await prisma.user.create({
     data: {
       username,
+      name: name?.trim()?.slice(0, 80) || null, // account-level display name (optional)
       email: normalizedEmail,
       passwordHash,
       emailVerified: false, // not required to sign in; users can verify later via the verify routes

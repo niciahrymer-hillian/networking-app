@@ -27,6 +27,8 @@ export default async function FeedPage() {
       author: {
         select: {
           username: true,
+          name: true,
+          avatarUrl: true,
           profiles: {
             select: { name: true, headshotUrl: true, isOwner: true },
             orderBy: { createdAt: "asc" },
@@ -75,8 +77,8 @@ export default async function FeedPage() {
                   post={post}
                   author={{
                     username: post.author.username,
-                    name: card?.name ?? null,
-                    headshotUrl: card?.headshotUrl ?? null,
+                    name: post.author.name ?? card?.name ?? null,
+                    headshotUrl: post.author.avatarUrl ?? card?.headshotUrl ?? null,
                   }}
                   reactions={counts}
                   viewerReaction={mine}
