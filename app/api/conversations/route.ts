@@ -54,6 +54,13 @@ export async function POST(request: NextRequest) {
   const members = [...new Set((userIds ?? []).filter((u) => typeof u === "string" && u !== me))];
   if (members.length === 0) return NextResponse.json({ error: "Pick at least one person" }, { status: 400 });
 
+  // Rule: you can only message people you're connected to.
+  const myConnections = new Set(
+    (await prisma.userConnection.findMany({ where: { userId: me }, select: { connectedUserId: true } })).map((c) => c.connectedUserId)
+  );
+  if (members.some((m) => !myConnections.has(m)))
+    return NextResponse.json({ error: "You can only message your connections" }, { status: 403 });
+
   if (!isGroup) {
     const other = members[0];
     // Dedupe: reuse an existing 1:1 DM with this person.

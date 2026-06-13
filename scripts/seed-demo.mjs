@@ -411,6 +411,14 @@ async function main() {
     for (let j = i + 1; j < targets.length; j++)
       link(targets[i].id, targets[j].id, `${targets[i].key}-${targets[j].key}`);
 
+  // --- Core demo connections are also connected to each other, so they can message
+  //     (connection-gated) and the seeded DMs/group are between real connections.
+  //     The remaining connections stay 2nd-degree, so "People you may know" still works. ---
+  const core = CONNECTIONS.slice(0, 5).map((c) => `demo-${c.username}`);
+  for (let i = 0; i < core.length; i++)
+    for (let j = i + 1; j < core.length; j++)
+      link(core[i], core[j], `core-${i}-${j}`);
+
   // --- Seeded reactions: vary count + emoji per post so the feed feels alive ---
   const EMOJI = ["👍", "❤️", "🎉", "💡", "👏", "😂"];
   const allReactors = [...CONNECTIONS.map((c) => `demo-${c.username}`), ...targets.map((t) => t.id)];

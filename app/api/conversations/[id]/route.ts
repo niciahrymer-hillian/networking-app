@@ -92,7 +92,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
     case "addMembers": {
       const ids = [...new Set((body.userIds ?? []).filter((u) => typeof u === "string"))];
+      // Rule: an admin can only add their own connections.
+      const myConns = new Set(
+        (await prisma.userConnection.findMany({ where: { userId: me }, select: { connectedUserId: true } })).map((c) => c.connectedUserId)
+      );
       for (const userId of ids) {
+        if (!myConns.has(userId)) continue;
         await prisma.conversationParticipant.upsert({
           where: { conversationId_userId: { conversationId: id, userId } },
           create: { conversationId: id, userId },
