@@ -24,7 +24,8 @@ model Profile {
   links       String?                             // JSON: [{label, url}, ...]
   // Card designer (Phase A): visual style of the public card. Defaults keep
   // existing cards looking exactly as before. Safe to ALTER (have defaults).
-  template    String       @default("classic")    // layout: classic | minimal | bold | split
+  template    String       @default("classic")    // profile card layout (see lib/card-design TEMPLATES)
+  cardTemplate String?                             // flippable business-card front; null = derive from template
   colorScheme String       @default("emerald")    // palette: emerald | indigo | rose | amber | violet | slate
   font        String       @default("sans")       // typeface: sans | serif | rounded | mono
   isOwner     Boolean      @default(false)        // true = this is the logged-in user's own card

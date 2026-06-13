@@ -2,14 +2,24 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { decrypt } from "@/lib/crypto";
 
 export const dynamic = "force-dynamic";
+
+// Best-effort human label for who submitted a connection (only their contact
+// fields are stored — encrypted). Scans are anonymous, so we surface a device hint.
+function deviceFromUA(ua: string | null): string {
+  if (!ua) return "Anonymous visitor";
+  if (/iphone|android|mobile/i.test(ua)) return "Someone on mobile";
+  if (/mac|windows|linux/i.test(ua)) return "Someone on desktop";
+  return "Anonymous visitor";
+}
 
 export default async function NotificationsPage() {
   const session = await requireAuth();
   if (!session?.userId) redirect("/login");
 
-  const [recentConnections, recentScans] = await Promise.all([
+  const [recentConnections, recentScans, scanTotal, connectionTotal, pendingTotal, networkTotal] = await Promise.all([
     prisma.connection.findMany({
       where: { profile: { userId: session.userId } },
       include: { profile: { select: { id: true, name: true } } },
@@ -22,20 +32,35 @@ export default async function NotificationsPage() {
       orderBy: { createdAt: "desc" },
       take: 20,
     }),
+    prisma.scan.count({ where: { profile: { userId: session.userId } } }),
+    prisma.connection.count({ where: { profile: { userId: session.userId }, status: "confirmed" } }),
+    prisma.connection.count({ where: { profile: { userId: session.userId }, status: "pending" } }),
+    prisma.userConnection.count({ where: { userId: session.userId } }),
   ]);
+
+  // Stats overview — at-a-glance totals across all of this user's cards.
+  const stats = [
+    { label: "Scans", value: scanTotal, emoji: "👀" },
+    { label: "Connections", value: connectionTotal, emoji: "🤝" },
+    { label: "Pending", value: pendingTotal, emoji: "⏳" },
+    { label: "Network", value: networkTotal, emoji: "🌐" },
+  ];
 
   const events = [
     ...recentConnections.map((c) => ({
       id: `connection-${c.id}`,
       // Confirm-to-connect: a pending submission is a request until the owner acts.
       type: c.status === "confirmed" ? "New connection" : "New connection request",
+      // Who: the best identifier they shared (decrypted), else anonymous.
+      who: c.emailEnc ? decrypt(c.emailEnc) : c.linkedinEnc ? decrypt(c.linkedinEnc) : c.githubEnc ? decrypt(c.githubEnc) : "Someone",
       profileId: c.profile.id,
       profileName: c.profile.name,
       createdAt: c.createdAt,
     })),
     ...recentScans.map((s) => ({
       id: `scan-${s.id}`,
-      type: "Profile scanned",
+      type: "Card scanned",
+      who: deviceFromUA(s.userAgent),
       profileId: s.profile.id,
       profileName: s.profile.name,
       createdAt: s.createdAt,
@@ -55,15 +80,28 @@ export default async function NotificationsPage() {
           </Link>
         </div>
 
+        {/* Stats overview */}
+        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.label} className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-line">
+              <p className="text-2xl">{s.emoji}</p>
+              <p className="mt-1 text-2xl font-bold tracking-tight">{s.value}</p>
+              <p className="text-sm text-muted">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
         {events.length === 0 ? (
           <p className="text-muted">No activity yet.</p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {events.map((event) => (
               <div key={event.id} className="bg-surface ring-1 ring-line shadow-sm rounded-xl px-4 py-3 flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-medium">{event.type}</p>
-                  <p className="text-xs text-muted mt-1">{event.profileName}</p>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">
+                    {event.type} · <span className="text-body font-normal">{event.who}</span>
+                  </p>
+                  <p className="text-xs text-muted mt-1">on “{event.profileName}”</p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-xs text-muted">{new Date(event.createdAt).toLocaleString()}</p>

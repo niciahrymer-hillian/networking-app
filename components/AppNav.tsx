@@ -45,21 +45,21 @@ export default async function AppNav() {
     "text-sm text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-500/10 px-3 py-1.5 rounded-lg transition-colors";
 
   return (
-    <nav className="bg-surface/80 backdrop-blur-md border-b border-line px-4 py-3 sticky top-0 z-50">
-      <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
+    <nav className="bg-surface/80 backdrop-blur-md border-b border-line px-6 pt-12 pb-8 sticky top-0 z-50">
+      <div className="w-full flex items-center justify-between gap-4">
 
-        {/* Brand */}
+        {/* Brand — pinned to the left corner */}
         <Link
           href="/"
           className="flex items-center gap-3 font-bold text-foreground hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors shrink-0"
         >
-          <img src="/logo.png" alt="Networking Cards" className="h-10 w-auto rounded-md" />
-          <span className="hidden sm:inline text-sm tracking-tight">Networking Cards</span>
+          <img src="/logo.png" alt="Networking Cards" className="h-16 w-auto rounded-md" />
+          <span className="hidden sm:inline text-xl tracking-tight">Networking Cards</span>
         </Link>
 
-        {/* Desktop centre links */}
+        {/* Desktop centre links — roomier spacing */}
         {loggedIn && (
-          <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
+          <div className="hidden md:flex items-center gap-3 flex-1 justify-center">
             {mainLinks.map((l) => (
               <Link key={l.href} href={l.href} className={navLink}>
                 {l.label}

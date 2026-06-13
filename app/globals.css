@@ -45,6 +45,19 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Bump the small end of the type scale for readability. Tailwind v4 derives the
+   text-xs / text-sm / text-base utilities from these tokens, so raising them here
+   enlarges small text everywhere at once (nav, badges, captions, buttons) without
+   touching individual className usages. ~1px larger each, line-heights kept roomy. */
+@theme {
+  --text-xs: 0.8125rem;          /* 13px (was 12px) */
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.9375rem;          /* 15px (was 14px) */
+  --text-sm--line-height: 1.375rem;
+  --text-base: 1.0625rem;        /* 17px (was 16px) */
+  --text-base--line-height: 1.625rem;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

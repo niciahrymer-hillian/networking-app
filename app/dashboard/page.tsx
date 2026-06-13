@@ -13,6 +13,8 @@ import DeleteButton from "../DeleteButton";
 import ShareQRButton from "@/components/ShareQRButton";
 import { getAppUrl } from "@/lib/app-url";
 import DashboardTiles, { type Tile } from "./DashboardTiles";
+import ConnectionActions from "../profiles/[id]/connections/ConnectionActions";
+import { decrypt } from "@/lib/crypto";
 
 export const dynamic = "force-dynamic"; // always fetch fresh profiles
 
@@ -80,6 +82,68 @@ export default async function Dashboard() {
       select: { id: true, createdAt: true, status: true, profile: { select: { name: true } } },
     }),
   ]);
+
+  // === Member-to-member network — powers notifications + "People you may know". ===
+  const ownerSelect = {
+    id: true,
+    username: true,
+    profiles: {
+      where: { isOwner: true },
+      select: { name: true, headshotUrl: true, headline: true, slug: true },
+      take: 1,
+    },
+  } as const;
+
+  const network = await prisma.userConnection.findMany({
+    where: { userId: session.userId },
+    orderBy: { createdAt: "desc" },
+    include: { connectedUser: { select: ownerSelect } },
+  });
+  const networkIds = network.map((n) => n.connectedUserId);
+
+  const [networkPosts, pendingRaw, secondDegree] = await Promise.all([
+    // New posts from people in your network (notification-style events).
+    networkIds.length
+      ? prisma.post.findMany({
+          where: { authorId: { in: networkIds } },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+          select: { id: true, createdAt: true, author: { select: { username: true } } },
+        })
+      : Promise.resolve([]),
+    // Pending connection requests across all of this user's cards (decrypted for display).
+    prisma.connection.findMany({
+      where: { profile: { userId: session.userId }, status: "pending" },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+      select: { id: true, emailEnc: true, linkedinEnc: true, githubEnc: true, createdAt: true, profile: { select: { name: true } } },
+    }),
+    // Friends-of-friends (2nd degree) that aren't already in your network.
+    networkIds.length
+      ? prisma.userConnection.findMany({
+          where: { userId: { in: networkIds }, connectedUserId: { notIn: [session.userId, ...networkIds] } },
+          include: { connectedUser: { select: ownerSelect } },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  // Pending requests — decrypt the best available identifier for a human label.
+  const pendingReqs = pendingRaw.map((c) => ({
+    id: c.id,
+    label: c.emailEnc ? decrypt(c.emailEnc) : c.linkedinEnc ? decrypt(c.linkedinEnc) : c.githubEnc ? decrypt(c.githubEnc) : null,
+    cardName: c.profile.name,
+    createdAt: c.createdAt,
+  }));
+
+  // People you may know — rank candidates by number of mutual connections.
+  const pymkMap = new Map<string, { user: (typeof secondDegree)[number]["connectedUser"]; mutuals: number }>();
+  for (const s of secondDegree) {
+    const entry = pymkMap.get(s.connectedUserId) ?? { user: s.connectedUser, mutuals: 0 };
+    entry.mutuals += 1;
+    pymkMap.set(s.connectedUserId, entry);
+  }
+  const pymk = [...pymkMap.values()].sort((a, b) => b.mutuals - a.mutuals).slice(0, 4);
+
   type Activity = { id: string; when: Date; text: string; emoji: string };
   const activity: Activity[] = [
     ...recentScans.map((s) => ({
@@ -98,6 +162,20 @@ export default async function Dashboard() {
           : c.status === "declined"
           ? `Declined request on "${c.profile.name}"`
           : `New connection request on "${c.profile.name}"`,
+    })),
+    // Notifications: new posts from your network.
+    ...networkPosts.map((p) => ({
+      id: `p-${p.id}`,
+      when: p.createdAt,
+      emoji: "📝",
+      text: `@${p.author.username} shared a new post`,
+    })),
+    // Notifications: people who joined your network.
+    ...network.slice(0, 6).map((n) => ({
+      id: `n-${n.id}`,
+      when: n.createdAt,
+      emoji: "🌐",
+      text: `@${n.connectedUser.username} is now in your network`,
     })),
   ]
     .sort((a, b) => new Date(b.when).getTime() - new Date(a.when).getTime())
@@ -144,6 +222,115 @@ export default async function Dashboard() {
       )}
     </div>
   );
+
+  // --- Tile: Pending requests widget (Confirm/Decline inline) ---
+  const pendingTile = (
+    <div className="flex h-full flex-col rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-line">
+      <div className="mb-3 flex items-center justify-between">
+        <p className="font-semibold">Pending requests</p>
+        {pendingReqs.length > 0 && (
+          <span className="rounded-full bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-300 ring-1 ring-amber-200">
+            {pendingReqs.length}
+          </span>
+        )}
+      </div>
+      {pendingReqs.length === 0 ? (
+        <p className="text-sm text-muted">No pending requests. Share your QR to collect new connections.</p>
+      ) : (
+        <ul className="flex flex-col gap-2.5">
+          {pendingReqs.map((r) => (
+            <li key={r.id} className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="truncate text-sm text-body">{r.label ?? "New request"}</p>
+                <p className="text-xs text-muted">on “{r.cardName}” · {timeAgo(r.createdAt)}</p>
+              </div>
+              <ConnectionActions id={r.id} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+
+  // --- Tile: People you may know (friends-of-friends) ---
+  const pymkTile = (
+    <div className="flex h-full flex-col rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-line">
+      <p className="mb-3 font-semibold">People you may know</p>
+      {pymk.length === 0 ? (
+        <p className="text-sm text-muted">Connect with more people and we’ll suggest mutuals here.</p>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {pymk.map(({ user, mutuals }) => {
+            const prof = user.profiles[0];
+            return (
+              <li key={user.id} className="flex items-center gap-3">
+                {prof?.headshotUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={prof.headshotUrl} alt={prof.name} className="h-9 w-9 rounded-full object-cover ring-1 ring-line" />
+                ) : (
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                    {(prof?.name ?? user.username).charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{prof?.name ?? `@${user.username}`}</p>
+                  <p className="truncate text-xs text-muted">{mutuals} mutual connection{mutuals !== 1 ? "s" : ""}</p>
+                </div>
+                <Link
+                  href={`/u/${user.username}`}
+                  className="shrink-0 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-500"
+                >
+                  + Connect
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+
+  // --- Tile: Profile strength / completeness ---
+  const completenessItems = ownerProfile
+    ? [
+        { label: "Photo", done: !!ownerProfile.headshotUrl },
+        { label: "Headline", done: !!ownerProfile.headline },
+        { label: "About", done: !!ownerProfile.about },
+        { label: "LinkedIn", done: !!ownerProfile.linkedinUrl },
+        { label: "GitHub", done: !!ownerProfile.githubUrl },
+        { label: "Phone", done: !!ownerProfile.phone },
+      ]
+    : [];
+  const completenessDone = completenessItems.filter((i) => i.done).length;
+  const completenessPct = completenessItems.length
+    ? Math.round((completenessDone / completenessItems.length) * 100)
+    : 0;
+  const completenessTile = ownerProfile ? (
+    <div className="flex h-full flex-col rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-line">
+      <div className="mb-3 flex items-center justify-between">
+        <p className="font-semibold">Profile strength</p>
+        <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">{completenessPct}%</span>
+      </div>
+      <div className="mb-3 h-2 w-full overflow-hidden rounded-full bg-elevated">
+        <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${completenessPct}%` }} />
+      </div>
+      <ul className="grid grid-cols-2 gap-1.5 text-sm">
+        {completenessItems.map((i) => (
+          <li key={i.label} className={i.done ? "text-body" : "text-muted"}>
+            <span className={i.done ? "text-emerald-600 dark:text-emerald-400" : "text-muted"}>{i.done ? "✓" : "○"}</span> {i.label}
+          </li>
+        ))}
+      </ul>
+      {completenessDone < completenessItems.length && (
+        <Link
+          href={`/profiles/${ownerProfile.id}/edit`}
+          className="mt-3 text-sm font-medium text-emerald-700 dark:text-emerald-300 hover:text-emerald-600"
+        >
+          Complete your profile →
+        </Link>
+      )}
+    </div>
+  ) : null;
 
   // --- Tile: one profile card (+ its nested secondary cards) ---
   const renderCardTile = (p: (typeof topLevel)[number]) => {
@@ -255,9 +442,12 @@ export default async function Dashboard() {
     );
   };
 
-  // Recent activity first by default; user can drag it anywhere.
+  // Widgets first by default; user can drag any of them anywhere.
   const tiles: Tile[] = [
     { id: "widget:recent-activity", node: activityTile },
+    { id: "widget:pending-requests", node: pendingTile },
+    { id: "widget:people-you-may-know", node: pymkTile },
+    ...(completenessTile ? [{ id: "widget:profile-completeness", node: completenessTile }] : []),
     ...topLevel.map((p) => ({ id: `card:${p.id}`, node: renderCardTile(p) })),
   ];
 
@@ -277,11 +467,11 @@ export default async function Dashboard() {
       )}
 
       <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* Welcome banner */}
-        <div className="mb-8 rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-7 text-center text-white shadow-xl shadow-emerald-900/10">
-          <p className="text-3xl mb-2">🤝</p>
-          <h2 className="text-xl font-bold tracking-tight">Welcome To the Network!</h2>
-          <p className="text-white/80 text-sm mt-1">Manage your cards, track connections, and share your QR.</p>
+        {/* Welcome banner — slim */}
+        <div className="mb-8 flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3.5 text-center text-white shadow-lg shadow-emerald-900/10">
+          <span className="text-xl">🤝</span>
+          <h2 className="text-base font-bold tracking-tight">Welcome to the Network</h2>
+          <span className="hidden sm:inline text-white/70 text-sm">· manage cards, track connections, share your QR</span>
         </div>
 
         {profiles.length === 0 ? (

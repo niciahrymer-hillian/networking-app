@@ -69,6 +69,7 @@ export default async function MemberProfilePage({
           {card ? (
             <ProfileCard
               template={card.template}
+              cardTemplate={card.cardTemplate}
               colorScheme={card.colorScheme}
               font={card.font}
               profile={{

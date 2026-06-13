@@ -2,19 +2,24 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { decrypt } from "@/lib/crypto";
+import ConnectionActions from "../profiles/[id]/connections/ConnectionActions";
 
 export const dynamic = "force-dynamic";
 
-export default async function MyConnectionsPage() {
+export default async function MyConnectionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ card?: string }>;
+}) {
   const session = await requireAuth();
   if (!session?.userId) redirect("/login");
+  const { card } = await searchParams;
 
   const profiles = await prisma.profile.findMany({
     where: { userId: session.userId },
     orderBy: { createdAt: "desc" },
-    include: {
-      _count: { select: { scans: true } },
-    },
+    include: { _count: { select: { scans: true } } },
   });
 
   // Confirm-to-connect: confirmed = network, pending = awaiting the owner's decision.
@@ -30,43 +35,116 @@ export default async function MyConnectionsPage() {
     else if (g.status === "pending") entry.pending = g._count._all;
     counts.set(g.profileId, entry);
   }
-  const countsFor = (profileId: string) =>
-    counts.get(profileId) ?? { confirmed: 0, pending: 0 };
+  const countsFor = (id: string) => counts.get(id) ?? { confirmed: 0, pending: 0 };
+
+  // Pending requests (decrypted) grouped per card, shown inline.
+  const pendingRaw = await prisma.connection.findMany({
+    where: { profile: { userId: session.userId }, status: "pending" },
+    orderBy: { createdAt: "desc" },
+    select: { id: true, emailEnc: true, linkedinEnc: true, githubEnc: true, createdAt: true, profileId: true },
+  });
+  const pendingByProfile = new Map<string, { id: string; label: string; createdAt: Date }[]>();
+  for (const c of pendingRaw) {
+    const label = c.emailEnc ? decrypt(c.emailEnc) : c.linkedinEnc ? decrypt(c.linkedinEnc) : c.githubEnc ? decrypt(c.githubEnc) : "New request";
+    const list = pendingByProfile.get(c.profileId) ?? [];
+    list.push({ id: c.id, label, createdAt: c.createdAt });
+    pendingByProfile.set(c.profileId, list);
+  }
+
+  // Optional filter: only show one card's connections.
+  const activeCard = card && profiles.some((p) => p.id === card) ? card : null;
+  const shown = activeCard ? profiles.filter((p) => p.id === activeCard) : profiles;
 
   return (
     <main className="min-h-screen bg-background text-foreground px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold">My Connections</h1>
-          <p className="text-sm text-muted mt-1">Per-card connection and scan totals.</p>
+          <p className="text-sm text-muted mt-1">Connection requests and network, per card.</p>
         </div>
+
+        {/* Filter by card (only when there's more than one) */}
+        {profiles.length > 1 && (
+          <div className="mb-6 flex flex-wrap gap-2">
+            <FilterChip href="/my-connections" active={!activeCard} label="All cards" />
+            {profiles.map((p) => (
+              <FilterChip
+                key={p.id}
+                href={`/my-connections?card=${p.id}`}
+                active={activeCard === p.id}
+                label={p.name}
+                badge={countsFor(p.id).pending || undefined}
+              />
+            ))}
+          </div>
+        )}
 
         {profiles.length === 0 ? (
           <p className="text-muted">No profiles yet. Create your first one to start collecting connections.</p>
         ) : (
-          <div className="grid gap-3">
-            {profiles.map((p) => (
-              <div key={p.id} className="bg-surface ring-1 ring-line shadow-sm rounded-xl p-4 flex items-center justify-between gap-4">
-                <div>
-                  <p className="font-semibold">{p.name}</p>
-                  <p className="text-xs text-muted mt-1">
-                    {countsFor(p.id).confirmed} connection{countsFor(p.id).confirmed !== 1 ? "s" : ""} • {p._count.scans} scan{p._count.scans !== 1 ? "s" : ""}
-                    {countsFor(p.id).pending > 0 && (
-                      <span className="font-medium text-amber-600"> • {countsFor(p.id).pending} pending</span>
-                    )}
-                  </p>
+          <div className="grid gap-6">
+            {shown.map((p) => {
+              const pending = pendingByProfile.get(p.id) ?? [];
+              return (
+                <div key={p.id} className="bg-surface ring-1 ring-line shadow-sm rounded-2xl p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-semibold">{p.name}</p>
+                      <p className="text-xs text-muted mt-1">
+                        {countsFor(p.id).confirmed} connection{countsFor(p.id).confirmed !== 1 ? "s" : ""} • {p._count.scans} scan{p._count.scans !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+                    <Link
+                      href={`/profiles/${p.id}/connections`}
+                      className="shrink-0 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-lg transition-colors"
+                    >
+                      View details
+                    </Link>
+                  </div>
+
+                  {/* Pending requests shown immediately underneath */}
+                  {pending.length > 0 && (
+                    <div className="mt-4 border-t border-line pt-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-amber-600 mb-3">
+                        Requests ({pending.length})
+                      </p>
+                      <div className="space-y-2">
+                        {pending.map((r) => (
+                          <div key={r.id} className="flex items-center justify-between gap-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 px-3 py-2.5">
+                            <div className="min-w-0">
+                              <p className="text-sm text-body truncate">{r.label}</p>
+                              <p className="text-xs text-muted">{new Date(r.createdAt).toLocaleDateString()}</p>
+                            </div>
+                            <ConnectionActions id={r.id} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <Link
-                  href={`/profiles/${p.id}/connections`}
-                  className="text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-lg transition-colors"
-                >
-                  View details
-                </Link>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
     </main>
+  );
+}
+
+function FilterChip({ href, active, label, badge }: { href: string; active: boolean; label: string; badge?: number }) {
+  return (
+    <Link
+      href={href}
+      className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
+        active
+          ? "bg-emerald-600 text-white"
+          : "bg-surface text-body ring-1 ring-line hover:bg-elevated"
+      }`}
+    >
+      <span className="truncate max-w-[10rem]">{label}</span>
+      {badge ? (
+        <span className={`rounded-full px-1.5 text-xs ${active ? "bg-white/20" : "bg-amber-100 text-amber-700"}`}>{badge}</span>
+      ) : null}
+    </Link>
   );
 }

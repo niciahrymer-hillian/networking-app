@@ -11,13 +11,14 @@ import BusinessCardClient from "@/components/BusinessCardClient";
 import DigitalCard from "@/components/DigitalCard";
 import ConnectForm from "@/app/p/[slug]/connect/ConnectForm";
 import ShareQRButton from "@/components/ShareQRButton";
-import { getPalette, getTemplate, getFont, FONTS, type Template, type ColorScheme, type Font } from "@/lib/card-design";
+import { getPalette, getTemplate, getFont, getCardTemplate, FONTS, type Template, type ColorScheme, type Font } from "@/lib/card-design";
 
 type Link = { label: string; url: string };
 type OtherCard = { slug: string; name: string; headline: string | null };
 
 interface Props {
   template: Template | string;
+  cardTemplate?: string | null; // explicit business-card front; null = derive from template
   colorScheme: ColorScheme | string;
   font?: Font | string;
   profile: {
@@ -46,7 +47,7 @@ interface Props {
   appUrl?: string; // base URL for the shared QR link
 }
 
-export default function ProfileCard({ template, colorScheme, font, profile, links, firstName, otherCards, preview, qrDataUrl, ownerUserId, viewerLoggedIn, viewerIsOwner, hideConnect, shareQr, appUrl }: Props) {
+export default function ProfileCard({ template, cardTemplate, colorScheme, font, profile, links, firstName, otherCards, preview, qrDataUrl, ownerUserId, viewerLoggedIn, viewerIsOwner, hideConnect, shareQr, appUrl }: Props) {
   const t = getTemplate(template);
   const p = getPalette(colorScheme);
 
@@ -155,6 +156,99 @@ export default function ProfileCard({ template, colorScheme, font, profile, link
             </div>
           </div>
         )}
+
+        {t === "spotlight" && (
+          <>
+            {/* Hero cover with a soft radial highlight; photo overlaps it by half */}
+            <div className="relative h-32 bg-[linear-gradient(135deg,var(--band-from),var(--band-to))]">
+              <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_30%_20%,white,transparent_60%)]" />
+            </div>
+            <div className="relative z-10 px-6 pb-7 -mt-14 flex flex-col items-center text-center">
+              {avatar("w-28 h-28")}
+              <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">{profile.name}</h1>
+              {profile.headline && <p className="mt-1.5 text-sm text-slate-500 leading-snug">{profile.headline}</p>}
+              {saveBtn("mt-5 w-full")}
+              {actionGrid}
+            </div>
+          </>
+        )}
+
+        {t === "sidebar" && (
+          <div className="flex">
+            {/* Full-height accent rail */}
+            <div className="w-2.5 self-stretch bg-[linear-gradient(to_bottom,var(--band-from),var(--band-to))]" />
+            <div className="flex-1 px-6 py-7">
+              <div className="flex items-center gap-4">
+                {avatar("w-16 h-16", "ring-2 ring-black/10")}
+                <div className="min-w-0">
+                  <h1 className="text-xl font-bold tracking-tight text-slate-900 truncate">{profile.name}</h1>
+                  {profile.headline && <p className="text-sm text-slate-500 leading-snug">{profile.headline}</p>}
+                </div>
+              </div>
+              {saveBtn("mt-5 w-full")}
+              {actionGrid}
+            </div>
+          </div>
+        )}
+
+        {t === "monogram" && (
+          <>
+            {/* Initial/photo badge on a tinted panel; name + accent rule below */}
+            <div className="px-6 pt-8 pb-6 flex justify-center" style={{ backgroundColor: p.soft }}>
+              {avatar("w-24 h-24", "ring-4 ring-white")}
+            </div>
+            <div className="px-6 pb-6 pt-5 flex flex-col items-center text-center">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">{profile.name}</h1>
+              {profile.headline && <p className="mt-1 text-sm text-slate-500 leading-snug">{profile.headline}</p>}
+              <div className="my-4 h-0.5 w-12 rounded-full" style={{ background: p.accent }} />
+              {saveBtn("w-full")}
+              {actionGrid}
+            </div>
+          </>
+        )}
+
+        {t === "framed" && (
+          <div className="p-3">
+            <div className="rounded-2xl px-6 py-7 flex flex-col items-center text-center" style={{ border: `1.5px solid ${p.accent}` }}>
+              {avatar("w-20 h-20", "ring-2 ring-white")}
+              <div className="mt-4 mb-3 h-px w-14" style={{ background: p.accent }} />
+              <h1 className="text-lg font-semibold uppercase tracking-[0.2em] text-slate-900">{profile.name}</h1>
+              {profile.headline && <p className="mt-1.5 text-xs uppercase tracking-widest text-slate-500">{profile.headline}</p>}
+              <div className="mt-3 h-px w-14" style={{ background: p.accent }} />
+              {saveBtn("mt-5 w-full")}
+              {actionGrid}
+            </div>
+          </div>
+        )}
+
+        {t === "corner" && (
+          <div className="relative px-6 pt-9 pb-6">
+            {/* Diagonal color accents clipped by the section's overflow-hidden */}
+            <div className="absolute -top-10 -left-10 h-28 w-28 rotate-45 bg-[linear-gradient(135deg,var(--band-from),var(--band-to))]" />
+            <div className="absolute -bottom-12 -right-12 h-24 w-24 rotate-45 opacity-10" style={{ background: p.accent }} />
+            <div className="relative">
+              {avatar("w-20 h-20", "ring-4 ring-white")}
+              <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-900">{profile.name}</h1>
+              {profile.headline && <p className="mt-1 text-sm text-slate-500 leading-snug">{profile.headline}</p>}
+              {saveBtn("mt-4 w-full")}
+              {actionGrid}
+            </div>
+          </div>
+        )}
+
+        {t === "wave" && (
+          <>
+            {/* Curved color divider (elliptical bottom edge) with overlapping photo */}
+            <div className="h-24 bg-[linear-gradient(120deg,var(--band-from),var(--band-to))] rounded-b-[50%_28px]" />
+            <div className="px-6 pb-6 -mt-12 flex flex-col items-center text-center">
+              {avatar("w-24 h-24")}
+              <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-900">{profile.name}</h1>
+              {profile.headline && <p className="mt-1 text-sm text-slate-500 leading-snug">{profile.headline}</p>}
+              {saveBtn("mt-4 w-full")}
+              {actionGrid}
+            </div>
+          </>
+        )}
       </section>
 
       {/* Share QR — only on the member-profile view when the owner allowed it */}
@@ -195,6 +289,7 @@ export default function ProfileCard({ template, colorScheme, font, profile, link
           <BusinessCardClient pdfUrl={profile.pdfUrl} />
         ) : (
           <DigitalCard
+            variant={getCardTemplate(cardTemplate, t)}
             name={profile.name}
             headline={profile.headline}
             headshotUrl={profile.headshotUrl}

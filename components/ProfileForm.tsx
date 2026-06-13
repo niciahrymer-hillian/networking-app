@@ -5,7 +5,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { TEMPLATES, PALETTES, FONTS } from "@/lib/card-design";
+import { TEMPLATES, BUSINESS_TEMPLATES, PALETTES, FONTS } from "@/lib/card-design";
 import ProfileCard from "@/components/ProfileCard";
 import AiDesignAssist from "@/components/AiDesignAssist";
 
@@ -22,6 +22,7 @@ export interface ProfileFormData {
   githubUrl: string;
   links: { label: string; url: string }[];
   template: string;
+  cardTemplate: string; // "" = derive business card from template
   colorScheme: string;
   font: string;
 }
@@ -33,7 +34,7 @@ interface Props {
 const EMPTY: ProfileFormData = {
   name: "", email: "", phone: "", headline: "", about: "",
   headshotUrl: "", pdfUrl: "", linkedinUrl: "", githubUrl: "", links: [],
-  template: "classic", colorScheme: "emerald", font: "sans",
+  template: "classic", cardTemplate: "", colorScheme: "emerald", font: "sans",
 };
 
 export default function ProfileForm({ initial }: Props) {
@@ -210,6 +211,28 @@ export default function ProfileForm({ initial }: Props) {
           ))}
         </div>
 
+        {/* Business card style — front of the flippable digital card */}
+        <div className="mt-5">
+          <label className="block text-sm font-medium text-body mb-2">Business card style</label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {BUSINESS_TEMPLATES.map((b) => (
+              <button
+                type="button"
+                key={b.key}
+                onClick={() => set("cardTemplate", b.key)}
+                className={`rounded-xl border px-3 py-2 text-left text-xs transition-colors ${
+                  form.cardTemplate === b.key
+                    ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 ring-1 ring-emerald-500"
+                    : "border-line-strong hover:bg-elevated"
+                }`}
+              >
+                <span className="block font-semibold text-foreground">{b.label}</span>
+                <span className="block text-muted leading-tight">{b.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="mt-3">
           <AiDesignAssist
             name={form.name}
@@ -340,6 +363,7 @@ export default function ProfileForm({ initial }: Props) {
       <ProfileCard
         preview
         template={form.template}
+        cardTemplate={form.cardTemplate}
         colorScheme={form.colorScheme}
         font={form.font}
         profile={{

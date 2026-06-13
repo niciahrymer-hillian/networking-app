@@ -55,6 +55,7 @@ export default async function EditProfilePage({
     githubUrl: profile.githubUrl ?? "",
     links: profile.links ? JSON.parse(profile.links) : [],
     template: profile.template,
+    cardTemplate: profile.cardTemplate ?? "",
     colorScheme: profile.colorScheme,
     font: profile.font,
   };

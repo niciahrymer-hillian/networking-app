@@ -66,6 +66,7 @@ export default async function PublicProfilePage({
       <ScanIntro firstName={firstName}>
         <ProfileCard
           template={profile.template}
+          cardTemplate={profile.cardTemplate}
           colorScheme={profile.colorScheme}
           font={profile.font}
           profile={{
