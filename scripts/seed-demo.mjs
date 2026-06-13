@@ -83,6 +83,13 @@ const IMG = {
   networking:      U("1556761175-4b46a572b786"),
   mobileDesign:    U("1512941937669-90a1b58e7e9c"),
   desk:            U("1486312338219-ce68d2c6f44d"),
+  meeting:         U("1600880292203-757bb62b4baf"),
+  womanLaptop:     U("1573164713988-8665fc963095"),
+  teamLaptop:      U("1519389950473-47ba0277781c"),
+  workshop2:       U("1519337265831-281ec6cc8514"),
+  chartsBoard:     U("1454165804606-c3d57bc86b40"),
+  coding:          U("1531482615713-2afd69097998"),
+  developers:      U("1551434678-e076c223a692"),
 };
 
 // label, username, slug, headline, headshot, share?, posts[]
@@ -92,6 +99,7 @@ const CONNECTIONS = [
     username: "ava", name: "Ava Chen", slug: "demo-ava",
     headline: "Product Designer · seamless digital experiences",
     headshot: "https://i.pravatar.cc/240?img=47", palette: "violet", share: 1, template: "spotlight", cardTemplate: "monogram",
+    email: "ava.chen@example.com", phone: "+1 (555) 247-8810", linkedin: "https://linkedin.com/in/avachen",
     posts: [
       { mins: 35, content: "Shipped our onboarding redesign this morning — early data shows a 30% drop in first-week churn. Proof that the boring details (empty states, error copy, loading skeletons) ARE the product. ✨", tags: ["design", "ux"] },
       { mins: 180, content: "Spent the day auditing our design system. 240 components, ~70% barely used. Sometimes the highest-leverage design work is deletion.", mediaUrl: IMG.designWorkspace, mediaType: "image", tags: ["designsystems"] },
@@ -109,6 +117,7 @@ const CONNECTIONS = [
     username: "liam", name: "Liam Patel", slug: "demo-liam",
     headline: "Growth marketer · data-driven campaigns",
     headshot: "https://i.pravatar.cc/240?img=12", palette: "executive", share: 0, template: "bold", cardTemplate: "wordmark", font: "slab",
+    email: "liam.patel@example.com", phone: "+1 (555) 310-4422", linkedin: "https://linkedin.com/in/liampatel",
     posts: [
       { mins: 90, content: "The best growth lever is still a product people genuinely love. Ads, SEO, lifecycle — those just amplify whatever's already there. Fix the product first.", tags: ["growth", "startups"] },
       { mins: 520, content: "Q3 recap: one rewritten onboarding email sequence lifted activation 41%. Compounding beats clever, every single time.", mediaUrl: IMG.growthChart, mediaType: "image", tags: ["growth", "retention"] },
@@ -122,6 +131,7 @@ const CONNECTIONS = [
     username: "sofia", name: "Sofia Gomez", slug: "demo-sofia",
     headline: "Data scientist · turning analytics into action",
     headshot: "https://i.pravatar.cc/240?img=32", palette: "marine", share: 1, template: "split", cardTemplate: "portrait", font: "humanist",
+    email: "sofia.gomez@example.com", phone: "+1 (555) 882-1097", linkedin: "https://linkedin.com/in/sofiagomez", github: "https://github.com/sofiagomez",
     posts: [
       { mins: 220, content: "A dashboard nobody opens is just an expensive screenshot. Build for the decision someone has to make, not the metric you happen to be able to measure.", tags: ["data", "analytics"] },
       { mins: 650, content: "Shipped our churn model to production this week — it flags at-risk accounts two weeks earlier, precision 0.82. The saved-revenue dashboard goes live Monday.", mediaUrl: IMG.analytics, mediaType: "image", tags: ["ml", "data"] },
@@ -135,6 +145,7 @@ const CONNECTIONS = [
     username: "maya", name: "Maya Okafor", slug: "demo-maya",
     headline: "Founder · building in public",
     headshot: "https://i.pravatar.cc/240?img=5", palette: "forest", share: 0, template: "minimal", cardTemplate: "elegant", font: "elegant",
+    email: "maya@okaforlabs.com", phone: "+1 (555) 720-6685", linkedin: "https://linkedin.com/in/mayaokafor",
     posts: [
       { mins: 300, content: "Day 142 of building in public. Revenue is up, sleep is down, conviction is steady. The only graph that matters is the one still climbing next quarter. 🚀", tags: ["buildinpublic"] },
       { mins: 820, content: "We moved into our first real office today. Two years ago this company was a Notion doc and a lot of nerve.", mediaUrl: IMG.startupOffice, mediaType: "image", tags: ["startups"] },
@@ -148,6 +159,7 @@ const CONNECTIONS = [
     username: "noah", name: "Noah Kim", slug: "demo-noah",
     headline: "Full-stack engineer · React + edge",
     headshot: "https://i.pravatar.cc/240?img=68", palette: "mocha", share: 0, template: "sidebar", cardTemplate: "corporate",
+    email: "noah.kim@example.com", phone: "+1 (555) 559-3471", linkedin: "https://linkedin.com/in/noahkim", github: "https://github.com/noahkim",
     posts: [
       { mins: 45, content: "Hot take: most apps don't need a state-management library. useState + the URL gets you surprisingly far before you reach for the heavy machinery.", tags: ["react", "webdev"] },
       { mins: 560, content: "Open-sourced my edge-rendering starter and it hit 1.2k stars in a week. Wild what happens when you scratch your own itch in public.", mediaUrl: IMG.code, mediaType: "image", tags: ["opensource", "edge"] },
@@ -155,6 +167,54 @@ const CONNECTIONS = [
       { mins: 1640, content: "Moved our rendering to the edge and cut p95 latency from 340ms to 90ms. Users didn't read the changelog — they just felt it get faster.", mediaUrl: IMG.server, mediaType: "image", tags: ["performance"] },
       { mins: 2350, content: "DX tip: a 30-second local setup is a feature. If onboarding a new dev takes a full day, that's not “just how it is” — it's a bug with a fix.", tags: ["webdev"] },
       { mins: 3150, content: "Wrote up how we ship on Fridays without fear: preview deploys, fast tests, small PRs. Calmest release process I've ever worked in.", linkUrl: "https://web.dev/articles/vitals", tags: ["engineering"] },
+    ],
+  },
+  {
+    username: "priya", name: "Priya Nair", slug: "demo-priya",
+    headline: "Senior Product Manager · 0→1 products",
+    headshot: "https://i.pravatar.cc/240?img=33", palette: "sky", share: 1, template: "classic", cardTemplate: "duo", font: "humanist",
+    email: "priya.nair@example.com", phone: "+1 (555) 401-7723", linkedin: "https://linkedin.com/in/priyanair",
+    posts: [
+      { mins: 120, content: "Prioritization is saying no to good ideas so the great one ships. Our roadmap got 3x clearer the day we capped “in progress” at three.", tags: ["product", "pm"] },
+      { mins: 640, content: "Shipped a feature we'd debated for months. Turns out 20 customer interviews beat 200 opinions — including mine.", mediaUrl: IMG.meeting, mediaType: "image", tags: ["product"] },
+      { mins: 1300, content: "We're hiring an Associate Product Manager — curious, writes clearly, obsessed with the “why” behind every ask. Early-career welcome, we mentor. DM me. 📦", tags: ["hiring", "product"] },
+      { mins: 2200, content: "Best PM habit I built this year: every spec opens with the user problem in one sentence. If I can't write it, it isn't ready to build.", mediaUrl: IMG.womanLaptop, mediaType: "image", tags: ["pm"] },
+    ],
+  },
+  {
+    username: "david", name: "David Brooks", slug: "demo-david",
+    headline: "Partnerships & Business Development",
+    headshot: "https://i.pravatar.cc/240?img=8", palette: "burgundy", share: 0, template: "bold", cardTemplate: "initials", font: "slab",
+    email: "david.brooks@example.com", phone: "+1 (555) 668-2240", linkedin: "https://linkedin.com/in/davidbrooks",
+    posts: [
+      { mins: 200, content: "Closed a partnership today that started as a 5-minute hallway chat at a conference last spring. Relationships compound — show up, follow up, repeat.", tags: ["partnerships", "sales"] },
+      { mins: 760, content: "On the road this week meeting partners face to face. No deck closes like a real conversation over coffee.", mediaUrl: IMG.teamLaptop, mediaType: "image", tags: ["bd"] },
+      { mins: 1500, content: "Hiring an Account Executive — consultative, curious, allergic to “just checking in” emails. Strong base + uncapped. Tag someone sharp. 🤝", tags: ["hiring", "sales"] },
+      { mins: 2600, content: "Reminder: “no” is rarely forever. Half my best deals were a “not right now” I nurtured for a year. Patience is a sales skill.", tags: ["sales"] },
+    ],
+  },
+  {
+    username: "elena", name: "Elena Petrova", slug: "demo-elena",
+    headline: "UX Researcher · mixed methods",
+    headshot: "https://i.pravatar.cc/240?img=16", palette: "blush", share: 1, template: "framed", cardTemplate: "framed", font: "elegant",
+    email: "elena.petrova@example.com", phone: "+1 (555) 293-5510", linkedin: "https://linkedin.com/in/elenapetrova",
+    posts: [
+      { mins: 260, content: "Watched five users try our new flow today. Four got stuck in the exact same spot. That's not an anecdote — that's a roadmap item.", tags: ["ux", "research"] },
+      { mins: 880, content: "Usability session in full swing. The magic isn't the script — it's the silence after “show me how you'd do that.”", mediaUrl: IMG.workshop2, mediaType: "image", tags: ["research"] },
+      { mins: 1700, content: "We're hiring a UX Researcher — mixed methods, great at turning messy interviews into decisions teams actually make. DM me to chat. 🔍", tags: ["hiring", "ux"] },
+      { mins: 2900, content: "Quant tells you what's happening; qual tells you why. Ship a survey with no interviews behind it and you'll optimize the wrong thing.", mediaUrl: IMG.chartsBoard, mediaType: "image", tags: ["research"] },
+    ],
+  },
+  {
+    username: "marcus", name: "Marcus Lee", slug: "demo-marcus",
+    headline: "Developer Advocate · community & docs",
+    headshot: "https://i.pravatar.cc/240?img=60", palette: "teal", share: 0, template: "sidebar", cardTemplate: "wave", font: "mono",
+    email: "marcus.lee@example.com", phone: "+1 (555) 774-0098", linkedin: "https://linkedin.com/in/marcuslee", github: "https://github.com/marcuslee",
+    posts: [
+      { mins: 70, content: "Developer advocacy in one line: make the hard thing easy, then get out of the way. Docs are a product, not an afterthought.", tags: ["devrel", "community"] },
+      { mins: 600, content: "Ran a live coding workshop tonight — 40 devs, one API, zero slides. Best feedback loop in the business.", mediaUrl: IMG.coding, mediaType: "image", tags: ["devrel"] },
+      { mins: 1400, content: "We're hiring a Developer Advocate — loves teaching, ships demos, turns GitHub issues into better products. Remote, conference budget included. DM me. 👋", tags: ["hiring", "devrel"] },
+      { mins: 2400, content: "Open-sourced the demo from tonight's workshop. Stars are nice; the PR from a first-time contributor made my week.", mediaUrl: IMG.developers, mediaType: "image", tags: ["opensource", "community"] },
     ],
   },
 ];
@@ -240,8 +300,8 @@ async function main() {
       args: [uid, c.username, `${c.username}@example.com`, pw, iso(5000)],
     });
     stmts.push({
-      sql: "INSERT INTO Profile (id, slug, name, headline, headshotUrl, template, cardTemplate, colorScheme, font, isOwner, isQREnabled, allowConnectionQrShare, userId, createdAt, updatedAt) VALUES (?,?,?,?,?, ?, ?, ?, ?, 1, 1, ?, ?, ?, ?)",
-      args: [`demoprofile-${c.username}`, c.slug, c.name, c.headline, c.headshot, c.template ?? "classic", c.cardTemplate ?? null, c.palette, c.font ?? "sans", c.share, uid, iso(5000), iso(5000)],
+      sql: "INSERT INTO Profile (id, slug, name, headline, headshotUrl, email, phone, linkedinUrl, githubUrl, template, cardTemplate, colorScheme, font, isOwner, isQREnabled, allowConnectionQrShare, userId, createdAt, updatedAt) VALUES (?,?,?,?,?, ?,?,?,?, ?, ?, ?, ?, 1, 1, ?, ?, ?, ?)",
+      args: [`demoprofile-${c.username}`, c.slug, c.name, c.headline, c.headshot, c.email ?? null, c.phone ?? null, c.linkedin ?? null, c.github ?? null, c.template ?? "classic", c.cardTemplate ?? null, c.palette, c.font ?? "sans", c.share, uid, iso(5000), iso(5000)],
     });
     c.posts.forEach((post, i) => {
       stmts.push({

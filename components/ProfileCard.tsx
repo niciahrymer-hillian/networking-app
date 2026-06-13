@@ -120,7 +120,7 @@ export default function ProfileCard({ template, cardTemplate, colorScheme, font,
             <div className="flex items-center gap-4">
               {avatar("w-16 h-16", "ring-1 ring-black/10")}
               <div className="min-w-0">
-                <h1 className="text-xl font-bold tracking-tight text-slate-900 truncate">{profile.name}</h1>
+                <h1 className="text-xl font-bold tracking-tight text-slate-900 break-words">{profile.name}</h1>
                 {profile.headline && <p className="text-sm text-slate-500 leading-snug">{profile.headline}</p>}
               </div>
             </div>
@@ -181,7 +181,7 @@ export default function ProfileCard({ template, cardTemplate, colorScheme, font,
               <div className="flex items-center gap-4">
                 {avatar("w-16 h-16", "ring-2 ring-black/10")}
                 <div className="min-w-0">
-                  <h1 className="text-xl font-bold tracking-tight text-slate-900 truncate">{profile.name}</h1>
+                  <h1 className="text-xl font-bold tracking-tight text-slate-900 break-words">{profile.name}</h1>
                   {profile.headline && <p className="text-sm text-slate-500 leading-snug">{profile.headline}</p>}
                 </div>
               </div>
@@ -295,6 +295,9 @@ export default function ProfileCard({ template, cardTemplate, colorScheme, font,
             headshotUrl={profile.headshotUrl}
             email={profile.email}
             phone={profile.phone}
+            linkedin={profile.linkedinUrl}
+            github={profile.githubUrl}
+            website={links[0]?.url ?? null}
             accent={p.accent}
             bandFrom={p.bandFrom}
             bandTo={p.bandTo}
