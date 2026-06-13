@@ -298,6 +298,7 @@ async function main() {
   // --- Clean previous demo data (children first) ---
   for (const sql of [
     "DELETE FROM UserConnection WHERE id LIKE 'demouc-%'",
+    "DELETE FROM Reaction WHERE id LIKE 'demoreact-%'",
     "DELETE FROM Post WHERE id LIKE 'demopost-%'",
     "DELETE FROM Connection WHERE id LIKE 'democonn-%'",
     "DELETE FROM Scan WHERE id LIKE 'demoscan-%'",
@@ -308,6 +309,7 @@ async function main() {
   }
 
   const stmts = [];
+  const postMeta = []; // { id, authorId } — collected to seed reactions afterward
 
   // Inbound connect-form submitters (their email is the only human label the
   // Connection model stores — encrypted at rest, decrypted in-app for display).
@@ -361,6 +363,7 @@ async function main() {
           post.tags ? JSON.stringify(post.tags) : null, iso(post.mins), iso(post.mins),
         ],
       });
+      postMeta.push({ id: `demopost-${c.username}-${i}`, authorId: uid });
     });
     // Give each demo card its own scans + requests so logging in as @ava etc.
     // shows a populated dashboard (pending requests, stats, activity).
@@ -389,6 +392,7 @@ async function main() {
           post.tags ? JSON.stringify(post.tags) : null, iso(post.mins), iso(post.mins),
         ],
       });
+      postMeta.push({ id: `demopost-${t.key}-${i}`, authorId: t.id });
     });
 
     addCardActivity(t.profileId, t.key);
@@ -398,6 +402,23 @@ async function main() {
   for (let i = 0; i < targets.length; i++)
     for (let j = i + 1; j < targets.length; j++)
       link(targets[i].id, targets[j].id, `${targets[i].key}-${targets[j].key}`);
+
+  // --- Seeded reactions: vary count + emoji per post so the feed feels alive ---
+  const EMOJI = ["👍", "❤️", "🎉", "💡", "👏", "😂"];
+  const allReactors = [...CONNECTIONS.map((c) => `demo-${c.username}`), ...targets.map((t) => t.id)];
+  let rid = 0;
+  postMeta.forEach((p, pi) => {
+    const pool = allReactors.filter((u) => u !== p.authorId); // not your own post
+    const n = Math.min(pool.length, 2 + ((pi * 5 + 3) % Math.max(1, pool.length - 1)));
+    for (let k = 0; k < n; k++) {
+      const userId = pool[(pi + k) % pool.length];
+      const emoji = EMOJI[(pi + k) % EMOJI.length];
+      stmts.push({
+        sql: "INSERT INTO Reaction (id, postId, userId, emoji, createdAt) VALUES (?,?,?,?,?)",
+        args: [`demoreact-${rid++}`, p.id, userId, emoji, iso(pi * 3 + k)],
+      });
+    }
+  });
 
   await db.batch(stmts, "write");
 

@@ -27,7 +27,11 @@ export default async function MemberProfilePage({
     where: { username },
     include: {
       profiles: { orderBy: { createdAt: "asc" } },
-      posts: { orderBy: { createdAt: "desc" }, take: 100 },
+      posts: {
+        orderBy: { createdAt: "desc" },
+        take: 100,
+        include: { reactions: { select: { emoji: true, userId: true } } },
+      },
     },
   });
   if (!user) notFound();
@@ -113,9 +117,16 @@ export default async function MemberProfilePage({
             </p>
           ) : (
             <div className="space-y-3">
-              {user.posts.map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
+              {user.posts.map((post) => {
+                const byEmoji = new Map<string, number>();
+                let mine: string | null = null;
+                for (const r of post.reactions) {
+                  byEmoji.set(r.emoji, (byEmoji.get(r.emoji) ?? 0) + 1);
+                  if (r.userId === viewerId) mine = r.emoji;
+                }
+                const counts = [...byEmoji.entries()].map(([emoji, count]) => ({ emoji, count })).sort((a, b) => b.count - a.count);
+                return <PostCard key={post.id} post={post} reactions={counts} viewerReaction={mine} />;
+              })}
             </div>
           )}
         </div>

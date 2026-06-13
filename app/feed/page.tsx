@@ -33,8 +33,21 @@ export default async function FeedPage() {
           },
         },
       },
+      reactions: { select: { emoji: true, userId: true } },
     },
   });
+
+  // Summarize reactions per post (counts by emoji) + the viewer's own reaction.
+  const reactionInfo = (rs: { emoji: string; userId: string }[]) => {
+    const byEmoji = new Map<string, number>();
+    let mine: string | null = null;
+    for (const r of rs) {
+      byEmoji.set(r.emoji, (byEmoji.get(r.emoji) ?? 0) + 1);
+      if (r.userId === session.userId) mine = r.emoji;
+    }
+    const counts = [...byEmoji.entries()].map(([emoji, count]) => ({ emoji, count })).sort((a, b) => b.count - a.count);
+    return { counts, mine };
+  };
 
   return (
     <main className="min-h-screen bg-background text-foreground px-4 py-8">
@@ -54,6 +67,7 @@ export default async function FeedPage() {
           <div className="mt-6 space-y-3">
             {posts.map((post) => {
               const card = post.author.profiles.find((pr) => pr.isOwner) ?? post.author.profiles[0];
+              const { counts, mine } = reactionInfo(post.reactions);
               return (
                 <PostCard
                   key={post.id}
@@ -63,6 +77,8 @@ export default async function FeedPage() {
                     name: card?.name ?? null,
                     headshotUrl: card?.headshotUrl ?? null,
                   }}
+                  reactions={counts}
+                  viewerReaction={mine}
                 />
               );
             })}

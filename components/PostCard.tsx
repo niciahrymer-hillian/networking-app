@@ -7,6 +7,7 @@
 // header is omitted (the page already shows who it is) and only a timestamp shows.
 
 import Link from "next/link";
+import PostReactions, { type ReactionCount } from "@/components/PostReactions";
 
 export type FeedPost = {
   id: string;
@@ -41,7 +42,14 @@ export function parseTags(json: string | null): string[] {
   }
 }
 
-export default function PostCard({ post, author }: { post: FeedPost; author?: PostAuthor | null }) {
+export default function PostCard({
+  post, author, reactions = [], viewerReaction = null,
+}: {
+  post: FeedPost;
+  author?: PostAuthor | null;
+  reactions?: ReactionCount[];
+  viewerReaction?: string | null;
+}) {
   const tags = parseTags(post.tags);
   const yt = post.linkUrl ? youTubeId(post.linkUrl) : null;
   const when = new Date(post.createdAt).toLocaleString();
@@ -119,6 +127,8 @@ export default function PostCard({ post, author }: { post: FeedPost; author?: Po
           ))}
         </div>
       )}
+
+      <PostReactions postId={post.id} counts={reactions} mine={viewerReaction} />
     </article>
   );
 }

@@ -61,6 +61,7 @@ model User {
   resetTokenExpiry          DateTime?
   profiles                  Profile[]
   posts                     Post[]
+  reactions                 Reaction[]
   // Mutual network graph — a connection creates rows in both directions, so
   // "my network" is simply networkOut.connectedUserId.
   networkOut                UserConnection[] @relation("NetworkOut")
@@ -97,8 +98,24 @@ model Post {
   tags      String?                          // JSON array of hashtag strings
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  reactions Reaction[]
 
   @@index([authorId])
+}
+
+// Emoji reaction on a post (LinkedIn-style: one reaction per user per post; the
+// chosen emoji can be changed, or removed by reacting with the same one again).
+model Reaction {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji     String                            // one of lib/reactions REACTIONS
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@index([postId])
 }
 
 // Each Connection = someone who scanned a profile's QR and shared their info.
