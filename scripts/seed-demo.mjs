@@ -90,6 +90,18 @@ const IMG = {
   chartsBoard:     U("1454165804606-c3d57bc86b40"),
   coding:          U("1531482615713-2afd69097998"),
   developers:      U("1551434678-e076c223a692"),
+  // Vacation / relaxation + social events (life outside work)
+  beach:           U("1507525428034-b723cf961d3e"),
+  mountainHike:    U("1476514525535-07fb3b4ae5f1"),
+  roadTrip:        U("1469854523086-cc02fe5d8800"),
+  lakeView:        U("1501785888041-af3ef285b470"),
+  sunset:          U("1500534314209-a25ddb2bd429"),
+  camping:         U("1533105079780-92b9be482077"),
+  partyCelebration:U("1530103862676-de8c9debad1d"),
+  dinnerTable:     U("1517457373958-b7bdd4587205"),
+  teamDinner:      U("1552674605-db6ffd4facb5"),
+  hiking:          U("1530023367847-a683933f4172"),
+  cityTravel:      U("1523580494863-6f3031224c94"),
 };
 
 // label, username, slug, headline, headshot, share?, posts[]
@@ -227,6 +239,43 @@ const MY_POSTS = [
   { mins: 1080, content: "Cleared the desk, cleared my head — spending the afternoon following up with everyone I met this month. If we crossed paths, let's actually stay in touch. 👋", mediaUrl: IMG.desk, mediaType: "image", tags: ["networking"] },
 ];
 
+// Extra posts per connection — project updates, social events, and vacation/relax
+// scenes (life outside work). Appended to each connection's own posts at seed time.
+const EXTRA = {
+  ava: [
+    { mins: 280, content: "Project update: design system v3 is live across all four products — one source of truth at last. The whole team moves faster now. 🎨", tags: ["designsystems", "update"] },
+    { mins: 5200, content: "Logged off for a long weekend by the coast. My best design ideas always show up the moment I stop staring at a screen. 🌊", mediaUrl: IMG.beach, mediaType: "image", tags: ["timeoff"] },
+  ],
+  liam: [
+    { mins: 520, content: "Team dinner after we cleared the quarterly number. The wins land differently when you celebrate them together. 🥂", mediaUrl: IMG.teamDinner, mediaType: "image", tags: ["team", "culture"] },
+    { mins: 4600, content: "Trail miles > inbox miles this weekend. Turns out the best growth strategy is sometimes touching grass. 🥾", mediaUrl: IMG.hiking, mediaType: "image", tags: ["balance"] },
+  ],
+  sofia: [
+    { mins: 760, content: "Project update: the recommendation engine we started in Q1 just crossed 1M predictions/day in prod. Quietly proud of this team. 📈", tags: ["data", "update"] },
+    { mins: 5400, content: "Sunset, airplane mode, and a paperback. Recharging so the models can keep training without me hovering. 🌅", mediaUrl: IMG.sunset, mediaType: "image", tags: ["timeoff"] },
+  ],
+  maya: [
+    { mins: 4800, content: "Founder brains need reboots too. Three days in the mountains — no laptop, no Slack — and I came back with the clearest roadmap I've had in a year. ⛰️", mediaUrl: IMG.mountainHike, mediaType: "image", tags: ["balance"] },
+  ],
+  noah: [
+    { mins: 900, content: "Project update: migrated the last service off the legacy stack today — two years of incremental work, zero downtime. Boring deploys are beautiful.", tags: ["engineering", "update"] },
+    { mins: 5000, content: "Closed the laptop, opened a tent. The best debugging tool is sometimes a campfire and no signal. 🔥", mediaUrl: IMG.camping, mediaType: "image", tags: ["balance"] },
+  ],
+  priya: [
+    { mins: 5300, content: "Took the week off and went somewhere with no roadmap and no Wi-Fi. 10/10, would prioritize again. ✈️", mediaUrl: IMG.cityTravel, mediaType: "image", tags: ["balance"] },
+  ],
+  david: [
+    { mins: 1150, content: "Closed out the conference with the whole crew at the afterparty. Deals get signed in the meeting; relationships get built right here. 🎉", mediaUrl: IMG.partyCelebration, mediaType: "image", tags: ["networking", "events"] },
+    { mins: 4700, content: "A few days off the grid on the lake before Q3 kicks off. Even closers need an off-season. 🎣", mediaUrl: IMG.lakeView, mediaType: "image", tags: ["timeoff"] },
+  ],
+  elena: [
+    { mins: 1250, content: "Hosted our first community dinner for researchers in the city — 18 strangers, one long table, zero awkward silences. 🍽️", mediaUrl: IMG.dinnerTable, mediaType: "image", tags: ["community", "events"] },
+  ],
+  marcus: [
+    { mins: 5100, content: "Conference season's over — celebrating with a road trip and exactly zero talks to prep. 🚗", mediaUrl: IMG.roadTrip, mediaType: "image", tags: ["timeoff"] },
+  ],
+};
+
 async function main() {
   // Resolve each target email -> { email, key, id, username, profileId }.
   const targets = [];
@@ -303,7 +352,7 @@ async function main() {
       sql: "INSERT INTO Profile (id, slug, name, headline, headshotUrl, email, phone, linkedinUrl, githubUrl, template, cardTemplate, colorScheme, font, isOwner, isQREnabled, allowConnectionQrShare, userId, createdAt, updatedAt) VALUES (?,?,?,?,?, ?,?,?,?, ?, ?, ?, ?, 1, 1, ?, ?, ?, ?)",
       args: [`demoprofile-${c.username}`, c.slug, c.name, c.headline, c.headshot, c.email ?? null, c.phone ?? null, c.linkedin ?? null, c.github ?? null, c.template ?? "classic", c.cardTemplate ?? null, c.palette, c.font ?? "sans", c.share, uid, iso(5000), iso(5000)],
     });
-    c.posts.forEach((post, i) => {
+    [...c.posts, ...(EXTRA[c.username] ?? [])].forEach((post, i) => {
       stmts.push({
         sql: "INSERT INTO Post (id, authorId, content, mediaUrl, mediaType, linkUrl, tags, createdAt, updatedAt) VALUES (?,?,?,?,?,?,?,?,?)",
         args: [
