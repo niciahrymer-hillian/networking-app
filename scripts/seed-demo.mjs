@@ -351,9 +351,12 @@ async function main() {
   // --- Shared demo connections: user + card + posts ---
   for (const c of CONNECTIONS) {
     const uid = `demo-${c.username}`;
+    // username (@handle), email (login), and name are three separate identities:
+    //   @noahkim  ·  noah@example.com  ·  Noah Kim
+    const handle = c.name.toLowerCase().replace(/[^a-z0-9]/g, "");
     stmts.push({
       sql: "INSERT INTO User (id, username, email, emailVerified, isAdmin, passwordHash, createdAt) VALUES (?,?,?,1,0,?,?)",
-      args: [uid, c.username, `${c.username}@example.com`, pw, iso(5000)],
+      args: [uid, handle, `${c.username}@example.com`, pw, iso(5000)],
     });
     stmts.push({
       sql: "INSERT INTO Profile (id, slug, name, headline, headshotUrl, email, phone, linkedinUrl, githubUrl, template, cardTemplate, colorScheme, font, isOwner, isQREnabled, allowConnectionQrShare, userId, createdAt, updatedAt) VALUES (?,?,?,?,?, ?,?,?,?, ?, ?, ?, ?, 1, 1, ?, ?, ?, ?)",
