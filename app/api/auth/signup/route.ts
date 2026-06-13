@@ -17,6 +17,14 @@ function isEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+// Username is a distinct handle (used in @mentions and /u/<username> URLs), kept
+// separate from email + display name. Rule: lowercase letters, numbers, and
+// underscores; 3–30 chars. Mirrors how seeded handles are generated.
+function normalizeUsername(username: string) {
+  return username.trim().toLowerCase();
+}
+const USERNAME_RE = /^[a-z0-9_]{3,30}$/;
+
 export async function POST(request: NextRequest) {
   // Signup is open by default. Set DISABLE_SIGNUP=true to turn it into an
   // admin-only/closed deployment (kill-switch).
@@ -25,17 +33,18 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json().catch(() => ({}));
-  const { username, email, password } = body as {
+  const { username: rawUsername, email, password } = body as {
     username?: string;
     email?: string;
     password?: string;
   };
 
-  if (!username || !email || !password) {
+  if (!rawUsername || !email || !password) {
     return NextResponse.json({ error: "Username, email, and password are required" }, { status: 400 });
   }
-  if (username.length < 3) {
-    return NextResponse.json({ error: "Username must be at least 3 characters" }, { status: 400 });
+  const username = normalizeUsername(rawUsername);
+  if (!USERNAME_RE.test(username)) {
+    return NextResponse.json({ error: "Username must be 3–30 characters: lowercase letters, numbers, or underscores." }, { status: 400 });
   }
   if (!isEmail(email)) {
     return NextResponse.json({ error: "A valid email address is required" }, { status: 400 });

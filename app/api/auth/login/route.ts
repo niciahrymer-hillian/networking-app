@@ -22,10 +22,10 @@ export async function POST(request: NextRequest) {
   const response = NextResponse.json({ ok: true });
   const session = await getIronSession<SessionData>(request, response, sessionOptions);
 
+  // Usernames are stored normalized (lowercase); match case-insensitively.
+  const normalized = usernameOrEmail.toLowerCase().trim();
   const user = await prisma.user.findFirst({
-    where: {
-      OR: [{ username: usernameOrEmail }, { email: usernameOrEmail.toLowerCase().trim() }],
-    },
+    where: { OR: [{ username: normalized }, { email: normalized }] },
   });
 
   if (user) {
