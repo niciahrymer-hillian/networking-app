@@ -22,6 +22,39 @@ export default async function MyConnectionsPage({
     include: { _count: { select: { scans: true } } },
   });
 
+  // Account-level network: the people this user is mutually connected with
+  // (UserConnection edges, created when a logged-in user connects via a card or
+  // signs up through one). This is separate from per-card Connection requests
+  // below — without it, network connections never appear on this page.
+  const network = await prisma.userConnection.findMany({
+    where: { userId: session.userId },
+    orderBy: { createdAt: "desc" },
+    select: {
+      createdAt: true,
+      connectedUser: {
+        select: {
+          username: true,
+          name: true,
+          avatarUrl: true,
+          profiles: {
+            where: { isOwner: true },
+            select: { name: true, headshotUrl: true },
+            take: 1,
+          },
+        },
+      },
+    },
+  });
+  const networkMembers = network.map((n) => {
+    const card = n.connectedUser.profiles[0];
+    return {
+      username: n.connectedUser.username,
+      name: n.connectedUser.name ?? card?.name ?? n.connectedUser.username,
+      avatarUrl: n.connectedUser.avatarUrl ?? card?.headshotUrl ?? null,
+      createdAt: n.createdAt,
+    };
+  });
+
   // Confirm-to-connect: confirmed = network, pending = awaiting the owner's decision.
   const statusGroups = await prisma.connection.groupBy({
     by: ["profileId", "status"],
@@ -76,6 +109,37 @@ export default async function MyConnectionsPage({
                 badge={countsFor(p.id).pending || undefined}
               />
             ))}
+          </div>
+        )}
+
+        {/* Account network: mutual connections (other logged-in accounts) */}
+        {networkMembers.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted mb-3">
+              My Network ({networkMembers.length})
+            </h2>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {networkMembers.map((m) => (
+                <Link
+                  key={m.username}
+                  href={`/u/${m.username}`}
+                  className="flex items-center gap-3 rounded-xl bg-surface ring-1 ring-line px-3 py-2.5 hover:bg-elevated transition-colors"
+                >
+                  {m.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={m.avatarUrl} alt="" className="h-9 w-9 rounded-full object-cover" />
+                  ) : (
+                    <span className="h-9 w-9 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 grid place-items-center text-sm font-semibold">
+                      {m.name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-body truncate">{m.name}</p>
+                    <p className="text-xs text-muted truncate">@{m.username}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
 
