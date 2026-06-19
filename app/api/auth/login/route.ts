@@ -7,6 +7,7 @@ import { getIronSession } from "iron-session";
 import { sessionOptions, SessionData } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { emailMatchClauses } from "@/lib/user-email";
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
@@ -23,9 +24,10 @@ export async function POST(request: NextRequest) {
   const session = await getIronSession<SessionData>(request, response, sessionOptions);
 
   // Usernames are stored normalized (lowercase); match case-insensitively.
+  // Email is matched via emailHash (encrypted rows) or plaintext (legacy rows).
   const normalized = usernameOrEmail.toLowerCase().trim();
   const user = await prisma.user.findFirst({
-    where: { OR: [{ username: normalized }, { email: normalized }] },
+    where: { OR: [{ username: normalized }, ...emailMatchClauses(usernameOrEmail)] },
   });
 
   if (user) {

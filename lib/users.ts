@@ -1,6 +1,7 @@
 // Account lookups that aren't tied to a single route. Kept here so they can be
 // unit-tested in isolation and reused by admin/diagnostic surfaces.
 import { prisma } from "@/lib/db";
+import { readEmail } from "@/lib/user-email";
 
 export interface UserSummary {
   id: string;
@@ -22,9 +23,11 @@ export function startOfToday(now: Date = new Date()): Date {
  * Useful for confirming signups are landing in the database.
  */
 export async function usersCreatedToday(now: Date = new Date()): Promise<UserSummary[]> {
-  return prisma.user.findMany({
+  const rows = await prisma.user.findMany({
     where: { createdAt: { gte: startOfToday(now) } },
     orderBy: { createdAt: "desc" },
-    select: { id: true, username: true, name: true, email: true, createdAt: true },
+    select: { id: true, username: true, name: true, email: true, emailEnc: true, createdAt: true },
   });
+  // Email is stored encrypted — decrypt for display (falls back to legacy plaintext).
+  return rows.map(({ emailEnc, ...u }) => ({ ...u, email: readEmail({ email: u.email, emailEnc }) }));
 }

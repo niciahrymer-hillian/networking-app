@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendVerificationEmail } from "@/lib/mail";
+import { emailMatchClauses } from "@/lib/user-email";
 
 function generateCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -12,7 +13,7 @@ export async function POST(request: NextRequest) {
   if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 });
 
   const normalized = email.trim().toLowerCase();
-  const user = await prisma.user.findUnique({ where: { email: normalized } });
+  const user = await prisma.user.findFirst({ where: { OR: emailMatchClauses(email) } });
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
   const code = generateCode();

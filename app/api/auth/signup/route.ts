@@ -8,10 +8,7 @@ import { getIronSession } from "iron-session";
 import { sessionOptions, SessionData } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
-
-function normalizeEmail(email: string) {
-  return email.trim().toLowerCase();
-}
+import { emailWriteFields, emailMatchClauses } from "@/lib/user-email";
 
 function isEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -54,12 +51,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
   }
 
-  const normalizedEmail = normalizeEmail(email);
   const existingUsername = await prisma.user.findUnique({ where: { username } });
   if (existingUsername) {
     return NextResponse.json({ error: "Username already taken" }, { status: 409 });
   }
-  const existingEmail = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+  const existingEmail = await prisma.user.findFirst({ where: { OR: emailMatchClauses(email) } });
   if (existingEmail) {
     return NextResponse.json({ error: "Email already in use" }, { status: 409 });
   }
@@ -70,7 +66,7 @@ export async function POST(request: NextRequest) {
     data: {
       username,
       name: name?.trim()?.slice(0, 80) || null, // account-level display name (optional)
-      email: normalizedEmail,
+      ...emailWriteFields(email), // email stored encrypted (emailEnc) + hashed (emailHash)
       passwordHash,
       emailVerified: false, // not required to sign in; users can verify later via the verify routes
     },

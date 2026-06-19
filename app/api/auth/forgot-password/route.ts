@@ -10,6 +10,7 @@ import { prisma } from "@/lib/db";
 import { randomUUID } from "crypto";
 import { getAppUrl } from "@/lib/app-url";
 import { sendPasswordResetEmail } from "@/lib/mail";
+import { emailMatchClauses, readEmail } from "@/lib/user-email";
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
 
   const user = await prisma.user.findFirst({
     where: {
-      OR: [{ username: usernameOrEmail }, { email: usernameOrEmail.toLowerCase().trim() }],
+      OR: [{ username: usernameOrEmail.toLowerCase().trim() }, ...emailMatchClauses(usernameOrEmail)],
     },
   });
 
@@ -41,11 +42,12 @@ export async function POST(request: NextRequest) {
 
   // Email the reset link. Don't fail the request if email delivery hiccups —
   // the token is saved either way, and in dev the link is returned below.
-  if (user.email) {
+  const userEmail = readEmail(user);
+  if (userEmail) {
     const appUrl = await getAppUrl();
     const resetUrl = `${appUrl}/reset-password/${token}`;
     try {
-      await sendPasswordResetEmail(user.email, resetUrl);
+      await sendPasswordResetEmail(userEmail, resetUrl);
     } catch (err) {
       console.error("[forgot-password] email send failed", err);
     }
@@ -53,7 +55,7 @@ export async function POST(request: NextRequest) {
 
   const isDev = process.env.NODE_ENV !== "production";
   return NextResponse.json({
-    email: user.email,
+    email: userEmail,
     message: "If that account exists, a reset link is on its way to its email.",
     // Only expose the raw token in development — never in production.
     ...(isDev ? { token } : {}),

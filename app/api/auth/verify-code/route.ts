@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { emailMatchClauses } from "@/lib/user-email";
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const { email, code } = body as { email?: string; code?: string };
   if (!email || !code) return NextResponse.json({ error: 'Email and code required' }, { status: 400 });
 
-  const normalized = email.trim().toLowerCase();
-  const user = await prisma.user.findUnique({ where: { email: normalized } });
+  const user = await prisma.user.findFirst({ where: { OR: emailMatchClauses(email) } });
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
   if (!user.emailVerificationToken || !user.emailVerificationExpiry) {

@@ -53,7 +53,14 @@ model User {
   username                  String    @unique
   name                      String?                       // account-level display name (identity; cards may differ)
   avatarUrl                 String?                       // account-level avatar; falls back to primary card photo
+  // Account email is stored encrypted at rest (AES-256-GCM in emailEnc) so a DB
+  // dump never exposes plaintext addresses. emailHash (SHA-256, deterministic)
+  // is the lookup/uniqueness key for login + signup dedup without decrypting.
+  // The legacy plaintext `email` column is kept nullable for backward-compatible
+  // lookups of any not-yet-migrated rows; migrated rows have email = null.
   email                     String?   @unique
+  emailEnc                  String?                       // AES-256-GCM encrypted email
+  emailHash                 String?   @unique             // SHA-256(lower(trim(email))) for lookup/dedup
   emailVerified             Boolean   @default(false)
   emailVerificationToken    String?
   emailVerificationExpiry   DateTime?
