@@ -29,6 +29,7 @@ export interface ProfileFormData {
 
 interface Props {
   initial?: ProfileFormData; // pre-populated for edit mode
+  account?: { name: string | null; username: string }; // account identity, to distinguish from the card name
 }
 
 const EMPTY: ProfileFormData = {
@@ -37,7 +38,7 @@ const EMPTY: ProfileFormData = {
   template: "classic", cardTemplate: "", colorScheme: "emerald", font: "sans",
 };
 
-export default function ProfileForm({ initial }: Props) {
+export default function ProfileForm({ initial, account }: Props) {
   const router = useRouter();
   const [form, setForm] = useState<ProfileFormData>(initial ?? EMPTY);
   const [saving, setSaving] = useState(false);
@@ -246,11 +247,20 @@ export default function ProfileForm({ initial }: Props) {
       </section>
 
       {/* === Core info === */}
-      <section className="grid gap-4 sm:grid-cols-2">
-        <Field label="Name *" value={form.name} onChange={(v) => set("name", v)} required placeholder="Jane Smith" />
-        <Field label="Email" value={form.email} onChange={(v) => set("email", v)} type="email" placeholder="jane@example.com" />
-        <Field label="Phone" value={form.phone} onChange={(v) => set("phone", v)} placeholder="+1 555 000 0000" />
-        <Field label="Headline" value={form.headline} onChange={(v) => set("headline", v)} placeholder="Senior Engineer @ Acme" />
+      <section>
+        {account && (
+          <p className="text-xs text-muted mb-3">
+            Signed in as{" "}
+            <span className="font-medium text-body">{account.name?.trim() || `@${account.username}`}</span>
+            {account.name?.trim() ? <> · @{account.username}</> : null}. The card name below is what shows on this card — it can differ from your account name.
+          </p>
+        )}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Name *" value={form.name} onChange={(v) => set("name", v)} required placeholder="Jane Smith" />
+          <Field label="Email" value={form.email} onChange={(v) => set("email", v)} type="email" placeholder="jane@example.com" />
+          <Field label="Phone" value={form.phone} onChange={(v) => set("phone", v)} placeholder="+1 555 000 0000" />
+          <Field label="Headline" value={form.headline} onChange={(v) => set("headline", v)} placeholder="Senior Engineer @ Acme" />
+        </div>
       </section>
 
       {/* === About === */}

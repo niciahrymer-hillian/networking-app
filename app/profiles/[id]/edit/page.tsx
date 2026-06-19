@@ -24,6 +24,12 @@ export default async function EditProfilePage({
 
   if (!profile) notFound();
 
+  // Account identity (distinct from the card name) — shown in the form as context.
+  const account = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { name: true, username: true },
+  });
+
   const appUrl = await getAppUrl();
 
   // Fetch other profiles to populate the secondary-card link dropdown
@@ -68,7 +74,7 @@ export default async function EditProfilePage({
         </Link>
         <h1 className="mt-4 mb-8 text-2xl font-bold tracking-tight">Edit — {profile.name}</h1>
 
-        <ProfileForm initial={initial} />
+        <ProfileForm initial={initial} account={account ?? undefined} />
 
         {/* QR + secondary-card settings, below the editor */}
         <div id="qr" className="mt-8 max-w-2xl scroll-mt-24 rounded-3xl bg-surface p-6 sm:p-8 shadow-sm ring-1 ring-line">
