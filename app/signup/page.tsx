@@ -111,6 +111,14 @@ export default function SignupPage() {
         <button type="submit" disabled={loading} className={authButton}>
           {loading ? "Creating account…" : "Create account"}
         </button>
+
+        {/* Trust note: reassures without naming the methods used (no detail that
+            would aid reverse engineering). Claims are deliberately truthful —
+            passwords are stored one-way and never readable; no selling/sharing. */}
+        <p className="text-xs text-muted text-center leading-relaxed">
+          🔒 Your information stays private. Your password is encrypted and never
+          visible to anyone — including us — and we never sell or share your data.
+        </p>
       </form>
     </AuthShell>
   );
