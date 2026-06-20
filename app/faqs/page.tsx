@@ -57,7 +57,7 @@ export default function FaqsPage() {
             <InstallButton />
           </div>
 
-          <div className="mt-5 grid gap-4 sm:grid-cols-3">
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Platform title="iPhone / iPad (Safari)" steps={[
               <>Tap the Share button {ShareIcon} in the toolbar.</>,
               <>Scroll down and tap {PlusBoxIcon} “Add to Home Screen.”</>,
@@ -68,7 +68,12 @@ export default function FaqsPage() {
               <>Tap {InstallIcon} “Install app” / “Add to Home screen.”</>,
               <>Confirm — it lands in your app drawer.</>,
             ]} />
-            <Platform title="Desktop (Chrome / Edge)" steps={[
+            <Platform title="Mac (Safari)" steps={[
+              <>In the menu bar, open <strong>File</strong> — or tap the Share button {ShareIcon}.</>,
+              <>Choose {PlusBoxIcon} “Add to Dock…,” then click “Add.”</>,
+              <>It appears in your Dock and opens in its own window.</>,
+            ]} />
+            <Platform title="Mac / PC (Chrome · Edge)" steps={[
               <>Click {InstallIcon} in the address bar, or the menu {KebabIcon}.</>,
               <>Choose “Install Networking Cards.”</>,
               <>It opens in its own window.</>,
