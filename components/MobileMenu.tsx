@@ -56,6 +56,10 @@ export default function MobileMenu({
 
             <div className="my-1 h-px bg-elevated" />
 
+            <Link href="/faqs" onClick={close} className={item()}>
+              Help &amp; FAQs
+            </Link>
+
             {loggedIn ? (
               <>
                 {username && <p className="px-3 py-1 text-xs text-muted font-mono">@{username}</p>}

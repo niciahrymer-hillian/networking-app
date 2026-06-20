@@ -20,6 +20,7 @@ export default async function proxy(request: NextRequest) {
     pathname === "/signup" ||
     pathname === "/forgot-password" ||
     pathname.startsWith("/reset-password/") ||
+    pathname === "/faqs" ||
     pathname.startsWith("/api/auth/") ||
     pathname === "/api/connections" ||
     pathname.startsWith("/api/private-upload") ||
@@ -27,6 +28,12 @@ export default async function proxy(request: NextRequest) {
     pathname.startsWith("/images/") ||
     pathname === "/logo.svg" ||
     pathname === "/logo.png" ||
+    // PWA assets must be reachable without a session (browser fetches them while
+    // installing / for the app icon + splash).
+    pathname === "/manifest.webmanifest" ||
+    pathname === "/sw.js" ||
+    pathname.startsWith("/icon-") ||
+    pathname.startsWith("/apple-icon") ||
     pathname.startsWith("/uploads/") ||
     pathname.startsWith("/api/uploads/") ||
     pathname === "/favicon.ico"

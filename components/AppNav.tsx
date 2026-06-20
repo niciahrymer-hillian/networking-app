@@ -77,6 +77,9 @@ export default async function AppNav() {
 
         {/* Desktop auth actions */}
         <div className="hidden md:flex items-center gap-2 shrink-0">
+          <Link href="/faqs" className={navLink} title="Help &amp; FAQs">
+            FAQs
+          </Link>
           {loggedIn ? (
             <>
               {username && (

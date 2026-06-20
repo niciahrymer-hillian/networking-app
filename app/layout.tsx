@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppNav from "@/components/AppNav";
+import PwaRegister from "@/components/PwaRegister";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,6 +17,17 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Networking Cards",
   description: "Digital networking profile manager",
+  // Makes the installed app open standalone with the right name/status bar on iOS.
+  // (manifest link + icons are auto-injected from app/manifest.ts + app/apple-icon.png.)
+  appleWebApp: {
+    capable: true,
+    title: "Networking",
+    statusBarStyle: "black-translucent",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#059669", // emerald — colors the mobile browser/status bar
 };
 
 export default function RootLayout({
@@ -39,6 +51,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
+        <PwaRegister />
         <AppNav />
         {children}
       </body>
