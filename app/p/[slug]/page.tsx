@@ -30,13 +30,19 @@ export default async function PublicProfilePage({
 
   if (!profile) notFound();
 
-  // Log the scan — fire-and-forget so a DB hiccup never breaks the page load
+  // Log the scan — fire-and-forget so a DB hiccup never breaks the page load.
+  // Record the viewer only when a logged-in account that isn't the card owner views
+  // it, so the owner sees "viewed by @user"; anonymous/own views stay anonymous.
   const reqHeaders = await headers();
+  const viewer = await getSession();
+  const viewerUserId =
+    viewer?.userId && viewer.userId !== profile.userId ? viewer.userId : undefined;
   prisma.scan
     .create({
       data: {
         profileId: profile.id,
         userAgent: reqHeaders.get("user-agent") ?? undefined,
+        viewerUserId,
       },
     })
     .catch(() => {});

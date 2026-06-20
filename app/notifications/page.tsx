@@ -38,6 +38,13 @@ export default async function NotificationsPage() {
     prisma.userConnection.count({ where: { userId: session.userId } }),
   ]);
 
+  // Resolve usernames for scans that recorded a logged-in viewer → "viewed by @user".
+  const viewerIds = [...new Set(recentScans.map((s) => s.viewerUserId).filter((v): v is string => !!v))];
+  const viewers = viewerIds.length
+    ? await prisma.user.findMany({ where: { id: { in: viewerIds } }, select: { id: true, username: true } })
+    : [];
+  const viewerName = new Map(viewers.map((u) => [u.id, `@${u.username}`]));
+
   // Stats overview — at-a-glance totals across all of this user's cards.
   const stats = [
     { label: "Scans", value: scanTotal, emoji: "👀" },
@@ -64,7 +71,7 @@ export default async function NotificationsPage() {
       emoji: "👀",
       type: "Card viewed",
       prep: "by",
-      who: deviceFromUA(s.userAgent),
+      who: (s.viewerUserId && viewerName.get(s.viewerUserId)) || deviceFromUA(s.userAgent),
       profileId: s.profile.id,
       profileName: s.profile.name,
       createdAt: s.createdAt,

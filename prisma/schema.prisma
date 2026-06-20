@@ -236,9 +236,10 @@ model Connection {
 // WHY: Lets you see total scans vs actual connections — conversion rate at a glance.
 //      Logged server-side so it works even if the visitor never submits the form.
 model Scan {
-  id        String   @id @default(cuid())
-  profileId String
-  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  userAgent String?  // browser/device hint, useful for understanding mobile vs desktop
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  profileId    String
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  userAgent    String?  // browser/device hint, useful for understanding mobile vs desktop
+  viewerUserId String?  // set when a logged-in (non-owner) account views the card; null = anonymous
+  createdAt    DateTime @default(now())
 }
