@@ -50,7 +50,9 @@ export default async function NotificationsPage() {
     ...recentConnections.map((c) => ({
       id: `connection-${c.id}`,
       // Confirm-to-connect: a pending submission is a request until the owner acts.
+      emoji: c.status === "confirmed" ? "🤝" : "🔗",
       type: c.status === "confirmed" ? "New connection" : "New connection request",
+      prep: "from",
       // Who: the best identifier they shared (decrypted), else anonymous.
       who: c.emailEnc ? decrypt(c.emailEnc) : c.linkedinEnc ? decrypt(c.linkedinEnc) : c.githubEnc ? decrypt(c.githubEnc) : "Someone",
       profileId: c.profile.id,
@@ -59,7 +61,9 @@ export default async function NotificationsPage() {
     })),
     ...recentScans.map((s) => ({
       id: `scan-${s.id}`,
-      type: "Card scanned",
+      emoji: "👀",
+      type: "Card viewed",
+      prep: "by",
       who: deviceFromUA(s.userAgent),
       profileId: s.profile.id,
       profileName: s.profile.name,
@@ -99,7 +103,7 @@ export default async function NotificationsPage() {
               <div key={event.id} className="bg-surface ring-1 ring-line shadow-sm rounded-xl px-4 py-3 flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate">
-                    {event.type} · <span className="text-body font-normal">{event.who}</span>
+                    <span className="mr-1">{event.emoji}</span>{event.type} {event.prep} <span className="text-body font-normal">{event.who}</span>
                   </p>
                   <p className="text-xs text-muted mt-1">on “{event.profileName}”</p>
                 </div>

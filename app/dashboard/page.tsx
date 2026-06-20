@@ -145,7 +145,7 @@ export default async function Dashboard() {
   }
   const pymk = [...pymkMap.values()].sort((a, b) => b.mutuals - a.mutuals).slice(0, 4);
 
-  type Activity = { id: string; when: Date; text: string; emoji: string };
+  type Activity = { id: string; when: Date; text: string; emoji: string; href?: string };
   const activity: Activity[] = [
     ...recentScans.map((s) => ({
       id: `s-${s.id}`,
@@ -164,19 +164,21 @@ export default async function Dashboard() {
           ? `Declined request on "${c.profile.name}"`
           : `New connection request on "${c.profile.name}"`,
     })),
-    // Notifications: new posts from your network.
+    // Notifications: new posts from your network — link to the post permalink.
     ...networkPosts.map((p) => ({
       id: `p-${p.id}`,
       when: p.createdAt,
       emoji: "📝",
       text: `@${p.author.username} shared a new post`,
+      href: `/posts/${p.id}`,
     })),
-    // Notifications: people who joined your network.
+    // Notifications: people who joined your network — link to their profile.
     ...network.slice(0, 6).map((n) => ({
       id: `n-${n.id}`,
       when: n.createdAt,
       emoji: "🌐",
       text: `@${n.connectedUser.username} is now in your network`,
+      href: `/u/${n.connectedUser.username}`,
     })),
   ]
     .sort((a, b) => new Date(b.when).getTime() - new Date(a.when).getTime())
@@ -215,7 +217,13 @@ export default async function Dashboard() {
           {activity.map((a) => (
             <li key={a.id} className="flex items-start gap-2.5 text-sm">
               <span className="shrink-0">{a.emoji}</span>
-              <span className="min-w-0 flex-1 text-body">{a.text}</span>
+              {a.href ? (
+                <Link href={a.href} className="min-w-0 flex-1 text-body hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline transition-colors">
+                  {a.text}
+                </Link>
+              ) : (
+                <span className="min-w-0 flex-1 text-body">{a.text}</span>
+              )}
               <span className="shrink-0 text-xs text-muted">{timeAgo(a.when)}</span>
             </li>
           ))}
