@@ -14,6 +14,7 @@ import ShareQRButton from "@/components/ShareQRButton";
 import { getAppUrl } from "@/lib/app-url";
 import DashboardTiles, { type Tile } from "./DashboardTiles";
 import ConnectionActions from "../profiles/[id]/connections/ConnectionActions";
+import PymkList from "@/components/PymkList";
 import { decrypt } from "@/lib/crypto";
 
 export const dynamic = "force-dynamic"; // always fetch fresh profiles
@@ -259,33 +260,15 @@ export default async function Dashboard() {
       {pymk.length === 0 ? (
         <p className="text-sm text-muted">Connect with more people and we’ll suggest mutuals here.</p>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {pymk.map(({ user, mutuals }) => {
-            const prof = user.profiles[0];
-            return (
-              <li key={user.id} className="flex items-center gap-3">
-                {prof?.headshotUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={prof.headshotUrl} alt={prof.name} className="h-9 w-9 rounded-full object-cover ring-1 ring-line" />
-                ) : (
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-sm font-bold text-emerald-700 dark:text-emerald-300">
-                    {(prof?.name ?? user.username).charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{prof?.name ?? `@${user.username}`}</p>
-                  <p className="truncate text-xs text-muted">{mutuals} mutual connection{mutuals !== 1 ? "s" : ""}</p>
-                </div>
-                <Link
-                  href={`/u/${user.username}`}
-                  className="shrink-0 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-500"
-                >
-                  + Connect
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <PymkList
+          people={pymk.map(({ user, mutuals }) => ({
+            id: user.id,
+            username: user.username,
+            name: user.profiles[0]?.name ?? `@${user.username}`,
+            headshotUrl: user.profiles[0]?.headshotUrl ?? null,
+            mutuals,
+          }))}
+        />
       )}
     </div>
   );

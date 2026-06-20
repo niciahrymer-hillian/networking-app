@@ -1,5 +1,6 @@
 // /feed — the connections feed: posts from your network + your own.
 
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -8,9 +9,17 @@ import PostCard from "@/components/PostCard";
 
 export const dynamic = "force-dynamic";
 
-export default async function FeedPage() {
+export default async function FeedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tag?: string }>;
+}) {
   const session = await requireAuth();
   if (!session?.userId) redirect("/login");
+
+  // Optional hashtag filter (clicked from a post). Normalized like stored tags.
+  const { tag: rawTag } = await searchParams;
+  const tag = rawTag?.trim().toLowerCase().replace(/^#/, "") || null;
 
   // My network (mutual edges) + me.
   const network = await prisma.userConnection.findMany({
@@ -20,7 +29,10 @@ export default async function FeedPage() {
   const authorIds = [session.userId, ...network.map((n) => n.connectedUserId)];
 
   const posts = await prisma.post.findMany({
-    where: { authorId: { in: authorIds } },
+    // Tag search stays within your network + own posts (same privacy scope as the
+    // feed). tags is a JSON array string; matching the quoted token avoids partial
+    // hits (e.g. "design" won't match "designsystems").
+    where: { authorId: { in: authorIds }, ...(tag ? { tags: { contains: `"${tag}"` } } : {}) },
     orderBy: { createdAt: "desc" },
     take: 100,
     include: {
@@ -56,15 +68,24 @@ export default async function FeedPage() {
     <main className="min-h-screen bg-background text-foreground px-4 py-8">
       <div className="max-w-xl mx-auto">
         <h1 className="text-2xl font-bold mb-1">Feed</h1>
-        <p className="text-sm text-muted mb-6">
-          Posts from your network — {network.length} connection{network.length !== 1 ? "s" : ""}.
-        </p>
+        {tag ? (
+          <p className="text-sm text-muted mb-6 flex items-center gap-2">
+            <span>Posts tagged <span className="font-semibold text-emerald-700 dark:text-emerald-300">#{tag}</span></span>
+            <Link href="/feed" className="text-xs underline hover:text-foreground">clear</Link>
+          </p>
+        ) : (
+          <p className="text-sm text-muted mb-6">
+            Posts from your network — {network.length} connection{network.length !== 1 ? "s" : ""}.
+          </p>
+        )}
 
-        <Composer />
+        {!tag && <Composer />}
 
         {posts.length === 0 ? (
           <p className="text-muted text-sm mt-8 text-center">
-            Nothing here yet. Share an update above, or connect with more people (scan their card!) to fill your feed.
+            {tag
+              ? <>No posts tagged <span className="font-medium">#{tag}</span> from your network yet. <Link href="/feed" className="underline">Back to feed</Link>.</>
+              : "Nothing here yet. Share an update above, or connect with more people (scan their card!) to fill your feed."}
           </p>
         ) : (
           <div className="mt-6 space-y-3">

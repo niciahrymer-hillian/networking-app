@@ -124,9 +124,13 @@ export default function PostCard({
       {tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {tags.map((t) => (
-            <span key={t} className="rounded-full bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+            <Link
+              key={t}
+              href={`/feed?tag=${encodeURIComponent(t)}`}
+              className="rounded-full bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors"
+            >
               #{t}
-            </span>
+            </Link>
           ))}
         </div>
       )}
