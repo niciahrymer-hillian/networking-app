@@ -1,0 +1,39 @@
+name: Supabase keep-alive
+
+# WHY: Supabase free-tier projects auto-pause after ~7 days of inactivity. A paused
+# project stops resolving (NXDOMAIN) and its Storage stops serving, so uploaded
+# headshots/PDFs 404. This makes one authenticated request to the project's Storage
+# backend on a schedule so the inactivity timer never trips. Daily gives ~7x margin.
+#
+# Secrets (Settings -> Secrets and variables -> Actions):
+#   SUPABASE_URL                — project URL, e.g. https://<ref>.supabase.co
+#   SUPABASE_SERVICE_ROLE_KEY   — service_role key (server-only; safe as a secret)
+
+on:
+  schedule:
+    - cron: "0 8 * * *" # every day at 08:00 UTC
+  workflow_dispatch: {} # allow manual runs from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase Storage (registers project activity)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "::error::SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY secrets are not set."
+            exit 1
+          fi
+          code=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            "${SUPABASE_URL}/storage/v1/bucket")
+          echo "Supabase Storage API responded: HTTP ${code}"
+          if [ "$code" != "200" ]; then
+            echo "::error::Keep-alive ping failed (HTTP ${code}). Project may be paused or misconfigured."
+            exit 1
+          fi
+          echo "✅ Project is awake."
