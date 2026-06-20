@@ -59,19 +59,19 @@ export default function FaqsPage() {
 
           <div className="mt-5 grid gap-4 sm:grid-cols-3">
             <Platform title="iPhone / iPad (Safari)" steps={[
-              "Tap the Share button (the square with an arrow).",
-              "Scroll down and tap “Add to Home Screen.”",
-              "Tap “Add” — the icon appears on your home screen.",
+              <>Tap the Share button {ShareIcon} in the toolbar.</>,
+              <>Scroll down and tap {PlusBoxIcon} “Add to Home Screen.”</>,
+              <>Tap “Add” — the icon appears on your home screen.</>,
             ]} />
             <Platform title="Android (Chrome)" steps={[
-              "Tap “Install the app” above, or open the ⋮ menu.",
-              "Tap “Install app” / “Add to Home screen.”",
-              "Confirm — it lands in your app drawer.",
+              <>Tap “Install the app” above, or the menu {KebabIcon}.</>,
+              <>Tap {InstallIcon} “Install app” / “Add to Home screen.”</>,
+              <>Confirm — it lands in your app drawer.</>,
             ]} />
             <Platform title="Desktop (Chrome / Edge)" steps={[
-              "Click the install icon in the address bar, or the ⋮ menu.",
-              "Choose “Install Networking Cards.”",
-              "It opens in its own window.",
+              <>Click {InstallIcon} in the address bar, or the menu {KebabIcon}.</>,
+              <>Choose “Install Networking Cards.”</>,
+              <>It opens in its own window.</>,
             ]} />
           </div>
         </section>
@@ -97,13 +97,48 @@ export default function FaqsPage() {
   );
 }
 
-function Platform({ title, steps }: { title: string; steps: string[] }) {
+function Platform({ title, steps }: { title: string; steps: React.ReactNode[] }) {
   return (
     <div className="rounded-xl bg-elevated ring-1 ring-line p-4">
       <p className="text-sm font-semibold text-foreground">{title}</p>
-      <ol className="mt-2 space-y-1.5 text-xs text-body list-decimal list-inside marker:text-emerald-600">
-        {steps.map((s, i) => <li key={i}>{s}</li>)}
+      <ol className="mt-2 space-y-2 text-xs text-body list-decimal list-outside ml-4 marker:text-emerald-600">
+        {steps.map((s, i) => <li key={i} className="pl-1">{s}</li>)}
       </ol>
     </div>
   );
 }
+
+// Inline button glyphs so users can recognize the actual buttons they're looking for.
+// `g` = an emerald rounded chip wrapper that mimics how the button looks in the OS UI.
+function g(children: React.ReactNode) {
+  return (
+    <span className="inline-flex items-center justify-center align-middle mx-0.5 h-5 w-5 rounded-md bg-emerald-600/10 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-600/20">
+      {children}
+    </span>
+  );
+}
+const svg = "h-3.5 w-3.5";
+// iOS Share: arrow rising out of a tray.
+const ShareIcon = g(
+  <svg viewBox="0 0 24 24" className={svg} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M12 3v11" /><path d="M8 7l4-4 4 4" /><path d="M6 12v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-7" />
+  </svg>
+);
+// Add to Home Screen: plus in a square.
+const PlusBoxIcon = g(
+  <svg viewBox="0 0 24 24" className={svg} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <rect x="3.5" y="3.5" width="17" height="17" rx="3.5" /><path d="M12 8v8M8 12h8" />
+  </svg>
+);
+// Chrome/Android overflow menu: three vertical dots.
+const KebabIcon = g(
+  <svg viewBox="0 0 24 24" className={svg} fill="currentColor" aria-hidden>
+    <circle cx="12" cy="5" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="12" cy="19" r="1.7" />
+  </svg>
+);
+// Install: arrow descending into a tray (address-bar / menu install glyph).
+const InstallIcon = g(
+  <svg viewBox="0 0 24 24" className={svg} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M12 3v10" /><path d="M8 9l4 4 4-4" /><path d="M6 17v2a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-2" />
+  </svg>
+);
