@@ -40,7 +40,7 @@ confirm anything ambiguous; a wrong assumption here is what breaks the build.
 15. **Display mode:** `standalone` (default, app-like) vs `fullscreen`/`minimal-ui`. Orientation lock?
 16. **Offline behavior:** none (live app, SW only for installability — safest default) vs cache an offline shell? Caching a logged-in/dynamic app causes stale-content bugs — default to **no caching**.
 17. **Is there an auth gate / middleware** that redirects unauthenticated requests? If so, the PWA assets + any public pages **must be whitelisted** (this is the #1 silent PWA breakage — see Part 2, step 6).
-18. **Install entry point:** just OS-native install, or also an in-app "Install" button + a help/FAQ page with manual steps? iOS has **no** install prompt — it always needs manual "Add to Home Screen" steps.
+18. **Install entry point:** just OS-native install, or also an in-app "Install" button + a help/FAQ page with manual steps? **iOS *and* macOS Safari have no install prompt** — they always need manual steps ("Add to Home Screen" / "Add to Dock"), so a help page covering all platforms is strongly recommended. Confirm where it's linked (nav? logged-out too?).
 
 ---
 
@@ -105,12 +105,31 @@ prompt (manual "Add to Home Screen").
 - `theme-color` (mobile browser/status bar) — Next: `export const viewport = { themeColor: "#xxxxxx" }`.
 - iOS web-app meta — Next: `metadata.appleWebApp = { capable: true, title, statusBarStyle }`; generic: the `apple-mobile-web-app-*` meta tags.
 
-### 5. Optional in-app install button + help page
-- A button that listens for `beforeinstallprompt`, prevents the default mini-infobar, and calls `prompt()` on click. **Hidden on iOS** (event never fires) → fall back to manual steps.
-- A `/faqs` (or `/install`) page with per-platform steps:
-  - **iPhone/iPad (Safari):** Share → Add to Home Screen → Add.
-  - **Android (Chrome):** tap Install / ⋮ → Install app.
-  - **Desktop (Chrome/Edge):** install icon in the address bar, or ⋮ → Install.
+### 5. In-app install button + FAQ/help page (requirements)
+
+**Install button** — listens for `beforeinstallprompt`, prevents the default
+mini-infobar, calls `prompt()` on click, and listens for `appinstalled`. **Hidden on
+iOS and macOS Safari** (the event never fires there) → those users follow the manual
+steps below. Also hide it when already running installed (`display-mode: standalone`).
+
+**FAQ / install help page** (e.g. `/faqs` or `/install`) — requirements:
+- **Public** — must be reachable logged-out (whitelist it in middleware, step 6) and
+  **linked from the nav AND the mobile menu in both signed-in and signed-out states**
+  (new users need it before they have an account).
+- **Lead with the install section**, then general FAQs (what the app is, sign-up,
+  privacy, etc.) in a collapsible `<details>` list.
+- **Cover all four install paths** — don't lump "desktop" together; macOS Safari is
+  different from Chrome/Edge:
+  - **iPhone / iPad (Safari):** Share → **Add to Home Screen** → Add.
+  - **Android (Chrome):** tap the in-app Install button, or ⋮ menu → **Install app / Add to Home screen**.
+  - **Mac (Safari 17+):** menu bar **File → Add to Dock…** (or Share → Add to Dock).
+  - **Mac / PC (Chrome · Edge):** **Install icon in the address bar**, or ⋮ menu → Install.
+- **Show recognizable button glyphs inline** next to each step so users can spot the
+  real button — at minimum: iOS **Share** (arrow out of a tray), **Add-to-Home** (＋ in
+  a square), **⋮ overflow menu** (three dots), **Install** (arrow into a tray). Small
+  inline SVGs in a brand-colored chip work well and stay crisp + theme-aware (screenshots
+  are clearer still but are OS-version-specific and add image weight).
+- **Embed the install button** in the install section (it self-hides where unsupported).
 
 ### 6. ⚠️ Whitelist PWA assets in any auth middleware (the silent killer)
 If middleware redirects unauthenticated requests to `/login`, it will also redirect
@@ -172,6 +191,7 @@ Vercel can't persist runtime file writes, so route uploads to object storage.
 - [ ] Manifest with name + 192/512 + maskable icons + apple-touch-icon; `display:standalone`.
 - [ ] Service worker registered (prod only), no caching.
 - [ ] theme-color + apple web-app meta in `<head>`.
+- [ ] FAQ/install page: public, nav-linked (logged-out too), covers iOS + Android + macOS Safari + Chrome/Edge, with inline button glyphs; install button self-hides where unsupported.
 - [ ] Auth middleware whitelists manifest, sw.js, icons, and public/install pages.
 - [ ] Uploads go to object storage; prod fails loudly if unconfigured.
 - [ ] (If free-tier storage) scheduled keep-alive cron in place.
