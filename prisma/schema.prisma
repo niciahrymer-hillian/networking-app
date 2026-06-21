@@ -81,6 +81,7 @@ model User {
   networkOut                UserConnection[] @relation("NetworkOut")
   networkIn                 UserConnection[] @relation("NetworkIn")
   dashboardLayout           String?                       // JSON: ordered list of dashboard tile ids ("widget:x" | "card:<id>")
+  feedLastSeenAt            DateTime?                     // when the user last opened /feed (for the "new posts" badge)
   createdAt                 DateTime  @default(now())
 }
 
@@ -140,6 +141,7 @@ model ConversationParticipant {
   userId         String
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   isAdmin        Boolean      @default(false)   // group admin: rename, add/remove, delegate
+  lastReadAt     DateTime?                       // when this member last opened the thread (for unread badges)
   createdAt      DateTime     @default(now())
 
   @@unique([conversationId, userId])

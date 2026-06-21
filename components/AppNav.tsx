@@ -8,6 +8,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { sessionOptions, SessionData } from "@/lib/session";
+import { prisma } from "@/lib/db";
 import LogoutButton from "@/app/LogoutButton";
 import MobileMenu, { type NavItem } from "@/components/MobileMenu";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -18,15 +19,47 @@ export default async function AppNav() {
   const loggedIn = session.isLoggedIn ?? false;
   const isAdmin = session.isAdmin ?? false;
   const username = session.username;
+  const me = session.userId;
+
+  // Notification badge counts (logged-in only): pending requests, unread messages,
+  // and new feed posts since the user last opened each area.
+  let pendingRequests = 0;
+  let unreadMessages = 0;
+  let newPosts = 0;
+  if (loggedIn && me) {
+    const [pending, myParts, net, user] = await Promise.all([
+      prisma.connection.count({ where: { profile: { userId: me }, status: "pending" } }),
+      prisma.conversationParticipant.findMany({
+        where: { userId: me },
+        select: {
+          lastReadAt: true,
+          conversation: { select: { messages: { orderBy: { createdAt: "desc" }, take: 1, select: { senderId: true, createdAt: true } } } },
+        },
+      }),
+      prisma.userConnection.findMany({ where: { userId: me }, select: { connectedUserId: true } }),
+      prisma.user.findUnique({ where: { id: me }, select: { feedLastSeenAt: true } }),
+    ]);
+    pendingRequests = pending;
+    unreadMessages = myParts.filter((p) => {
+      const last = p.conversation.messages[0];
+      return last && last.senderId !== me && (!p.lastReadAt || last.createdAt > p.lastReadAt);
+    }).length;
+    const netIds = net.map((n) => n.connectedUserId);
+    newPosts = netIds.length
+      ? await prisma.post.count({
+          where: { authorId: { in: netIds }, ...(user?.feedLastSeenAt ? { createdAt: { gt: user.feedLastSeenAt } } : {}) },
+        })
+      : 0;
+  }
 
   // Single source of truth for the nav links, used by both desktop + mobile.
   const links: NavItem[] = loggedIn
     ? [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Feed", href: "/feed" },
-        { label: "Messages", href: "/messages" },
+        { label: "Feed", href: "/feed", badge: newPosts },
+        { label: "Messages", href: "/messages", badge: unreadMessages },
         ...(!isAdmin ? [{ label: "My profile", href: "/my-profile" }] : []),
-        { label: "Connections", href: "/my-connections" },
+        { label: "Connections", href: "/my-connections", badge: pendingRequests },
         { label: "Activity", href: "/notifications" },
         ...(isAdmin
           ? [
@@ -66,8 +99,9 @@ export default async function AppNav() {
         {loggedIn && (
           <div className="hidden md:flex items-center gap-3 flex-1 justify-center">
             {mainLinks.map((l) => (
-              <Link key={l.href} href={l.href} className={navLink}>
+              <Link key={l.href} href={l.href} className={`${navLink} inline-flex items-center gap-1.5`}>
                 {l.label}
+                {l.badge ? <Bubble n={l.badge} /> : null}
               </Link>
             ))}
             {adminLinks.length > 0 && <span className="mx-1 h-4 w-px bg-line" aria-hidden />}
@@ -119,5 +153,14 @@ export default async function AppNav() {
         <MobileMenu links={links} loggedIn={loggedIn} username={username} />
       </div>
     </nav>
+  );
+}
+
+// Small emerald count bubble for nav notification badges (caps at "9+").
+function Bubble({ n }: { n: number }) {
+  return (
+    <span className="inline-flex h-[1.1rem] min-w-[1.1rem] items-center justify-center rounded-full bg-emerald-600 px-1 text-[10px] font-bold leading-none text-white">
+      {n > 9 ? "9+" : n}
+    </span>
   );
 }

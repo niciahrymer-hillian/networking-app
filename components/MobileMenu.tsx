@@ -11,6 +11,7 @@ export interface NavItem {
   label: string;
   href: string;
   admin?: boolean;
+  badge?: number;
 }
 
 export default function MobileMenu({
@@ -49,8 +50,13 @@ export default function MobileMenu({
           <div className="fixed inset-0 z-40" onClick={close} aria-hidden />
           <div className="absolute right-3 top-14 z-50 w-56 rounded-2xl bg-surface shadow-xl ring-1 ring-line p-2 flex flex-col">
             {links.map((l) => (
-              <Link key={l.href} href={l.href} onClick={close} className={item(l.admin)}>
-                {l.label}
+              <Link key={l.href} href={l.href} onClick={close} className={`${item(l.admin)} flex items-center justify-between gap-2`}>
+                <span>{l.label}</span>
+                {l.badge ? (
+                  <span className="inline-flex h-[1.1rem] min-w-[1.1rem] items-center justify-center rounded-full bg-emerald-600 px-1 text-[10px] font-bold leading-none text-white">
+                    {l.badge > 9 ? "9+" : l.badge}
+                  </span>
+                ) : null}
               </Link>
             ))}
 

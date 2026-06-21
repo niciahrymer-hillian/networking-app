@@ -28,6 +28,11 @@ export default async function FeedPage({
   });
   const authorIds = [session.userId, ...network.map((n) => n.connectedUserId)];
 
+  // Visiting the feed clears the "new posts" badge. Fire-and-forget.
+  prisma.user
+    .update({ where: { id: session.userId }, data: { feedLastSeenAt: new Date() } })
+    .catch(() => {});
+
   const posts = await prisma.post.findMany({
     // Tag search stays within your network + own posts (same privacy scope as the
     // feed). tags is a JSON array string; matching the quoted token avoids partial

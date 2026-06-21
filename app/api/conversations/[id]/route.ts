@@ -20,6 +20,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const part = await participantOf(id, me);
   if (!part) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  // Opening the thread marks it read (powers the Messages unread badge). Fire-and-forget.
+  prisma.conversationParticipant
+    .updateMany({ where: { conversationId: id, userId: me }, data: { lastReadAt: new Date() } })
+    .catch(() => {});
+
   const convo = await prisma.conversation.findUnique({
     where: { id },
     include: {
