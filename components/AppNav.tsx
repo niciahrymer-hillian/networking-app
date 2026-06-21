@@ -95,7 +95,7 @@ export default async function AppNav() {
           href="/"
           className="flex items-center gap-3 font-bold text-foreground hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors shrink-0"
         >
-          <img src="/logo.png" alt="Networking Cards" className="h-16 w-auto rounded-md" />
+          <img src="/logo.svg" alt="Networking Cards" className="h-16 w-auto rounded-md" />
           <span className="hidden sm:inline text-xl tracking-tight">Networking Cards</span>
         </Link>
 

@@ -32,7 +32,7 @@ export default async function proxy(request: NextRequest) {
     // installing / for the app icon + splash).
     pathname === "/manifest.webmanifest" ||
     pathname === "/sw.js" ||
-    pathname.startsWith("/icon-") ||
+    pathname.startsWith("/icon") ||
     pathname.startsWith("/apple-icon") ||
     pathname.startsWith("/uploads/") ||
     pathname.startsWith("/api/uploads/") ||
