@@ -41,6 +41,8 @@ confirm anything ambiguous; a wrong assumption here is what breaks the build.
 16. **Offline behavior:** none (live app, SW only for installability — safest default) vs cache an offline shell? Caching a logged-in/dynamic app causes stale-content bugs — default to **no caching**.
 17. **Is there an auth gate / middleware** that redirects unauthenticated requests? If so, the PWA assets + any public pages **must be whitelisted** (this is the #1 silent PWA breakage — see Part 2, step 6).
 18. **Install entry point:** just OS-native install, or also an in-app "Install" button + a help/FAQ page with manual steps? **iOS *and* macOS Safari have no install prompt** — they always need manual steps ("Add to Home Screen" / "Add to Dock"), so a help page covering all platforms is strongly recommended. Confirm where it's linked (nav? logged-out too?).
+19. **In-app nav controls?** A standalone PWA hides the browser's back/forward/reload — do you want in-app buttons for those (shown only when installed)?
+20. **Notifications?** Do you want unread bubbles on nav items and/or an app-icon badge (Web Badging API)? If so, what counts as "unread" per area, and is there read-state to track it (or does that need adding)? Note: live background badge updates need push + a service worker.
 
 ---
 
@@ -139,7 +141,35 @@ Explicitly allow, before the auth check:
 `/manifest.webmanifest`, `/sw.js`, `/icon-*`, `/apple-icon*`, and any public page
 like `/faqs`. Test each returns **200 unauthenticated**, not a 307 to `/login`.
 
-### 7. Verify installability
+### 7. In-app navigation controls (standalone hides the browser chrome)
+A `display: standalone` PWA has no address bar — so **no back / forward / reload**.
+Add in-app controls so users aren't stranded:
+- A small client component with **← back** (`history.back()`), **→ forward**
+  (`history.forward()`), and **⟳ reload** (`location.reload()`) buttons, placed in the
+  app's top bar/nav (which should render on every page → controls are global).
+- **Render them only when installed** — gate on
+  `matchMedia('(display-mode: standalone)').matches || navigator.standalone === true`
+  (the latter is iOS Safari's flag). In a normal browser tab they stay hidden since the
+  browser already has them.
+- Back also works via edge-swipe (iOS) / system back (Android); the real gaps are
+  **reload** and **forward**, so include at least those.
+
+### 8. Notifications: in-app bubbles + the app-icon badge
+Two complementary surfaces — do the in-app bubbles first (they work everywhere):
+- **In-app nav bubbles** — count badges on nav items (Feed / Messages / Requests, …).
+  To be meaningful they need a **read-state**, or they never clear: store a
+  `lastReadAt` per conversation and a `lastSeenAt` per feed/area, set it when the user
+  opens that area, then count items newer than it (and from others). Compute the counts
+  in the nav (server) component; cap display at "9+".
+- **App-icon badge (Web Badging API)** — a count on the installed home-screen/dock icon.
+  Tiny client component fed the same unread total:
+  `'setAppBadge' in navigator && (count > 0 ? navigator.setAppBadge(count) : navigator.clearAppBadge())`.
+  **Gotchas:** iOS shows it only when the PWA is **installed AND has notification
+  permission** (so the in-app bubbles are the reliable fallback); and it updates **only
+  while the app is open** (on navigation) — live background updates need **push +
+  a service worker**, a separate larger feature.
+
+### 9. Verify installability
 ```bash
 BASE="https://your-app.vercel.app"
 for p in manifest.webmanifest sw.js icon-192.png icon-512.png apple-icon.png faqs; do
@@ -192,6 +222,8 @@ Vercel can't persist runtime file writes, so route uploads to object storage.
 - [ ] Service worker registered (prod only), no caching.
 - [ ] theme-color + apple web-app meta in `<head>`.
 - [ ] FAQ/install page: public, nav-linked (logged-out too), covers iOS + Android + macOS Safari + Chrome/Edge, with inline button glyphs; install button self-hides where unsupported.
+- [ ] In-app back / forward / reload controls, shown only when installed (standalone).
+- [ ] Notification bubbles on nav items (backed by read-state so they clear) + optional app-icon badge via the Web Badging API.
 - [ ] Auth middleware whitelists manifest, sw.js, icons, and public/install pages.
 - [ ] Uploads go to object storage; prod fails loudly if unconfigured.
 - [ ] (If free-tier storage) scheduled keep-alive cron in place.
