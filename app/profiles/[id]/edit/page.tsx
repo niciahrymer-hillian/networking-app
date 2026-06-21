@@ -97,6 +97,20 @@ export default async function EditProfilePage({
             parentName={parentProfile?.name ?? null}
             otherProfiles={otherProfiles}
           />
+
+          {/* Quick add: a new secondary card that adopts this card's contact details */}
+          <div className="mt-4 border-t border-line pt-4">
+            <p className="text-sm font-medium text-body">Have a second career or role?</p>
+            <p className="text-xs text-muted mt-0.5 mb-2">
+              Start a new card that reuses your name, email, phone and links — just change the headline + style.
+            </p>
+            <Link
+              href={`/profiles/new?from=${profile.id}`}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-4 py-2 transition-colors"
+            >
+              + Add a secondary card
+            </Link>
+          </div>
         </div>
       </div>
     </main>

@@ -28,8 +28,9 @@ export interface ProfileFormData {
 }
 
 interface Props {
-  initial?: ProfileFormData; // pre-populated for edit mode
+  initial?: ProfileFormData; // pre-populated for edit mode (or a pre-filled new card)
   account?: { name: string | null; username: string }; // account identity, to distinguish from the card name
+  secondaryOf?: string; // when set, the created card links as a secondary of this parent card
 }
 
 const EMPTY: ProfileFormData = {
@@ -38,7 +39,7 @@ const EMPTY: ProfileFormData = {
   template: "classic", cardTemplate: "", colorScheme: "emerald", font: "sans",
 };
 
-export default function ProfileForm({ initial, account }: Props) {
+export default function ProfileForm({ initial, account, secondaryOf }: Props) {
   const router = useRouter();
   const [form, setForm] = useState<ProfileFormData>(initial ?? EMPTY);
   const [saving, setSaving] = useState(false);
@@ -97,10 +98,13 @@ export default function ProfileForm({ initial, account }: Props) {
     const url = isEdit ? `/api/profiles/${initial!.id}` : "/api/profiles";
     const method = isEdit ? "PUT" : "POST";
 
+    // On create, link as a secondary of the parent card when requested.
+    const payload = !isEdit && secondaryOf ? { ...form, parentProfileId: secondaryOf } : form;
+
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     });
 
     if (res.ok) {
@@ -116,6 +120,11 @@ export default function ProfileForm({ initial, account }: Props) {
   return (
     <div className="flex flex-col-reverse gap-8 lg:grid lg:grid-cols-[1fr_360px] lg:items-start">
     <form onSubmit={handleSubmit} className="flex flex-col gap-6 rounded-3xl bg-surface p-6 sm:p-8 shadow-sm ring-1 ring-line">
+      {secondaryOf && !isEdit && (
+        <div className="rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-sm px-4 py-3">
+          🔗 <span className="font-medium">Secondary card.</span> Your contact details were copied from your other card — just set the new role’s <span className="font-medium">headline, about, and style</span> below. It’ll link to the original automatically.
+        </div>
+      )}
       {error && (
         <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 text-sm px-4 py-3 rounded-lg">
           {error}

@@ -29,10 +29,22 @@ export async function POST(request: NextRequest) {
   if (!body.name?.trim())
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
 
+  // Optional: link the new card as a secondary of another card the user owns
+  // (the "two careers" flow). Validate ownership so you can't graft onto someone else's.
+  let parentProfileId: string | null = null;
+  if (body.parentProfileId) {
+    const parent = await prisma.profile.findFirst({
+      where: { id: body.parentProfileId, userId: session.userId },
+      select: { id: true },
+    });
+    parentProfileId = parent?.id ?? null;
+  }
+
   const profile = await prisma.profile.create({
     data: {
       slug: uuidv4(), // unique URL-safe ID for the public /p/<slug> page
       userId: session.userId,
+      parentProfileId,
       name: body.name.trim(),
       email: body.email?.trim() || null,
       phone: body.phone?.trim() || null,
