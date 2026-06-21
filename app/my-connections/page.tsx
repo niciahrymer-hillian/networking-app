@@ -2,8 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { decrypt } from "@/lib/crypto";
+import { decrypt, hash } from "@/lib/crypto";
 import ConnectionActions from "../profiles/[id]/connections/ConnectionActions";
+import AccountPreviewButton from "@/components/AccountPreviewButton";
 
 export const dynamic = "force-dynamic";
 
@@ -76,13 +77,20 @@ export default async function MyConnectionsPage({
     orderBy: { createdAt: "desc" },
     select: { id: true, emailEnc: true, linkedinEnc: true, githubEnc: true, createdAt: true, profileId: true },
   });
-  const pendingByProfile = new Map<string, { id: string; label: string; createdAt: Date }[]>();
+  const pendingByProfile = new Map<string, { id: string; label: string; email: string | null; createdAt: Date }[]>();
   for (const c of pendingRaw) {
-    const label = c.emailEnc ? decrypt(c.emailEnc) : c.linkedinEnc ? decrypt(c.linkedinEnc) : c.githubEnc ? decrypt(c.githubEnc) : "New request";
+    const email = c.emailEnc ? decrypt(c.emailEnc) : null;
+    const label = email ?? (c.linkedinEnc ? decrypt(c.linkedinEnc) : c.githubEnc ? decrypt(c.githubEnc) : "New request");
     const list = pendingByProfile.get(c.profileId) ?? [];
-    list.push({ id: c.id, label, createdAt: c.createdAt });
+    list.push({ id: c.id, label, email, createdAt: c.createdAt });
     pendingByProfile.set(c.profileId, list);
   }
+  // Which requesters have an account (match by emailHash)? → enable a preview.
+  const reqHashes = [...new Set([...pendingByProfile.values()].flat().filter((p) => p.email).map((p) => hash(p.email!)))];
+  const reqAccounts = reqHashes.length
+    ? await prisma.user.findMany({ where: { emailHash: { in: reqHashes } }, select: { username: true, emailHash: true } })
+    : [];
+  const usernameByHash = new Map(reqAccounts.map((a) => [a.emailHash!, a.username] as const));
 
   // Optional filter: only show one card's connections.
   const activeCard = card && profiles.some((p) => p.id === card) ? card : null;
@@ -173,15 +181,21 @@ export default async function MyConnectionsPage({
                         Requests ({pending.length})
                       </p>
                       <div className="space-y-2">
-                        {pending.map((r) => (
-                          <div key={r.id} className="flex items-center justify-between gap-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 px-3 py-2.5">
-                            <div className="min-w-0">
-                              <p className="text-sm text-body truncate">{r.label}</p>
-                              <p className="text-xs text-muted">{new Date(r.createdAt).toLocaleDateString()}</p>
+                        {pending.map((r) => {
+                          const previewUsername = r.email ? usernameByHash.get(hash(r.email)) : undefined;
+                          return (
+                            <div key={r.id} className="flex items-center justify-between gap-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 px-3 py-2.5">
+                              <div className="min-w-0">
+                                <p className="text-sm text-body truncate">{r.label}</p>
+                                <p className="text-xs text-muted">
+                                  {new Date(r.createdAt).toLocaleDateString()}
+                                  {previewUsername && <> · <AccountPreviewButton username={previewUsername} name={r.label} /></>}
+                                </p>
+                              </div>
+                              <ConnectionActions id={r.id} />
                             </div>
-                            <ConnectionActions id={r.id} />
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}

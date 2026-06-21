@@ -9,8 +9,9 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { decrypt } from "@/lib/crypto";
+import { decrypt, hash } from "@/lib/crypto";
 import ConnectionActions from "./ConnectionActions";
+import AccountPreviewButton from "@/components/AccountPreviewButton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -47,6 +48,13 @@ export default async function ConnectionsPage({ params }: Props) {
 
   const pending = connections.filter((c) => c.status === "pending");
   const confirmed = connections.filter((c) => c.status === "confirmed");
+
+  // Which pending requesters have an account (match by emailHash)? → enable a preview.
+  const reqHashes = [...new Set(pending.filter((c) => c.email).map((c) => hash(c.email!)))];
+  const reqAccounts = reqHashes.length
+    ? await prisma.user.findMany({ where: { emailHash: { in: reqHashes } }, select: { username: true, emailHash: true } })
+    : [];
+  const usernameByHash = new Map(reqAccounts.map((a) => [a.emailHash!, a.username] as const));
 
   // Categorized views operate on confirmed connections only (the actual network)
   const emails = confirmed.filter((c) => c.email);
@@ -107,6 +115,10 @@ export default async function ConnectionsPage({ params }: Props) {
                   )}
                   <p className="text-xs text-gray-400">
                     {new Date(c.createdAt).toLocaleDateString()}
+                    {(() => {
+                      const previewUsername = c.email ? usernameByHash.get(hash(c.email)) : undefined;
+                      return previewUsername ? <> · <AccountPreviewButton username={previewUsername} name={c.email ?? previewUsername} /></> : null;
+                    })()}
                   </p>
                 </div>
                 <ConnectionActions id={c.id} />
