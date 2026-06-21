@@ -13,6 +13,7 @@ import LogoutButton from "@/app/LogoutButton";
 import MobileMenu, { type NavItem } from "@/components/MobileMenu";
 import ThemeToggle from "@/components/ThemeToggle";
 import PwaNavControls from "@/components/PwaNavControls";
+import AppBadge from "@/components/AppBadge";
 
 export default async function AppNav() {
   const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
@@ -81,6 +82,9 @@ export default async function AppNav() {
 
   return (
     <nav className="bg-surface/80 backdrop-blur-md border-b border-line px-6 pt-12 pb-8 sticky top-0 z-50">
+      {/* Installed-app icon badge = total unread across the nav bubbles */}
+      {loggedIn && <AppBadge count={pendingRequests + unreadMessages + newPosts} />}
+
       <div className="w-full flex items-center justify-between gap-4">
 
         {/* Back / forward / reload — only visible when running as an installed PWA */}
