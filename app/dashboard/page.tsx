@@ -15,7 +15,8 @@ import { getAppUrl } from "@/lib/app-url";
 import DashboardTiles, { type Tile } from "./DashboardTiles";
 import ConnectionActions from "../profiles/[id]/connections/ConnectionActions";
 import PymkList from "@/components/PymkList";
-import { decrypt } from "@/lib/crypto";
+import { decrypt, hash } from "@/lib/crypto";
+import AccountPreviewButton from "@/components/AccountPreviewButton";
 
 export const dynamic = "force-dynamic"; // always fetch fresh profiles
 
@@ -129,12 +130,22 @@ export default async function Dashboard() {
   ]);
 
   // Pending requests — decrypt the best available identifier for a human label.
-  const pendingReqs = pendingRaw.map((c) => ({
-    id: c.id,
-    label: c.emailEnc ? decrypt(c.emailEnc) : c.linkedinEnc ? decrypt(c.linkedinEnc) : c.githubEnc ? decrypt(c.githubEnc) : null,
-    cardName: c.profile.name,
-    createdAt: c.createdAt,
-  }));
+  const pendingReqs = pendingRaw.map((c) => {
+    const email = c.emailEnc ? decrypt(c.emailEnc) : null;
+    return {
+      id: c.id,
+      email,
+      label: email ?? (c.linkedinEnc ? decrypt(c.linkedinEnc) : c.githubEnc ? decrypt(c.githubEnc) : null),
+      cardName: c.profile.name,
+      createdAt: c.createdAt,
+    };
+  });
+  // Which requesters have an account? Match by emailHash so the owner can preview them.
+  const reqHashes = [...new Set(pendingReqs.filter((r) => r.email).map((r) => hash(r.email!)))];
+  const reqAccounts = reqHashes.length
+    ? await prisma.user.findMany({ where: { emailHash: { in: reqHashes } }, select: { username: true, emailHash: true } })
+    : [];
+  const usernameByHash = new Map(reqAccounts.map((a) => [a.emailHash!, a.username] as const));
 
   // People you may know — rank candidates by number of mutual connections.
   const pymkMap = new Map<string, { user: (typeof secondDegree)[number]["connectedUser"]; mutuals: number }>();
@@ -247,15 +258,21 @@ export default async function Dashboard() {
         <p className="text-sm text-muted">No pending requests. Share your QR to collect new connections.</p>
       ) : (
         <ul className="flex flex-col gap-2.5">
-          {pendingReqs.map((r) => (
-            <li key={r.id} className="flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <p className="truncate text-sm text-body">{r.label ?? "New request"}</p>
-                <p className="text-xs text-muted">on “{r.cardName}” · {timeAgo(r.createdAt)}</p>
-              </div>
-              <ConnectionActions id={r.id} />
-            </li>
-          ))}
+          {pendingReqs.map((r) => {
+            const previewUsername = r.email ? usernameByHash.get(hash(r.email)) : undefined;
+            return (
+              <li key={r.id} className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="truncate text-sm text-body">{r.label ?? "New request"}</p>
+                  <p className="text-xs text-muted">
+                    on “{r.cardName}” · {timeAgo(r.createdAt)}
+                    {previewUsername && <> · <AccountPreviewButton username={previewUsername} name={r.label ?? previewUsername} /></>}
+                  </p>
+                </div>
+                <ConnectionActions id={r.id} />
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
