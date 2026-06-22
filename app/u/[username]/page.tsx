@@ -62,6 +62,13 @@ export default async function MemberProfilePage({
   const accountAvatar = user.avatarUrl ?? card?.headshotUrl ?? null;
   const otherCards = user.profiles.filter((p) => p.id !== card?.id);
 
+  // Structured résumé (account-level JSON), shown to connections.
+  const parseArr = <T,>(s: string | null): T[] => { try { const v = JSON.parse(s ?? "[]"); return Array.isArray(v) ? (v as T[]) : []; } catch { return []; } };
+  const experience = parseArr<{ role?: string; org?: string; period?: string; summary?: string }>(user.experience);
+  const education = parseArr<{ school?: string; credential?: string; period?: string }>(user.education);
+  const skills = parseArr<string>(user.skills);
+  const hasResume = experience.length > 0 || education.length > 0 || skills.length > 0;
+
   // Share QR is gated by the owner's per-card setting AND the viewer being in their network (or themselves).
   const canShareQr = !!card?.allowConnectionQrShare && canSeeFull;
 
@@ -87,6 +94,11 @@ export default async function MemberProfilePage({
           <div className="min-w-0">
             <h1 className="truncate text-2xl font-bold tracking-tight">{accountName}</h1>
             <p className="text-sm text-muted">@{user.username}{user.profiles.length > 1 ? ` · ${user.profiles.length} cards` : ""}</p>
+            {user.openToWork && (
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-500/30">
+                🟢 Open to work
+              </span>
+            )}
           </div>
         </div>
 
@@ -123,6 +135,47 @@ export default async function MemberProfilePage({
           <div className="mt-8 lg:mt-0">
             {canSeeFull ? (
               <>
+                {hasResume && (
+                  <div className="mb-8 space-y-4">
+                    {experience.length > 0 && (
+                      <section className="rounded-2xl bg-surface p-5 shadow-sm ring-1 ring-line">
+                        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">Experience</h2>
+                        <div className="space-y-4">
+                          {experience.map((e, i) => (
+                            <div key={i}>
+                              <p className="text-sm font-semibold">{e.role}{e.org && <span className="font-normal text-muted"> · {e.org}</span>}</p>
+                              {e.period && <p className="text-xs text-muted">{e.period}</p>}
+                              {e.summary && <p className="mt-1 text-sm text-body whitespace-pre-wrap leading-relaxed">{e.summary}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    )}
+                    {education.length > 0 && (
+                      <section className="rounded-2xl bg-surface p-5 shadow-sm ring-1 ring-line">
+                        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">Education</h2>
+                        <div className="space-y-3">
+                          {education.map((e, i) => (
+                            <div key={i}>
+                              <p className="text-sm font-semibold">{e.school}</p>
+                              <p className="text-xs text-muted">{[e.credential, e.period].filter(Boolean).join(" · ")}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    )}
+                    {skills.length > 0 && (
+                      <section className="rounded-2xl bg-surface p-5 shadow-sm ring-1 ring-line">
+                        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">Skills</h2>
+                        <div className="flex flex-wrap gap-1.5">
+                          {skills.map((s) => (
+                            <span key={s} className="rounded-full bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">{s}</span>
+                          ))}
+                        </div>
+                      </section>
+                    )}
+                  </div>
+                )}
                 <h2 className="mb-4 text-lg font-bold tracking-tight">{accountName.replace(/^@/, "")}&apos;s posts</h2>
                 {user.posts.length === 0 ? (
                   <p className="rounded-2xl bg-surface px-4 py-8 text-center text-sm text-muted ring-1 ring-line">No posts yet.</p>

@@ -82,6 +82,11 @@ model User {
   networkIn                 UserConnection[] @relation("NetworkIn")
   dashboardLayout           String?                       // JSON: ordered list of dashboard tile ids ("widget:x" | "card:<id>")
   feedLastSeenAt            DateTime?                     // when the user last opened /feed (for the "new posts" badge)
+  // Structured résumé (account-level, shown on /u). JSON strings:
+  experience                String?                       // [{ role, org, period, summary }]
+  education                 String?                       // [{ school, credential, period }]
+  skills                    String?                       // ["Figma","UX", ...]
+  openToWork                Boolean   @default(false)      // "Open to work" badge on the profile
   createdAt                 DateTime  @default(now())
 }
 
