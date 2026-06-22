@@ -58,6 +58,7 @@ export default async function AppNav() {
     ? [
         { label: "Dashboard", href: "/dashboard" },
         { label: "Feed", href: "/feed", badge: newPosts },
+        { label: "Search", href: "/search" },
         { label: "Messages", href: "/messages", badge: unreadMessages },
         ...(!isAdmin ? [{ label: "My profile", href: "/my-profile" }] : []),
         { label: "Connections", href: "/my-connections", badge: pendingRequests },
