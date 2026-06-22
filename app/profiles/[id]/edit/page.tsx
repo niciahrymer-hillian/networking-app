@@ -72,7 +72,20 @@ export default async function EditProfilePage({
         <Link href="/dashboard" className="text-sm text-emerald-700 dark:text-emerald-300 hover:text-emerald-600 transition-colors">
           ← Dashboard
         </Link>
-        <h1 className="mt-4 mb-8 text-2xl font-bold tracking-tight">Edit — {profile.name}</h1>
+        <h1 className="mt-4 mb-6 text-2xl font-bold tracking-tight">Edit — {profile.name}</h1>
+
+        {/* Account-level professional profile (Experience/Skills/Open-to-work) lives
+            in Account settings, not on the card — surface it here so it's findable. */}
+        <Link
+          href="/account#professional"
+          className="mb-8 flex items-center justify-between gap-3 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 ring-1 ring-emerald-200 dark:ring-emerald-500/30 px-5 py-4 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors"
+        >
+          <span className="min-w-0">
+            <span className="block text-sm font-semibold text-emerald-800 dark:text-emerald-200">🟢 Professional profile &amp; “Open to work”</span>
+            <span className="block text-xs text-emerald-700/80 dark:text-emerald-300/80 mt-0.5">Add experience, education &amp; skills, and toggle Open to work — shown on your profile to your network.</span>
+          </span>
+          <span className="shrink-0 text-sm font-medium text-emerald-700 dark:text-emerald-300">Edit →</span>
+        </Link>
 
         <ProfileForm initial={initial} account={account ?? undefined} />
 

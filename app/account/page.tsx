@@ -182,7 +182,7 @@ export default function AccountPage() {
         </form>
 
         {/* Professional profile — résumé shown on your /u profile */}
-        <form onSubmit={saveProfessional} className="bg-surface ring-1 ring-line shadow-sm rounded-2xl p-6 space-y-5">
+        <form id="professional" onSubmit={saveProfessional} className="bg-surface ring-1 ring-line shadow-sm rounded-2xl p-6 space-y-5 scroll-mt-24">
           <div>
             <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Professional profile</h2>
             <p className="text-sm text-muted mt-1">Experience, education and skills — shown on your profile to connections.</p>
