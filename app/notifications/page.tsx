@@ -19,7 +19,7 @@ export default async function NotificationsPage() {
   const session = await requireAuth();
   if (!session?.userId) redirect("/login");
 
-  const [recentConnections, recentScans, scanTotal, connectionTotal, pendingTotal, networkTotal] = await Promise.all([
+  const [recentConnections, recentScans, scanTotal, connectionTotal, pendingTotal, networkTotal, recentReactions, recentComments] = await Promise.all([
     prisma.connection.findMany({
       where: { profile: { userId: session.userId } },
       include: { profile: { select: { id: true, name: true } } },
@@ -36,6 +36,19 @@ export default async function NotificationsPage() {
     prisma.connection.count({ where: { profile: { userId: session.userId }, status: "confirmed" } }),
     prisma.connection.count({ where: { profile: { userId: session.userId }, status: "pending" } }),
     prisma.userConnection.count({ where: { userId: session.userId } }),
+    // Engagement on YOUR posts (from others) — reactions + comments.
+    prisma.reaction.findMany({
+      where: { post: { authorId: session.userId }, userId: { not: session.userId } },
+      orderBy: { createdAt: "desc" },
+      take: 15,
+      select: { id: true, emoji: true, createdAt: true, postId: true, user: { select: { username: true } } },
+    }),
+    prisma.comment.findMany({
+      where: { post: { authorId: session.userId }, authorId: { not: session.userId } },
+      orderBy: { createdAt: "desc" },
+      take: 15,
+      select: { id: true, body: true, createdAt: true, postId: true, author: { select: { username: true } } },
+    }),
   ]);
 
   // Resolve usernames for scans that recorded a logged-in viewer → "viewed by @user".
@@ -53,28 +66,39 @@ export default async function NotificationsPage() {
     { label: "Network", value: networkTotal, emoji: "🌐" },
   ];
 
-  const events = [
+  const trunc = (s: string, n = 60) => (s.length > n ? s.slice(0, n).trimEnd() + "…" : s);
+  type Event = { id: string; emoji: string; text: string; sub?: string; href: string; createdAt: Date };
+  const events: Event[] = [
     ...recentConnections.map((c) => ({
       id: `connection-${c.id}`,
       // Confirm-to-connect: a pending submission is a request until the owner acts.
       emoji: c.status === "confirmed" ? "🤝" : "🔗",
-      type: c.status === "confirmed" ? "New connection" : "New connection request",
-      prep: "from",
-      // Who: the best identifier they shared (decrypted), else anonymous.
-      who: c.emailEnc ? decrypt(c.emailEnc) : c.linkedinEnc ? decrypt(c.linkedinEnc) : c.githubEnc ? decrypt(c.githubEnc) : "Someone",
-      profileId: c.profile.id,
-      profileName: c.profile.name,
+      text: `${c.status === "confirmed" ? "New connection" : "New connection request"} from ${c.emailEnc ? decrypt(c.emailEnc) : c.linkedinEnc ? decrypt(c.linkedinEnc) : c.githubEnc ? decrypt(c.githubEnc) : "Someone"}`,
+      sub: `on “${c.profile.name}”`,
+      href: `/profiles/${c.profile.id}/connections`,
       createdAt: c.createdAt,
     })),
     ...recentScans.map((s) => ({
       id: `scan-${s.id}`,
       emoji: "👀",
-      type: "Card viewed",
-      prep: "by",
-      who: (s.viewerUserId && viewerName.get(s.viewerUserId)) || deviceFromUA(s.userAgent),
-      profileId: s.profile.id,
-      profileName: s.profile.name,
+      text: `Card viewed by ${(s.viewerUserId && viewerName.get(s.viewerUserId)) || deviceFromUA(s.userAgent)}`,
+      sub: `on “${s.profile.name}”`,
+      href: `/profiles/${s.profile.id}/connections`,
       createdAt: s.createdAt,
+    })),
+    ...recentReactions.map((r) => ({
+      id: `reaction-${r.id}`,
+      emoji: r.emoji,
+      text: `@${r.user.username} reacted to your post`,
+      href: `/posts/${r.postId}`,
+      createdAt: r.createdAt,
+    })),
+    ...recentComments.map((c) => ({
+      id: `comment-${c.id}`,
+      emoji: "💬",
+      text: `@${c.author.username} commented: “${trunc(c.body)}”`,
+      href: `/posts/${c.postId}`,
+      createdAt: c.createdAt,
     })),
   ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
@@ -84,7 +108,7 @@ export default async function NotificationsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold">Activity</h1>
-            <p className="text-sm text-muted mt-1">Recent connections and scans across your cards.</p>
+            <p className="text-sm text-muted mt-1">Connections, scans, and reactions &amp; comments on your posts.</p>
           </div>
           <Link href="/scan-log" className="text-sm font-medium text-emerald-700 dark:text-emerald-300 hover:text-emerald-600 shrink-0">
             Full scan log →
@@ -107,20 +131,15 @@ export default async function NotificationsPage() {
         ) : (
           <div className="space-y-3">
             {events.map((event) => (
-              <div key={event.id} className="bg-surface ring-1 ring-line shadow-sm rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+              <Link key={event.id} href={event.href} className="bg-surface ring-1 ring-line shadow-sm rounded-xl px-4 py-3 flex items-center justify-between gap-3 hover:bg-elevated transition-colors">
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate">
-                    <span className="mr-1">{event.emoji}</span>{event.type} {event.prep} <span className="text-body font-normal">{event.who}</span>
+                    <span className="mr-1">{event.emoji}</span>{event.text}
                   </p>
-                  <p className="text-xs text-muted mt-1">on “{event.profileName}”</p>
+                  {event.sub && <p className="text-xs text-muted mt-1 truncate">{event.sub}</p>}
                 </div>
-                <div className="text-right shrink-0">
-                  <p className="text-xs text-muted">{new Date(event.createdAt).toLocaleString()}</p>
-                  <Link href={`/profiles/${event.profileId}/connections`} className="text-xs font-medium text-emerald-700 dark:text-emerald-300 hover:text-emerald-600">
-                    Open
-                  </Link>
-                </div>
-              </div>
+                <p className="text-xs text-muted shrink-0">{new Date(event.createdAt).toLocaleString()}</p>
+              </Link>
             ))}
           </div>
         )}
