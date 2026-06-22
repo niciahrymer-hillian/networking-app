@@ -58,6 +58,24 @@ export default async function NotificationsPage() {
     : [];
   const viewerName = new Map(viewers.map((u) => [u.id, `@${u.username}`]));
 
+  // @mentions of you, in posts/comments by your network (so the linked post is viewable).
+  type MentionEvent = { id: string; emoji: string; text: string; href: string; createdAt: Date };
+  const mentionEvents: MentionEvent[] = [];
+  const handle = session.username;
+  if (handle) {
+    const net = await prisma.userConnection.findMany({ where: { userId: session.userId }, select: { connectedUserId: true } });
+    const netIds = net.map((n) => n.connectedUserId);
+    if (netIds.length) {
+      const boundary = new RegExp(`@${handle}(?![a-zA-Z0-9_])`, "i"); // avoid @handle matching @handle2
+      const [mPosts, mComments] = await Promise.all([
+        prisma.post.findMany({ where: { authorId: { in: netIds }, content: { contains: `@${handle}` } }, orderBy: { createdAt: "desc" }, take: 15, select: { id: true, content: true, createdAt: true, author: { select: { username: true } } } }),
+        prisma.comment.findMany({ where: { authorId: { in: netIds }, body: { contains: `@${handle}` } }, orderBy: { createdAt: "desc" }, take: 15, select: { id: true, postId: true, body: true, createdAt: true, author: { select: { username: true } } } }),
+      ]);
+      for (const p of mPosts) if (boundary.test(p.content)) mentionEvents.push({ id: `mp-${p.id}`, emoji: "📣", text: `@${p.author.username} mentioned you in a post`, href: `/posts/${p.id}`, createdAt: p.createdAt });
+      for (const c of mComments) if (boundary.test(c.body)) mentionEvents.push({ id: `mc-${c.id}`, emoji: "📣", text: `@${c.author.username} mentioned you in a comment`, href: `/posts/${c.postId}`, createdAt: c.createdAt });
+    }
+  }
+
   // Stats overview — at-a-glance totals across all of this user's cards.
   const stats = [
     { label: "Scans", value: scanTotal, emoji: "👀" },
@@ -100,6 +118,7 @@ export default async function NotificationsPage() {
       href: `/posts/${c.postId}`,
       createdAt: c.createdAt,
     })),
+    ...mentionEvents,
   ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   return (

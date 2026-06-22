@@ -7,6 +7,7 @@
 // header is omitted (the page already shows who it is) and only a timestamp shows.
 
 import Link from "next/link";
+import MentionText from "@/components/MentionText";
 import PostReactions, { type ReactionCount } from "@/components/PostReactions";
 import PostComments from "@/components/PostComments";
 import ShareToDM from "@/components/ShareToDM";
@@ -84,7 +85,7 @@ export default function PostCard({
       )}
 
       {post.content && (
-        <p className="text-sm text-body whitespace-pre-wrap leading-relaxed">{post.content}</p>
+        <p className="text-sm text-body whitespace-pre-wrap leading-relaxed"><MentionText text={post.content} /></p>
       )}
 
       {post.mediaUrl && post.mediaType === "image" && (

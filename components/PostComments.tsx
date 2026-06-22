@@ -4,6 +4,7 @@
 // reply boxes. Loads on first open from GET /api/posts/:id/comments.
 
 import { useState } from "react";
+import MentionText from "@/components/MentionText";
 
 type Comment = {
   id: string;
@@ -116,7 +117,7 @@ export default function PostComments({ postId, initialCount }: { postId: string;
                     <p className="text-sm font-semibold text-foreground">
                       {c.author.name ?? `@${c.author.username}`} <span className="ml-1 text-xs font-normal text-muted">{timeAgo(c.createdAt)}</span>
                     </p>
-                    <p className="text-sm text-body whitespace-pre-wrap break-words">{c.body}</p>
+                    <p className="text-sm text-body whitespace-pre-wrap break-words"><MentionText text={c.body} /></p>
                   </div>
                   <button
                     type="button"
@@ -134,7 +135,7 @@ export default function PostComments({ postId, initialCount }: { postId: string;
                         <p className="text-sm font-semibold text-foreground">
                           {r.author.name ?? `@${r.author.username}`} <span className="ml-1 text-xs font-normal text-muted">{timeAgo(r.createdAt)}</span>
                         </p>
-                        <p className="text-sm text-body whitespace-pre-wrap break-words">{r.body}</p>
+                        <p className="text-sm text-body whitespace-pre-wrap break-words"><MentionText text={r.body} /></p>
                       </div>
                     </div>
                   ))}
